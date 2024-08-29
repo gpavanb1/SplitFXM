@@ -35,14 +35,14 @@ from splitfxm.schemes import default_scheme
 from splitfxm.visualize import draw
 
 # Define the problem
-m = AdvectionDiffusion(c=0.2, nu=0.001)
+method = 'FDM'
+m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
 
 # Define the domain and variables
 # ng stands for ghost point count
 d = Domain.from_size(20, 2, ["u", "v", "w"]) # nx, ng, variables
 
 # Define the problem
-method = 'FDM'
 m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
 d = Domain.from_size(20, 2, ["u", "v", "w"])
 ics = {"u": "gaussian", "v": "rarefaction"}
