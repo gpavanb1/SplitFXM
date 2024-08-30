@@ -1,0 +1,23 @@
+site_name: splitfxm
+theme:
+  name: readthedocs
+nav:
+  - Home: index.md
+  - Code Documentation:
+      - Overview: api.md
+      - Model: model.md
+      - Domain: domain.md
+      - Initial Conditions: ic.md
+      - Boundary Conditions: bc.md
+      - Visualization: visualize.md
+      - Adaptive Mesh Refinement: refine.md
+      - Finite Volume Schemes: flux.md
+      - Finite Difference Schemes: derivatives.md
+      - Internals:
+        - Cell: cell.md
+        - Boundary: boundary.md
+        - System: system.md
+        - Simulation: simulation.md
+
+plugins:
+  - mkdocstrings
