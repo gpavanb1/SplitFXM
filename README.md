@@ -65,6 +65,20 @@ iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
 draw(d, "label")
 ```
 
+## Run benchmark
+There is a benchmark that is included, which compares the time it takes to generate both a sparse and dense Jacobian. The results are as follows:
+
+For N=250, 
+
+| Method    | Time       | 
+|-----------|------------|
+| Dense   |    20 seconds |
+| Sparse |  ~0.6 seconds  |
+
+The benchmark can be executed from the parent folder using the command
+
+`python -m pytest -s benchmark`
+
 ## Whom to contact?
 
 Please direct your queries to [gpavanb1](http://github.com/gpavanb1)
