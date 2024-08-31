@@ -11,23 +11,6 @@ class Refiner:
     """
     Class for refining grids using slope, curve, and prune.
 
-    Parameters
-    ----------
-    ratio : float, optional
-        Specifies the desired refinement ratio, by default 10.0
-    slope : float, optional
-        The slope tolerance, by default 0.8
-    curve : float, optional
-        The curve tolerance, by default 0.8
-    prune : float, optional
-        The prune tolerance, by default -0.001
-    npmax : int, optional
-        The maximum number of points in the grid, by default 1000
-    min_range : float, optional
-        The minimum range span factor, by default 0.01
-    min_grid : float, optional
-        The minimum grid spacing, by default 1e-10
-
     Raises
     ------
     SFXM

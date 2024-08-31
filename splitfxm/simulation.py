@@ -222,20 +222,20 @@ class Simulation:
         """
         Extends the provided input bounds based on whether there is a split or not.
 
-        Parameters:
+        Parameters
         ----------
         bounds : list of list
-            A list containing two lists, each of size nv, representing the lower and upper bounds.
+            A list containing two lists, each of size `nv`, representing the lower and upper bounds.
         num_points : int
             The number of points to extend each bound to.
         nv : int
             The number of variables, indicating the length of each bound list.
         split : bool, optional
-            A flag indicating whether to split the bounds at a specific location. Default is False.
+            A flag indicating whether to split the bounds at a specific location. Default is `False`.
         split_loc : int, optional
-            The index at which to split the bounds if split is True. Default is None.
+            The index at which to split the bounds if `split` is `True`. Default is `None`.
 
-        Returns:
+        Returns
         -------
         list of list
             A list containing the extended lower and upper bounds.
