@@ -3,21 +3,32 @@ theme:
   name: readthedocs
 nav:
   - Home: index.md
+  - Getting Started: start.md
+  - Benchmark: benchmark.md
   - Code Documentation:
       - Overview: api.md
       - Model: model.md
       - Domain: domain.md
       - Initial Conditions: ic.md
       - Boundary Conditions: bc.md
-      - Visualization: visualize.md
-      - Adaptive Mesh Refinement: refine.md
       - Finite Volume Schemes: flux.md
       - Finite Difference Schemes: derivatives.md
+      - Visualization: visualize.md
+      - Adaptive Mesh Refinement: refine.md
       - Internals:
+        - Overview: internals.md
         - Cell: cell.md
         - Boundary: boundary.md
         - System: system.md
         - Simulation: simulation.md
 
 plugins:
-  - mkdocstrings
+- mkdocstrings:
+    handlers:
+      python:
+        options:
+          docstring_style: numpy
+          allow_inspection: true
+
+extra_css:
+  - assets/docs.css
