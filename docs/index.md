@@ -16,68 +16,26 @@ The system is divided into two and for ease of communication, let's refer to fir
 
 * This process is repeated till convergence criterion is met for the full system (same as in Newton)
 
-## How to install and execute?
+## Why SplitFXM?
 
-Just run 
-```
-pip install splitfxm
-```
+The combination of adaptive mesh refinement+multiple boundary conditions+various finite-difference/finite-volume schemes in 1D is crucial for accurately capturing steep gradients and complex phenomena in various physical systems. A [SplitNewton](http://github.com/gpavanb1/SplitNewton) solver further increases robustness by efficiently handling non-linearities and stiff reactions, ensuring convergence in challenging scenarios.
 
-There is an [examples](https://github.com/gpavanb1/SplitFXM/examples) folder that contains a test model - [Advection-Diffusion](https://en.wikipedia.org/wiki/Convection%E2%80%93diffusion_equation)
+Some of the applications where challenging 1D problems exist include:
 
-You can define your own equations by simply creating a derived class from `Model` and adding to the `_equations` using existing or custom equations!
+- **Compressible Flows**: Shock waves, boundary layers.
+- **Flamelet Problems**: Premixed and non-premixed combustion.
+- **Batteries**: Electrochemical reactions, solid-electrolyte interfaces. 
+- **Phase Changes**: Solidification, melting fronts.
+- **Heat Transfer**: Thermal gradients in thin layers.
+- **Chemical Kinetics**: Reaction fronts, ignition processes.
+- **Acoustics**: Wave propagation in media with varying density.
+- **Plasma Physics**: Sheaths, boundary layers in plasma.
+- **Magnetohydrodynamics (MHD)**: Magnetic reconnection, shock structures.
+ 
 
-A basic driver program is as follows
-```
-from splitfxm.domain import Domain
-from splitfxm.simulation import Simulation
-from splitfxm.schemes import default_scheme
-from splitfxm.visualize import draw
+## GitHub Repository
 
-# Define the problem
-method = 'FDM'
-m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
-d = Domain.from_size(20, 2, ["u", "v", "w"]) # nx, ng, variables
-ics = {"u": "gaussian", "v": "rarefaction"}
-bcs = {
-    "u": {
-        "left": "periodic",
-        "right": "periodic"
-    },
-    "v": {
-        "left": {"dirichlet": 3},
-        "right": {"dirichlet": 4}
-    },
-    "w": {
-        "left": {"dirichlet": 2},
-        "right": "periodic"
-    }
-}
-s = Simulation(d, m, ics, bcs, default_scheme(method))
-
-
-# Advance in time or to steady state
-s.evolve(dt=0.1)
-bounds = [[-1., -2., 0.], [5., 4., 3.]]
-iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
-
-# Visualize
-draw(d, "label")
-```
-
-## Run benchmark
-There is a benchmark that is included, which compares the time it takes to generate both a sparse and dense Jacobian. The results are as follows:
-
-For N=250, 
-
-| Method    | Time       | 
-|-----------|------------|
-| Dense   |    20 seconds |
-| Sparse |  ~0.6 seconds  |
-
-The benchmark can be executed from the parent folder using the command
-
-`python -m pytest -s benchmark`
+The link to the repository can be found [here](http://github.com/gpavanb1/SplitFXM)
 
 ## Whom to contact?
 

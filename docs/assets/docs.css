@@ -1,0 +1,11 @@
+/* Increase line spacing between subsections */
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 1.5em;
+    /* Adjust this value to increase spacing */
+    margin-bottom: 0.5em;
+    /* Adjust this value to control spacing before the next section */
+}
