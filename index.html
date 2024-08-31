@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>splitfxm</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="assets/docs.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> splitfxm
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#what-does-split-mean">What does 'split' mean?</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#why-splitfxm">Why SplitFXM?</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#github-repository">GitHub Repository</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#whom-to-contact">Whom to contact?</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="start/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="benchmark/">Benchmark</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Documentation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="api/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="model/">Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="domain/">Domain</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="ic/">Initial Conditions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="bc/">Boundary Conditions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="flux/">Finite Volume Schemes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="derivatives/">Finite Difference Schemes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="visualize/">Visualization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="refine/">Adaptive Mesh Refinement</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Internals</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="internals/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="cell/">Cell</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="boundary/">Boundary</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="system/">System</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="simulation/">Simulation</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">splitfxm</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Home</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="splitfxm">SplitFXM</h1>
+<p><a href="https://pepy.tech/project/splitfxm"><img alt="Downloads" src="https://pepy.tech/badge/splitfxm" /></a></p>
+<p><img alt="img" src="images/logo.jpg" /></p>
+<p>1D <a href="https://en.wikipedia.org/wiki/Finite_difference_method">Finite-Difference</a> or <a href="https://en.wikipedia.org/wiki/Finite_volume_method">Finite-Volume</a> with <a href="https://en.wikipedia.org/wiki/Adaptive_mesh_refinement">adaptive mesh refinement</a> and steady-state solver using Newton and <a href="https://github.com/gpavanb1/SplitNewton">Split-Newton</a> approach</p>
+<h2 id="what-does-split-mean">What does 'split' mean?</h2>
+<p>The system is divided into two and for ease of communication, let's refer to first set of variables as "outer" and the second as "inner".</p>
+<ul>
+<li>
+<p>Holding the outer variables fixed, Newton iteration is performed till convergence using the sub-Jacobian</p>
+</li>
+<li>
+<p>One Newton step is performed for the outer variables with inner held fixed (using its sub-Jacobian)</p>
+</li>
+<li>
+<p>This process is repeated till convergence criterion is met for the full system (same as in Newton)</p>
+</li>
+</ul>
+<h2 id="why-splitfxm">Why SplitFXM?</h2>
+<p>The combination of adaptive mesh refinement+multiple boundary conditions+various finite-difference/finite-volume schemes in 1D is crucial for accurately capturing steep gradients and complex phenomena in various physical systems. A <a href="http://github.com/gpavanb1/SplitNewton">SplitNewton</a> solver further increases robustness by efficiently handling non-linearities and stiff reactions, ensuring convergence in challenging scenarios.</p>
+<p>Some of the applications where challenging 1D problems exist include:</p>
+<ul>
+<li><strong>Compressible Flows</strong>: Shock waves, boundary layers.</li>
+<li><strong>Flamelet Problems</strong>: Premixed and non-premixed combustion.</li>
+<li><strong>Batteries</strong>: Electrochemical reactions, solid-electrolyte interfaces. </li>
+<li><strong>Phase Changes</strong>: Solidification, melting fronts.</li>
+<li><strong>Heat Transfer</strong>: Thermal gradients in thin layers.</li>
+<li><strong>Chemical Kinetics</strong>: Reaction fronts, ignition processes.</li>
+<li><strong>Acoustics</strong>: Wave propagation in media with varying density.</li>
+<li><strong>Plasma Physics</strong>: Sheaths, boundary layers in plasma.</li>
+<li><strong>Magnetohydrodynamics (MHD)</strong>: Magnetic reconnection, shock structures.</li>
+</ul>
+<h2 id="github-repository">GitHub Repository</h2>
+<p>The link to the repository can be found <a href="http://github.com/gpavanb1/SplitFXM">here</a></p>
+<h2 id="whom-to-contact">Whom to contact?</h2>
+<p>Please direct your queries to <a href="http://github.com/gpavanb1">gpavanb1</a>
+for any questions.</p>
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>Special thanks to <a href="https://github.com/Cantera/cantera">Cantera</a> and <a href="https://github.com/comp-physics/WENO-scalar">WENO-Scalar</a> for serving as an inspiration for code architecture.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="start/" class="btn btn-neutral float-right" title="Getting Started">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+      <span><a href="start/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2024-08-31 17:31:41.450607+00:00
+-->

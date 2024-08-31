@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Initial Conditions - splitfxm</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="../assets/docs.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Initial Conditions";
+        var mkdocs_page_input_path = "ic.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> splitfxm
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../start/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../benchmark/">Benchmark</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Documentation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../api/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../model/">Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../domain/">Domain</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Initial Conditions</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.initialize">initialize</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.initialize.set_initial_condition">set_initial_condition</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bc/">Boundary Conditions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite Volume Schemes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite Difference Schemes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../refine/">Adaptive Mesh Refinement</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Internals</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../internals/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../cell/">Cell</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../boundary/">Boundary</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../system/">System</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../simulation/">Simulation</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">splitfxm</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Code Documentation</li>
+      <li class="breadcrumb-item active">Initial Conditions</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="initial-conditions">Initial Conditions</h1>
+<p>The next step to perform is to define the initial conditions for the system.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="splitfxm.initialize"></a>
+    <div class="doc doc-contents first">
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="splitfxm.initialize.set_initial_condition" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_initial_condition</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Set the initial condition of a given component in a domain.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>d</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="splitfxm.domain.Domain" href="../domain/#splitfxm.domain.Domain">Domain</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>The domain to set the initial condition in.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>v</code></b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The component to set the initial condition for.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>type</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;gaussian&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The type of initial condition to set. Options are: 'tophat', 'sine', 'rarefaction', 'gaussian'. Default is 'gaussian'.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Raises:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>NotImplementedError</code>
+              –
+              <div class="doc-md-description">
+                <p>If the specified type of initial condition is not implemented.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/initialize.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_initial_condition</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the initial condition of a given component in a domain.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d : Domain</span>
+<span class="sd">        The domain to set the initial condition in.</span>
+<span class="sd">    v : str</span>
+<span class="sd">        The component to set the initial condition for.</span>
+<span class="sd">    type : str, optional</span>
+<span class="sd">        The type of initial condition to set. Options are: &#39;tophat&#39;, &#39;sine&#39;, &#39;rarefaction&#39;, &#39;gaussian&#39;. Default is &#39;gaussian&#39;.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NotImplementedError</span>
+<span class="sd">        If the specified type of initial condition is not implemented.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Find index of component</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">component_index</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="c1"># Some initial conditions</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;tophat&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span>
+                <span class="n">idx</span><span class="p">,</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mf">0.333</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.666</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;sine&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span>
+                <span class="n">idx</span><span class="p">,</span>
+                <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.333</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.333</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mf">0.333</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.666</span><span class="p">)</span>
+                <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;rarefaction&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="mf">2.0</span> <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../domain/" class="btn btn-neutral float-left" title="Domain"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../bc/" class="btn btn-neutral float-right" title="Boundary Conditions">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../domain/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../bc/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

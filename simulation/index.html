@@ -1,0 +1,2582 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Simulation - splitfxm</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="../assets/docs.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Simulation";
+        var mkdocs_page_input_path = "simulation.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> splitfxm
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../start/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../benchmark/">Benchmark</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Documentation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../api/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../model/">Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../domain/">Domain</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../ic/">Initial Conditions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../bc/">Boundary Conditions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite Volume Schemes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite Difference Schemes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../refine/">Adaptive Mesh Refinement</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Internals</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../internals/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../cell/">Cell</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../boundary/">Boundary</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../system/">System</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Simulation</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.simulation">simulation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.simulation.Simulation">Simulation</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.__init__">__init__</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.evolve">evolve</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.extend_bounds">extend_bounds</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.get_residuals_from_list">get_residuals_from_list</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.get_shape_from_list">get_shape_from_list</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.initialize_from_list">initialize_from_list</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.jacobian">jacobian</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.simulation.Simulation.steady_state">steady_state</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.simulation.array_list_reshape">array_list_reshape</a>
+    </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">splitfxm</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Code Documentation</li>
+          <li class="breadcrumb-item">Internals</li>
+      <li class="breadcrumb-item active">Simulation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="simulation">Simulation</h1>
+<p>This is the main object that is used to run the simulation. It contains the domain, model, initial conditions, boundary conditions, and the scheme.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="splitfxm.simulation"></a>
+    <div class="doc doc-contents first">
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="splitfxm.simulation.Simulation" class="doc doc-heading">
+            <code>Simulation</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+
+      <p>A class representing a simulation.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>d</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="splitfxm.domain.Domain" href="../domain/#splitfxm.domain.Domain">Domain</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>The domain on which to perform the simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>m</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="splitfxm.model.Model" href="../model/#splitfxm.model.Model">Model</a></code>)
+              –
+              <div class="doc-md-description">
+                <p>The model to use in the simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>ics</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>The initial conditions to apply to the domain.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>bcs</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>The boundary conditions to apply to the domain.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>ss</code></b>
+                  (<code>dict</code>, default:
+                      <code>{}</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The steady-state solver settings to use in the simulation.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+              <details class="quote">
+                <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class representing a simulation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d : Domain</span>
+<span class="sd">        The domain on which to perform the simulation.</span>
+<span class="sd">    m : Model</span>
+<span class="sd">        The model to use in the simulation.</span>
+<span class="sd">    ics : dict</span>
+<span class="sd">        The initial conditions to apply to the domain.</span>
+<span class="sd">    bcs : dict</span>
+<span class="sd">        The boundary conditions to apply to the domain.</span>
+<span class="sd">    ss : dict, optional</span>
+<span class="sd">        The steady-state solver settings to use in the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">bcs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ss</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a Simulation object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="n">System</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_r</span> <span class="o">=</span> <span class="n">Refiner</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span> <span class="o">=</span> <span class="n">bcs</span>
+
+        <span class="c1"># Steady-state solver settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ss</span> <span class="o">=</span> <span class="n">ss</span>
+
+        <span class="c1"># Set initial conditions</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">ictype</span> <span class="ow">in</span> <span class="n">ics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">set_initial_condition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">ictype</span><span class="p">)</span>
+
+        <span class="c1"># Fill BCs</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refinement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evolve the simulation for a given time step.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dt : float</span>
+<span class="sd">            The time step for the evolution.</span>
+<span class="sd">        refinement : bool, optional</span>
+<span class="sd">            Whether to perform mesh refinement. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Fill BCs</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+        <span class="c1"># Evaluate residuals (values, derivatives) from equations</span>
+        <span class="n">interior_residual_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+        <span class="c1"># Update cell values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">interior_residual_block</span><span class="p">)</span>
+
+        <span class="c1"># Perform mesh refinement if enabled</span>
+        <span class="k">if</span> <span class="n">refinement</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_r</span><span class="o">.</span><span class="n">refine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+    <span class="c1">############</span>
+    <span class="c1"># List related methods</span>
+    <span class="c1">############</span>
+
+    <span class="k">def</span> <span class="nf">get_shape_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the shape of the list when reshaped into a NumPy array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        l : list</span>
+<span class="sd">            The list to get the shape for.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        num_points : int</span>
+<span class="sd">            The number of points in the reshaped array.</span>
+<span class="sd">        nv : int</span>
+<span class="sd">            The number of components per point in the reshaped array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">num_components</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">%</span> <span class="n">nv</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;List length not aligned with interior size&quot;</span><span class="p">)</span>
+
+        <span class="n">num_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">//</span> <span class="n">nv</span>
+
+        <span class="k">return</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span>
+
+    <span class="k">def</span> <span class="nf">initialize_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the domain from a list of values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        l : list</span>
+<span class="sd">            The list of values to initialize the domain with.</span>
+<span class="sd">        split : bool, optional</span>
+<span class="sd">            Whether to split the values into outer and inner blocks. Defaults to False.</span>
+<span class="sd">        split_loc : int, optional</span>
+<span class="sd">            The location to split the values at. Required if `split` is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Just demarcate every nv entries as a block</span>
+        <span class="c1"># This gives block-diagonal structure in unsplit case</span>
+        <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">split</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Split location must be specified in this case&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Same as SplitNewton convention</span>
+            <span class="c1"># Outer system will be excluding `loc`</span>
+            <span class="n">outer_block</span> <span class="o">=</span> <span class="n">array_list_reshape</span><span class="p">(</span>
+                <span class="n">l</span><span class="p">[:</span> <span class="n">split_loc</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">inner_block</span> <span class="o">=</span> <span class="n">array_list_reshape</span><span class="p">(</span>
+                <span class="n">l</span><span class="p">[</span><span class="n">split_loc</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">:],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nv</span> <span class="o">-</span> <span class="n">split_loc</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_points</span><span class="p">):</span>
+                <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">outer_block</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">inner_block</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Reshape list</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">array_list_reshape</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="p">(</span><span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">))</span>
+
+        <span class="c1"># Assign values to cells in domain</span>
+        <span class="n">cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">interior</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+            <span class="n">b</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">get_residuals_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the residuals for the domain given a list of values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        l : list</span>
+<span class="sd">            The list of values to get the residuals for.</span>
+<span class="sd">        split : bool, optional</span>
+<span class="sd">            Whether to split the residuals into outer and inner blocks. Defaults to False.</span>
+<span class="sd">        split_loc : int, optional</span>
+<span class="sd">            The location to split the residuals at. Required if `split` is True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        residual_list : list</span>
+<span class="sd">            The list of residual values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Assign values from list</span>
+        <span class="c1"># Note domain already exists and we preserve distances</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+
+        <span class="c1"># Fill BCs</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+        <span class="n">interior_residual_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">split</span><span class="p">:</span>
+            <span class="n">outer_block</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[:</span><span class="n">split_loc</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">interior_residual_block</span><span class="p">]</span>
+            <span class="n">inner_block</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">split_loc</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">interior_residual_block</span><span class="p">]</span>
+            <span class="n">outer_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">outer_block</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">inner_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inner_block</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">residual_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">outer_list</span><span class="p">,</span> <span class="n">inner_list</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Reshape residual block in list order</span>
+            <span class="n">residual_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interior_residual_block</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">residual_list</span>
+
+    <span class="k">def</span> <span class="nf">extend_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extends the provided input bounds based on whether there is a split or not.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bounds : list of list</span>
+<span class="sd">            A list containing two lists, each of size `nv`, representing the lower and upper bounds.</span>
+<span class="sd">        num_points : int</span>
+<span class="sd">            The number of points to extend each bound to.</span>
+<span class="sd">        nv : int</span>
+<span class="sd">            The number of variables, indicating the length of each bound list.</span>
+<span class="sd">        split : bool, optional</span>
+<span class="sd">            A flag indicating whether to split the bounds at a specific location. Default is `False`.</span>
+<span class="sd">        split_loc : int, optional</span>
+<span class="sd">            The index at which to split the bounds if `split` is `True`. Default is `None`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of list</span>
+<span class="sd">            A list containing the extended lower and upper bounds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if bounds is a 2-list, each of size nv</span>
+        <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Bounds must be a list of 2 lists&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="n">nv</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="n">nv</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
+                    <span class="s2">&quot;Each list in bounds must be of length - number of variables&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">split</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;split_loc must be provided if split is True&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">split_loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">split_loc</span><span class="p">:]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">,</span>
+                    <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="n">split_loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">split_loc</span><span class="p">:]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Jacobian of the system using finite differences.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        l : list</span>
+<span class="sd">            The list of values to calculate the Jacobian for.</span>
+<span class="sd">        split : bool, optional</span>
+<span class="sd">            Whether to split the Jacobian into outer and inner blocks. Defaults to False.</span>
+<span class="sd">        split_loc : int, optional</span>
+<span class="sd">            The location to split the Jacobian at. Required if `split` is True.</span>
+<span class="sd">        epsilon : float, optional</span>
+<span class="sd">            The finite difference step size. Defaults to 1e-8.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        jac : scipy.sparse.lil_matrix</span>
+<span class="sd">            The Jacobian of the system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize domain from the provided list and apply boundary conditions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+        <span class="c1"># Find the variables with periodic BCs and their directions</span>
+        <span class="n">periodic_bcs_dict</span> <span class="o">=</span> <span class="n">get_periodic_bcs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+        <span class="c1"># Get the number of points and variables</span>
+        <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">num_points</span> <span class="o">*</span> <span class="n">nv</span>
+
+        <span class="c1"># Create a sparse matrix for the Jacobian</span>
+        <span class="n">jac</span> <span class="o">=</span> <span class="n">lil_matrix</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+        <span class="c1"># Retrieve cells and boundary parameters</span>
+        <span class="n">cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">cells</span><span class="p">()</span>
+        <span class="n">nb</span><span class="p">,</span> <span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ilo</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
+
+        <span class="c1"># Use same point iteration as system residuals</span>
+        <span class="c1"># Iterating over interior points</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># Define the neighborhood and band around the current cell</span>
+            <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb</span><span class="p">,</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="c1"># Indices of points that affect the Jacobian (or part of the band)</span>
+            <span class="n">band</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nb</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+
+            <span class="c1"># Calculate unperturbed residuals</span>
+            <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)</span>
+                                  <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">equations</span><span class="p">()])</span>
+
+            <span class="c1"># Perturb each variable and compute the Jacobian columns</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+                <span class="c1"># Extend the band if required for that variable</span>
+                <span class="c1"># Only required for periodic BC for now</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">periodic_bcs_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">dirs</span> <span class="o">=</span> <span class="n">periodic_bcs_dict</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="n">band</span> <span class="o">=</span> <span class="n">extend_band</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
+                    <span class="c1"># Compared to center_cell, what is the index of the cell</span>
+                    <span class="c1"># to be perturbed</span>
+                    <span class="n">cell</span> <span class="o">=</span> <span class="n">cells</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
+                    <span class="n">current_value</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+                    <span class="c1"># Perturb the current variable and compute perturbed residuals</span>
+                    <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">current_value</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+
+                    <span class="c1"># Apply BC again if cell is adjacent to boundary</span>
+                    <span class="k">if</span> <span class="n">ilo</span> <span class="ow">in</span> <span class="n">band</span> <span class="ow">or</span> <span class="n">ihi</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+                    <span class="c1"># Calculate updated residual</span>
+                    <span class="n">rhs_pert</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)</span>
+                                               <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">equations</span><span class="p">()])</span>
+
+                    <span class="c1"># Reset the value</span>
+                    <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">current_value</span><span class="p">)</span>
+                    <span class="c1"># Apply BC again if cell is adjacent to boundary</span>
+                    <span class="k">if</span> <span class="n">ilo</span> <span class="ow">in</span> <span class="n">band</span> <span class="ow">or</span> <span class="n">ihi</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+                    <span class="c1"># Compute the difference and assign to the Jacobian</span>
+                    <span class="n">col</span> <span class="o">=</span> <span class="p">(</span><span class="n">rhs_pert</span> <span class="o">-</span> <span class="n">rhs</span><span class="p">)</span> <span class="o">/</span> <span class="n">epsilon</span>
+
+                    <span class="c1"># Assign the calculated column to the Jacobian</span>
+                    <span class="c1"># Blocks of nv*nv matrices are computed</span>
+                    <span class="c1"># row_idx gives the start of the column vector</span>
+                    <span class="c1"># First point starts at 0, second point starts at nv and so on</span>
+                    <span class="c1"># For col_idx, loc - ilo gives shift from 0 for the block in multiples of nv</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">split</span><span class="p">:</span>
+                        <span class="n">row_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nv</span>
+                        <span class="n">col_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">loc</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nv</span> <span class="o">+</span> <span class="n">j</span>
+                        <span class="n">jac</span><span class="p">[</span><span class="n">row_idx</span><span class="p">:</span><span class="n">row_idx</span> <span class="o">+</span> <span class="n">nv</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="s2">&quot;Split location must be specified if split is True&quot;</span><span class="p">)</span>
+
+                        <span class="c1"># Sizes of the sub-Jacobians</span>
+                        <span class="n">na</span><span class="p">,</span> <span class="n">nc</span> <span class="o">=</span> <span class="n">split_loc</span><span class="p">,</span> <span class="p">(</span><span class="n">nv</span> <span class="o">-</span> <span class="n">split_loc</span><span class="p">)</span>
+                        <span class="c1"># Jumps of block_offset instead of nv here</span>
+                        <span class="n">block_offset</span> <span class="o">=</span> <span class="n">num_points</span> <span class="o">*</span> <span class="n">na</span>
+
+                        <span class="c1"># First part of residuals</span>
+                        <span class="c1"># Same as previous but use na instead</span>
+                        <span class="n">row_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">na</span>
+                        <span class="c1"># col_idx jumps to right part of Jacobian</span>
+                        <span class="c1"># depending on the variable if pre- or post-split</span>
+                        <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">na</span><span class="p">:</span>
+                            <span class="n">col_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">loc</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">na</span> <span class="o">+</span> <span class="n">j</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># Jumps of nc in post-split parts</span>
+                            <span class="c1"># j-na to ensure post-split variables start afresh</span>
+                            <span class="n">col_idx</span> <span class="o">=</span> <span class="n">block_offset</span> <span class="o">+</span> \
+                                <span class="p">(</span><span class="n">loc</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nc</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">na</span><span class="p">)</span>
+
+                        <span class="n">jac</span><span class="p">[</span><span class="n">row_idx</span><span class="p">:</span><span class="n">row_idx</span> <span class="o">+</span> <span class="n">na</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="p">[:</span><span class="n">na</span><span class="p">]</span>
+
+                        <span class="c1"># Second part of residuals</span>
+                        <span class="c1"># col_idx remains same as previous</span>
+                        <span class="n">row_idx</span> <span class="o">=</span> <span class="n">block_offset</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nc</span>
+                        <span class="n">jac</span><span class="p">[</span><span class="n">row_idx</span><span class="p">:</span><span class="n">row_idx</span> <span class="o">+</span> <span class="n">nc</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="p">[</span><span class="n">na</span><span class="p">:]</span>
+
+        <span class="k">return</span> <span class="n">jac</span>
+
+    <span class="k">def</span> <span class="nf">steady_state</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solve for the steady state of the system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        split : bool, optional</span>
+<span class="sd">            Whether to split the solution into outer and inner blocks. Defaults to False.</span>
+<span class="sd">        split_loc : int, optional</span>
+<span class="sd">            The location to split the solution at. Required if `split` is True.</span>
+<span class="sd">        sparse : bool, optional</span>
+<span class="sd">            Whether to use a sparse Jacobian. Defaults to True.</span>
+<span class="sd">        dt0 : float, optional</span>
+<span class="sd">            The initial time step to use in pseudo-time. Defaults to 0.0.</span>
+<span class="sd">        dtmax : float, optional</span>
+<span class="sd">            The maximum time step to use  in pseudo-time. Defaults to 1.0.</span>
+<span class="sd">        armijo : bool, optional</span>
+<span class="sd">            Whether to use the Armijo rule for line searches. Defaults to False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        iter : int</span>
+<span class="sd">            The number of iterations performed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_f</span><span class="p">(</span><span class="n">u</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_residuals_from_list</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">_jac</span><span class="p">(</span><span class="n">u</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+
+        <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">listify_interior</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+        <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape_from_list</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+
+        <span class="c1"># Extend bounds based on input</span>
+        <span class="n">ext_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extend_bounds</span><span class="p">(</span>
+            <span class="n">bounds</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">split</span><span class="p">:</span>
+            <span class="n">xf</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="nb">iter</span> <span class="o">=</span> <span class="n">newton</span><span class="p">(</span>
+                <span class="n">_f</span><span class="p">,</span> <span class="n">_jac</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="n">sparse</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="n">dt0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="n">dtmax</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="n">armijo</span><span class="p">,</span>
+                <span class="n">bounds</span><span class="o">=</span><span class="n">ext_bounds</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Split location must be specified in this case&quot;</span><span class="p">)</span>
+
+            <span class="n">loc</span> <span class="o">=</span> <span class="n">num_points</span> <span class="o">*</span> <span class="n">split_loc</span>
+            <span class="n">xf</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="nb">iter</span> <span class="o">=</span> <span class="n">split_newton</span><span class="p">(</span>
+                <span class="n">_f</span><span class="p">,</span> <span class="n">_jac</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="n">sparse</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="n">dt0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="n">dtmax</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="n">armijo</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">ext_bounds</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_from_list</span><span class="p">(</span><span class="n">xf</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">iter</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">ics</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">ss</span><span class="o">=</span><span class="p">{})</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Initialize a Simulation object.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">bcs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ss</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize a Simulation object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="n">d</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="n">System</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_r</span> <span class="o">=</span> <span class="n">Refiner</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span> <span class="o">=</span> <span class="n">bcs</span>
+
+    <span class="c1"># Steady-state solver settings</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ss</span> <span class="o">=</span> <span class="n">ss</span>
+
+    <span class="c1"># Set initial conditions</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">ictype</span> <span class="ow">in</span> <span class="n">ics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">set_initial_condition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">ictype</span><span class="p">)</span>
+
+    <span class="c1"># Fill BCs</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.evolve" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">evolve</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">refinement</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Evolve the simulation for a given time step.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>dt</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>The time step for the evolution.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>refinement</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to perform mesh refinement. Defaults to False.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refinement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evolve the simulation for a given time step.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dt : float</span>
+<span class="sd">        The time step for the evolution.</span>
+<span class="sd">    refinement : bool, optional</span>
+<span class="sd">        Whether to perform mesh refinement. Defaults to False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Fill BCs</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+    <span class="c1"># Evaluate residuals (values, derivatives) from equations</span>
+    <span class="n">interior_residual_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+    <span class="c1"># Update cell values</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">interior_residual_block</span><span class="p">)</span>
+
+    <span class="c1"># Perform mesh refinement if enabled</span>
+    <span class="k">if</span> <span class="n">refinement</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_r</span><span class="o">.</span><span class="n">refine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.extend_bounds" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">extend_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Extends the provided input bounds based on whether there is a split or not.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>bounds</code></b>
+                  (<code>list of list</code>)
+              –
+              <div class="doc-md-description">
+                <p>A list containing two lists, each of size <code>nv</code>, representing the lower and upper bounds.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>num_points</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>The number of points to extend each bound to.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>nv</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>The number of variables, indicating the length of each bound list.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>A flag indicating whether to split the bounds at a specific location. Default is <code>False</code>.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split_loc</code></b>
+                  (<code>int</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The index at which to split the bounds if <code>split</code> is <code>True</code>. Default is <code>None</code>.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>list of list</code>
+              –
+              <div class="doc-md-description">
+                <p>A list containing the extended lower and upper bounds.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extend_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends the provided input bounds based on whether there is a split or not.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bounds : list of list</span>
+<span class="sd">        A list containing two lists, each of size `nv`, representing the lower and upper bounds.</span>
+<span class="sd">    num_points : int</span>
+<span class="sd">        The number of points to extend each bound to.</span>
+<span class="sd">    nv : int</span>
+<span class="sd">        The number of variables, indicating the length of each bound list.</span>
+<span class="sd">    split : bool, optional</span>
+<span class="sd">        A flag indicating whether to split the bounds at a specific location. Default is `False`.</span>
+<span class="sd">    split_loc : int, optional</span>
+<span class="sd">        The index at which to split the bounds if `split` is `True`. Default is `None`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of list</span>
+<span class="sd">        A list containing the extended lower and upper bounds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check if bounds is a 2-list, each of size nv</span>
+    <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Bounds must be a list of 2 lists&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="n">nv</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="n">nv</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
+                <span class="s2">&quot;Each list in bounds must be of length - number of variables&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">split</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;split_loc must be provided if split is True&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">split_loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">split_loc</span><span class="p">:]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">,</span>
+                <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="n">split_loc</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_points</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">split_loc</span><span class="p">:]</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.get_residuals_from_list" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_residuals_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Get the residuals for the domain given a list of values.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>l</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>The list of values to get the residuals for.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to split the residuals into outer and inner blocks. Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split_loc</code></b>
+                  (<code>int</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The location to split the residuals at. Required if <code>split</code> is True.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>residual_list</code></b>(                  <code>list</code>
+)              –
+              <div class="doc-md-description">
+                <p>The list of residual values.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_residuals_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the residuals for the domain given a list of values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : list</span>
+<span class="sd">        The list of values to get the residuals for.</span>
+<span class="sd">    split : bool, optional</span>
+<span class="sd">        Whether to split the residuals into outer and inner blocks. Defaults to False.</span>
+<span class="sd">    split_loc : int, optional</span>
+<span class="sd">        The location to split the residuals at. Required if `split` is True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    residual_list : list</span>
+<span class="sd">        The list of residual values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Assign values from list</span>
+    <span class="c1"># Note domain already exists and we preserve distances</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">initialize_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+
+    <span class="c1"># Fill BCs</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+    <span class="n">interior_residual_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">split</span><span class="p">:</span>
+        <span class="n">outer_block</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[:</span><span class="n">split_loc</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">interior_residual_block</span><span class="p">]</span>
+        <span class="n">inner_block</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">split_loc</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">interior_residual_block</span><span class="p">]</span>
+        <span class="n">outer_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">outer_block</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">inner_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inner_block</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">residual_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">outer_list</span><span class="p">,</span> <span class="n">inner_list</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Reshape residual block in list order</span>
+        <span class="n">residual_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interior_residual_block</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">residual_list</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.get_shape_from_list" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_shape_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Get the shape of the list when reshaped into a NumPy array.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>l</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>The list to get the shape for.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>num_points</code></b>(                  <code>int</code>
+)              –
+              <div class="doc-md-description">
+                <p>The number of points in the reshaped array.</p>
+              </div>
+            </li>
+            <li>
+<b><code>nv</code></b>(                  <code>int</code>
+)              –
+              <div class="doc-md-description">
+                <p>The number of components per point in the reshaped array.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_shape_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the shape of the list when reshaped into a NumPy array.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : list</span>
+<span class="sd">        The list to get the shape for.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    num_points : int</span>
+<span class="sd">        The number of points in the reshaped array.</span>
+<span class="sd">    nv : int</span>
+<span class="sd">        The number of components per point in the reshaped array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">num_components</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">%</span> <span class="n">nv</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;List length not aligned with interior size&quot;</span><span class="p">)</span>
+
+    <span class="n">num_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">//</span> <span class="n">nv</span>
+
+    <span class="k">return</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.initialize_from_list" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">initialize_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Initialize the domain from a list of values.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>l</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>The list of values to initialize the domain with.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to split the values into outer and inner blocks. Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split_loc</code></b>
+                  (<code>int</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The location to split the values at. Required if <code>split</code> is True.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the domain from a list of values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : list</span>
+<span class="sd">        The list of values to initialize the domain with.</span>
+<span class="sd">    split : bool, optional</span>
+<span class="sd">        Whether to split the values into outer and inner blocks. Defaults to False.</span>
+<span class="sd">    split_loc : int, optional</span>
+<span class="sd">        The location to split the values at. Required if `split` is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Just demarcate every nv entries as a block</span>
+    <span class="c1"># This gives block-diagonal structure in unsplit case</span>
+    <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">split</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Split location must be specified in this case&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Same as SplitNewton convention</span>
+        <span class="c1"># Outer system will be excluding `loc`</span>
+        <span class="n">outer_block</span> <span class="o">=</span> <span class="n">array_list_reshape</span><span class="p">(</span>
+            <span class="n">l</span><span class="p">[:</span> <span class="n">split_loc</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">inner_block</span> <span class="o">=</span> <span class="n">array_list_reshape</span><span class="p">(</span>
+            <span class="n">l</span><span class="p">[</span><span class="n">split_loc</span> <span class="o">*</span> <span class="n">num_points</span><span class="p">:],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nv</span> <span class="o">-</span> <span class="n">split_loc</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_points</span><span class="p">):</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">outer_block</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">inner_block</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Reshape list</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">array_list_reshape</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="p">(</span><span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">))</span>
+
+    <span class="c1"># Assign values to cells in domain</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">interior</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.jacobian" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">jacobian</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Calculate the Jacobian of the system using finite differences.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>l</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>The list of values to calculate the Jacobian for.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to split the Jacobian into outer and inner blocks. Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split_loc</code></b>
+                  (<code>int</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The location to split the Jacobian at. Required if <code>split</code> is True.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>epsilon</code></b>
+                  (<code>float</code>, default:
+                      <code>1e-08</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The finite difference step size. Defaults to 1e-8.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>jac</code></b>(                  <code><span title="scipy.sparse.lil_matrix">lil_matrix</span></code>
+)              –
+              <div class="doc-md-description">
+                <p>The Jacobian of the system.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the Jacobian of the system using finite differences.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : list</span>
+<span class="sd">        The list of values to calculate the Jacobian for.</span>
+<span class="sd">    split : bool, optional</span>
+<span class="sd">        Whether to split the Jacobian into outer and inner blocks. Defaults to False.</span>
+<span class="sd">    split_loc : int, optional</span>
+<span class="sd">        The location to split the Jacobian at. Required if `split` is True.</span>
+<span class="sd">    epsilon : float, optional</span>
+<span class="sd">        The finite difference step size. Defaults to 1e-8.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    jac : scipy.sparse.lil_matrix</span>
+<span class="sd">        The Jacobian of the system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialize domain from the provided list and apply boundary conditions</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">initialize_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+    <span class="c1"># Find the variables with periodic BCs and their directions</span>
+    <span class="n">periodic_bcs_dict</span> <span class="o">=</span> <span class="n">get_periodic_bcs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+    <span class="c1"># Get the number of points and variables</span>
+    <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape_from_list</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">num_points</span> <span class="o">*</span> <span class="n">nv</span>
+
+    <span class="c1"># Create a sparse matrix for the Jacobian</span>
+    <span class="n">jac</span> <span class="o">=</span> <span class="n">lil_matrix</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+    <span class="c1"># Retrieve cells and boundary parameters</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">cells</span><span class="p">()</span>
+    <span class="n">nb</span><span class="p">,</span> <span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ilo</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
+
+    <span class="c1"># Use same point iteration as system residuals</span>
+    <span class="c1"># Iterating over interior points</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Define the neighborhood and band around the current cell</span>
+        <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb</span><span class="p">,</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="c1"># Indices of points that affect the Jacobian (or part of the band)</span>
+        <span class="n">band</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nb</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+
+        <span class="c1"># Calculate unperturbed residuals</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">equations</span><span class="p">()])</span>
+
+        <span class="c1"># Perturb each variable and compute the Jacobian columns</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
+            <span class="c1"># Extend the band if required for that variable</span>
+            <span class="c1"># Only required for periodic BC for now</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">periodic_bcs_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">dirs</span> <span class="o">=</span> <span class="n">periodic_bcs_dict</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">band</span> <span class="o">=</span> <span class="n">extend_band</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
+                <span class="c1"># Compared to center_cell, what is the index of the cell</span>
+                <span class="c1"># to be perturbed</span>
+                <span class="n">cell</span> <span class="o">=</span> <span class="n">cells</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
+                <span class="n">current_value</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+                <span class="c1"># Perturb the current variable and compute perturbed residuals</span>
+                <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">current_value</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+
+                <span class="c1"># Apply BC again if cell is adjacent to boundary</span>
+                <span class="k">if</span> <span class="n">ilo</span> <span class="ow">in</span> <span class="n">band</span> <span class="ow">or</span> <span class="n">ihi</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+                <span class="c1"># Calculate updated residual</span>
+                <span class="n">rhs_pert</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)</span>
+                                           <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">equations</span><span class="p">()])</span>
+
+                <span class="c1"># Reset the value</span>
+                <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">current_value</span><span class="p">)</span>
+                <span class="c1"># Apply BC again if cell is adjacent to boundary</span>
+                <span class="k">if</span> <span class="n">ilo</span> <span class="ow">in</span> <span class="n">band</span> <span class="ow">or</span> <span class="n">ihi</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">apply_BC</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">bctype</span><span class="p">)</span>
+
+                <span class="c1"># Compute the difference and assign to the Jacobian</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="p">(</span><span class="n">rhs_pert</span> <span class="o">-</span> <span class="n">rhs</span><span class="p">)</span> <span class="o">/</span> <span class="n">epsilon</span>
+
+                <span class="c1"># Assign the calculated column to the Jacobian</span>
+                <span class="c1"># Blocks of nv*nv matrices are computed</span>
+                <span class="c1"># row_idx gives the start of the column vector</span>
+                <span class="c1"># First point starts at 0, second point starts at nv and so on</span>
+                <span class="c1"># For col_idx, loc - ilo gives shift from 0 for the block in multiples of nv</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">split</span><span class="p">:</span>
+                    <span class="n">row_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nv</span>
+                    <span class="n">col_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">loc</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nv</span> <span class="o">+</span> <span class="n">j</span>
+                    <span class="n">jac</span><span class="p">[</span><span class="n">row_idx</span><span class="p">:</span><span class="n">row_idx</span> <span class="o">+</span> <span class="n">nv</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s2">&quot;Split location must be specified if split is True&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># Sizes of the sub-Jacobians</span>
+                    <span class="n">na</span><span class="p">,</span> <span class="n">nc</span> <span class="o">=</span> <span class="n">split_loc</span><span class="p">,</span> <span class="p">(</span><span class="n">nv</span> <span class="o">-</span> <span class="n">split_loc</span><span class="p">)</span>
+                    <span class="c1"># Jumps of block_offset instead of nv here</span>
+                    <span class="n">block_offset</span> <span class="o">=</span> <span class="n">num_points</span> <span class="o">*</span> <span class="n">na</span>
+
+                    <span class="c1"># First part of residuals</span>
+                    <span class="c1"># Same as previous but use na instead</span>
+                    <span class="n">row_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">na</span>
+                    <span class="c1"># col_idx jumps to right part of Jacobian</span>
+                    <span class="c1"># depending on the variable if pre- or post-split</span>
+                    <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">na</span><span class="p">:</span>
+                        <span class="n">col_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">loc</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">na</span> <span class="o">+</span> <span class="n">j</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Jumps of nc in post-split parts</span>
+                        <span class="c1"># j-na to ensure post-split variables start afresh</span>
+                        <span class="n">col_idx</span> <span class="o">=</span> <span class="n">block_offset</span> <span class="o">+</span> \
+                            <span class="p">(</span><span class="n">loc</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nc</span> <span class="o">+</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">na</span><span class="p">)</span>
+
+                    <span class="n">jac</span><span class="p">[</span><span class="n">row_idx</span><span class="p">:</span><span class="n">row_idx</span> <span class="o">+</span> <span class="n">na</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="p">[:</span><span class="n">na</span><span class="p">]</span>
+
+                    <span class="c1"># Second part of residuals</span>
+                    <span class="c1"># col_idx remains same as previous</span>
+                    <span class="n">row_idx</span> <span class="o">=</span> <span class="n">block_offset</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">)</span> <span class="o">*</span> <span class="n">nc</span>
+                    <span class="n">jac</span><span class="p">[</span><span class="n">row_idx</span><span class="p">:</span><span class="n">row_idx</span> <span class="o">+</span> <span class="n">nc</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="p">[</span><span class="n">na</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">jac</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.simulation.Simulation.steady_state" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">steady_state</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Solve for the steady state of the system.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>split</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to split the solution into outer and inner blocks. Defaults to False.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>split_loc</code></b>
+                  (<code>int</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The location to split the solution at. Required if <code>split</code> is True.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>sparse</code></b>
+                  (<code>bool</code>, default:
+                      <code>True</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to use a sparse Jacobian. Defaults to True.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>dt0</code></b>
+                  (<code>float</code>, default:
+                      <code>0.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The initial time step to use in pseudo-time. Defaults to 0.0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>dtmax</code></b>
+                  (<code>float</code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The maximum time step to use  in pseudo-time. Defaults to 1.0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>armijo</code></b>
+                  (<code>bool</code>, default:
+                      <code>False</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Whether to use the Armijo rule for line searches. Defaults to False.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>iter</code></b>(                  <code>int</code>
+)              –
+              <div class="doc-md-description">
+                <p>The number of iterations performed.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">steady_state</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solve for the steady state of the system.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    split : bool, optional</span>
+<span class="sd">        Whether to split the solution into outer and inner blocks. Defaults to False.</span>
+<span class="sd">    split_loc : int, optional</span>
+<span class="sd">        The location to split the solution at. Required if `split` is True.</span>
+<span class="sd">    sparse : bool, optional</span>
+<span class="sd">        Whether to use a sparse Jacobian. Defaults to True.</span>
+<span class="sd">    dt0 : float, optional</span>
+<span class="sd">        The initial time step to use in pseudo-time. Defaults to 0.0.</span>
+<span class="sd">    dtmax : float, optional</span>
+<span class="sd">        The maximum time step to use  in pseudo-time. Defaults to 1.0.</span>
+<span class="sd">    armijo : bool, optional</span>
+<span class="sd">        Whether to use the Armijo rule for line searches. Defaults to False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    iter : int</span>
+<span class="sd">        The number of iterations performed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_f</span><span class="p">(</span><span class="n">u</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_residuals_from_list</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_jac</span><span class="p">(</span><span class="n">u</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+
+    <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">listify_interior</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+    <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape_from_list</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+
+    <span class="c1"># Extend bounds based on input</span>
+    <span class="n">ext_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extend_bounds</span><span class="p">(</span>
+        <span class="n">bounds</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">split</span><span class="p">:</span>
+        <span class="n">xf</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="nb">iter</span> <span class="o">=</span> <span class="n">newton</span><span class="p">(</span>
+            <span class="n">_f</span><span class="p">,</span> <span class="n">_jac</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="n">sparse</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="n">dt0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="n">dtmax</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="n">armijo</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="n">ext_bounds</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">split_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Split location must be specified in this case&quot;</span><span class="p">)</span>
+
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">num_points</span> <span class="o">*</span> <span class="n">split_loc</span>
+        <span class="n">xf</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="nb">iter</span> <span class="o">=</span> <span class="n">split_newton</span><span class="p">(</span>
+            <span class="n">_f</span><span class="p">,</span> <span class="n">_jac</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="n">sparse</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="n">dt0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="n">dtmax</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="n">armijo</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">ext_bounds</span>
+        <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">initialize_from_list</span><span class="p">(</span><span class="n">xf</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">split_loc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">iter</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="splitfxm.simulation.array_list_reshape" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">array_list_reshape</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Reshape a list into a list of 1D NumPy arrays.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>l</code></b>
+                  (<code>list</code>)
+              –
+              <div class="doc-md-description">
+                <p>The list to reshape.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>shape</code></b>
+                  (<code>tuple</code>)
+              –
+              <div class="doc-md-description">
+                <p>The shape to reshape the list into.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+<b><code>reshaped_list</code></b>(                  <code>list of ndarray</code>
+)              –
+              <div class="doc-md-description">
+                <p>The reshaped list.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/simulation.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">array_list_reshape</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reshape a list into a list of 1D NumPy arrays.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l : list</span>
+<span class="sd">        The list to reshape.</span>
+<span class="sd">    shape : tuple</span>
+<span class="sd">        The shape to reshape the list into.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    reshaped_list : list of ndarray</span>
+<span class="sd">        The reshaped list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Reshape to list of 1D numpy arrays</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../system/" class="btn btn-neutral float-left" title="System"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../system/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
