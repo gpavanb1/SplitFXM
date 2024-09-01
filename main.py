@@ -26,7 +26,7 @@ logging.basicConfig(level=loglevel)
 # Define the problem
 method = 'FDM'
 m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
-d = Domain.from_size(20, 2, ["u", "v", "w"])
+d = Domain.from_size(20, 1, 1, ["u", "v", "w"])
 ics = {"u": "gaussian", "v": "rarefaction"}
 bcs = {
     "u": {

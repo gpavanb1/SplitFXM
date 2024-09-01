@@ -3,6 +3,7 @@ import numdifftools as nd
 from splitnewton.newton import newton
 from splitnewton.split_newton import split_newton
 
+from .constants import btype
 from .domain import Domain
 from .error import SFXM
 from .system import System
@@ -296,15 +297,18 @@ class Simulation:
 
         # Retrieve cells and boundary parameters
         cells = self._d.cells()
-        nb, ilo, ihi = self._d.nb(), self._d.ilo(), self._d.ihi()
+        nb_left, nb_right, ilo, ihi = self._d.nb(btype.LEFT), self._d.nb(
+            btype.RIGHT), self._d.ilo(), self._d.ihi()
 
         # Use same point iteration as system residuals
         # Iterating over interior points
         for i in range(ilo, ihi + 1):
             # Define the neighborhood and band around the current cell
-            cell_sub = [cells[i + offset] for offset in range(-nb, nb + 1)]
+            cell_sub = [cells[i + offset]
+                        for offset in range(-nb_left, nb_right + 1)]
             # Indices of points that affect the Jacobian (or part of the band)
-            band = list(range(max(ilo, i - nb), min(ihi + 1, i + nb + 1)))
+            band = list(range(max(ilo, i - nb_left),
+                        min(ihi + 1, i + nb_right + 1)))
 
             # Calculate unperturbed residuals
             rhs = np.concatenate([eq.residuals(cell_sub, self._s._scheme)

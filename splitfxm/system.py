@@ -1,5 +1,6 @@
 import numpy as np
 from .domain import Domain
+from .constants import btype
 
 
 class System:
@@ -42,6 +43,10 @@ class System:
         ilo = d.ilo()
         ihi = d.ihi()
 
+        # Get list of boundary points in each direction
+        nb_left = d.nb(btype.LEFT)
+        nb_right = d.nb(btype.RIGHT)
+
         rhs_list = []
 
         for i in range(ilo, ihi + 1):
@@ -51,7 +56,7 @@ class System:
                 # Send two-sided stencil
                 # Let model decide computation
                 cell_sub = [cells[i + offset]
-                            for offset in range(-d.nb(), d.nb() + 1)]
+                            for offset in range(-nb_left, nb_right + 1)]
                 rhs = np.concatenate(
                     (rhs, eq.residuals(cell_sub, self._scheme)))
             rhs_list.append(rhs)

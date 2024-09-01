@@ -3,7 +3,6 @@ import numpy as np
 import pytest
 import time
 
-
 from examples.advection_diffusion import AdvectionDiffusion
 from splitfxm.domain import Domain
 from splitfxm.simulation import Simulation
@@ -13,7 +12,7 @@ from splitfxm.schemes import default_scheme
 def test_dense_sparse_jac_comparison():
     method = 'FDM'
     m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
-    d = Domain.from_size(250, 2, ["u", "v", "w"])
+    d = Domain.from_size(250, 1, 1, ["u", "v", "w"])
     ics = {"u": "gaussian", "v": "rarefaction"}
     bcs = {
         "u": {

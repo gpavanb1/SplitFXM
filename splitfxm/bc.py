@@ -221,8 +221,8 @@ def extend_band(band, dirs: list, i: int, d: Domain):
     This function works only for symmetric schemes. It handles overflow points for 
     periodic boundaries by adding indices from the left or right domain as needed.
     """
-    # TODO: Works only for symmetric schemes
-    nb = d.nb()
+    nb_left = d.nb(btype.LEFT)
+    nb_right = d.nb(btype.RIGHT)
 
     ilo = d.ilo()
     ihi = d.ihi()
@@ -233,12 +233,12 @@ def extend_band(band, dirs: list, i: int, d: Domain):
         # If right is periodic, check how much overflow there is
         # and add the left domain points to the band
         if dir == btype_map[btype.RIGHT]:
-            overflow = max(0, nb - (ihi - i))
+            overflow = max(0, nb_right - (ihi - i))
             addl_points.extend(list(range(ilo, ilo + overflow)))
         # If left is periodic, check how much overflow there is
         # and add the right domain points to the band
         elif dir == btype_map[btype.LEFT]:
-            overflow = max(0, nb - (i - ilo))
+            overflow = max(0, nb_left - (i - ilo))
             addl_points.extend(list(range(ihi - overflow + 1, ihi + 1)))
         else:
             raise SFXM("Incorrect boundary direction encountered")

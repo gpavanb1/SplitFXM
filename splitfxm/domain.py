@@ -1,7 +1,9 @@
 import numpy as np
 
 from numpy import linspace, zeros
-from .boundary import btype, Boundary
+
+from .boundary import Boundary
+from .constants import btype
 from .cell import Cell
 from .error import SFXM
 
@@ -21,24 +23,28 @@ class Domain:
     """
 
     def __init__(
-        self, cells: list[Cell], boundaries: list[Boundary], components: list[str]
+        self, cells: list[Cell], left_boundaries: list[Boundary], right_boundaries: list[Boundary], components: list[str]
     ):
         """
         Initialize a `Domain` object.
         """
         # Boundaries list contains both left and right
         # nb indicates number on each side
-        self._nb = int(len(boundaries) / 2)
+        self._nb = {btype.LEFT: int(
+            len(left_boundaries)), btype.RIGHT: int(len(right_boundaries))}
+
         self._nx = len(cells)
-        self._domain = [*(boundaries[: self._nb]), *
-                        cells, *(boundaries[self._nb:])]
+        # Domain is a list of left boundary, interior cells and right boundaries
+        self._domain = [*left_boundaries, *
+                        cells, *right_boundaries]
         self._components = components
 
-    @classmethod
+    @ classmethod
     def from_size(
         cls,
         nx: int,
-        ng: int,
+        nb_left: int,
+        nb_right: int,
         components: list[str],
         xmin: float = 0.0,
         xmax: float = 1.0,
@@ -50,8 +56,10 @@ class Domain:
         ----------
         nx : int
             The number of cells in the domain.
-        ng : int
-            The number of ghost cells in total. Must be even.
+        nb_left: int
+            The number of ghost cells on the left side of the domain.
+        nb_right: int
+            The number of ghost cells on the right side of the domain.
         components : list of str
             The names of the components in the domain.
         xmin : float, optional
@@ -65,9 +73,6 @@ class Domain:
             The initialized `Domain` object.
         """
 
-        if ng % 2 != 0:
-            raise SFXM("nb must be an even number")
-
         # Initialize a uniform grid
         xarr = linspace(xmin, xmax, nx)
         nv = len(components)
@@ -77,15 +82,14 @@ class Domain:
         dx = (xmax - xmin) / nx
         left_boundaries = [
             Boundary(xmin - (i + 1) * dx, btype.LEFT, zeros(nv))
-            for i in range(int(ng / 2))
+            for i in range(nb_left)
         ]
         right_boundaries = [
             Boundary(xmax + (i + 1) * dx, btype.RIGHT, zeros(nv))
-            for i in range(int(ng / 2))
+            for i in range(nb_right)
         ]
-        boundaries = left_boundaries + right_boundaries
 
-        return Domain(interior, boundaries, components)
+        return Domain(interior, left_boundaries, right_boundaries, components)
 
     def ilo(self):
         """
@@ -96,7 +100,7 @@ class Domain:
         int
             The index of the leftmost interior cell.
         """
-        return self._nb
+        return self._nb[btype.LEFT]
 
     def ihi(self):
         """
@@ -107,9 +111,9 @@ class Domain:
         int
             The index of the rightmost interior cell.
         """
-        return self._nb + self._nx - 1
+        return self._nb[btype.LEFT] + self._nx - 1
 
-    def nb(self):
+    def nb(self, dir: btype):
         """
         Get the number of ghost cells on each side of the domain.
 
@@ -118,7 +122,7 @@ class Domain:
         int
             The number of ghost cells on each side of the domain.
         """
-        return self._nb
+        return self._nb[dir]
 
     def cells(self, interior=False):
         """
@@ -140,7 +144,8 @@ class Domain:
         tuple of Boundary
             The left and right boundaries of the domain.
         """
-        return self._domain[: self._nb], self._domain[-self._nb:]
+        nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
+        return self._domain[: nb_left], self._domain[-nb_right:]
 
     def interior(self):
         """
@@ -151,7 +156,8 @@ class Domain:
         list of Cell
             The interior cells in the domain.
         """
-        return self._domain[self._nb: -self._nb]
+        nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
+        return self._domain[nb_left: -nb_right]
 
     def set_interior(self, cells):
         """
@@ -163,8 +169,9 @@ class Domain:
             The new interior cells in the domain.
         """
         self._nx = len(cells)
-        self._domain = [*self._domain[: self._nb],
-                        *cells, *self._domain[-self._nb:]]
+        nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
+        self._domain = [*self._domain[: nb_left],
+                        *cells, *self._domain[-nb_right:]]
 
     def num_components(self):
         """
@@ -252,8 +259,8 @@ class Domain:
         numpy.ndarray
             The values of all interior cells in the domain in a list.
         """
-
-        interior_values = self.values()[self._nb: -self._nb]
+        nb_left, nb_right = self.nb(btype.LEFT), self.nb(btype.RIGHT)
+        interior_values = self.values()[nb_left: -nb_right]
 
         if not split:
             return np.array(interior_values).flatten()
