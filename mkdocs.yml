@@ -11,8 +11,8 @@ nav:
       - Domain: domain.md
       - Initial Conditions: ic.md
       - Boundary Conditions: bc.md
-      - Finite Volume Schemes: flux.md
-      - Finite Difference Schemes: derivatives.md
+      - Finite-Volume Schemes: flux.md
+      - Finite-Difference Schemes: derivatives.md
       - Visualization: visualize.md
       - Adaptive Mesh Refinement: refine.md
       - Internals:

@@ -16,8 +16,10 @@ class Domain:
     ----------
     cells : list of Cell
         The cells in the domain.
-    boundaries : list of Boundary
-        The boundaries of the domain.
+    left_boundaries : list of Boundary
+        The left boundaries of the domain.
+    right_boundaries : list of Boundary
+        The right boundaries of the domain.
     components : list of str
         The names of the components in the domain.
     """
