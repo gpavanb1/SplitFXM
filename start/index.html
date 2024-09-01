@@ -124,7 +124,7 @@ from splitfxm.visualize import draw
 # Define the problem
 method = 'FDM'
 m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
-d = Domain.from_size(20, 2, [&quot;u&quot;, &quot;v&quot;, &quot;w&quot;]) # nx, ng, variables
+d = Domain.from_size(20, 1, 1, [&quot;u&quot;, &quot;v&quot;, &quot;w&quot;]) # nx, nb_left, nb_right, variables
 ics = {&quot;u&quot;: &quot;gaussian&quot;, &quot;v&quot;: &quot;rarefaction&quot;}
 bcs = {
     &quot;u&quot;: {
