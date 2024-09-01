@@ -61,9 +61,9 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../bc/">Boundary Conditions</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite Volume Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite Difference Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite-Difference Schemes</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
@@ -233,8 +233,7 @@
 </table>
               <details class="quote">
                 <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 42</span>
-<span class="normal"> 43</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 43</span>
 <span class="normal"> 44</span>
 <span class="normal"> 45</span>
 <span class="normal"> 46</span>
@@ -632,7 +631,11 @@
 <span class="normal">438</span>
 <span class="normal">439</span>
 <span class="normal">440</span>
-<span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class representing a simulation.</span>
 
@@ -889,15 +892,18 @@
 
         <span class="c1"># Retrieve cells and boundary parameters</span>
         <span class="n">cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">cells</span><span class="p">()</span>
-        <span class="n">nb</span><span class="p">,</span> <span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ilo</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
+        <span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span><span class="p">,</span> <span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span>
+            <span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ilo</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
 
         <span class="c1"># Use same point iteration as system residuals</span>
         <span class="c1"># Iterating over interior points</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="c1"># Define the neighborhood and band around the current cell</span>
-            <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb</span><span class="p">,</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
             <span class="c1"># Indices of points that affect the Jacobian (or part of the band)</span>
-            <span class="n">band</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nb</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+            <span class="n">band</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nb_left</span><span class="p">),</span>
+                        <span class="nb">min</span><span class="p">(</span><span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
 
             <span class="c1"># Calculate unperturbed residuals</span>
             <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)</span>
@@ -1062,8 +1068,7 @@
 
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">60</span>
-<span class="normal">61</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
 <span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
@@ -1080,7 +1085,8 @@
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">bcs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ss</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+<span class="normal">78</span>
+<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">bcs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ss</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize a Simulation object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1154,8 +1160,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 80</span>
-<span class="normal"> 81</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 81</span>
 <span class="normal"> 82</span>
 <span class="normal"> 83</span>
 <span class="normal"> 84</span>
@@ -1178,7 +1183,8 @@
 <span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
-<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refinement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">104</span>
+<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">refinement</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Evolve the simulation for a given time step.</span>
 
@@ -1307,8 +1313,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">221</span>
-<span class="normal">222</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
 <span class="normal">223</span>
 <span class="normal">224</span>
 <span class="normal">225</span>
@@ -1346,7 +1351,8 @@
 <span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
-<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extend_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">260</span>
+<span class="normal">261</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extend_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">nv</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extends the provided input bounds based on whether there is a split or not.</span>
 
@@ -1474,8 +1480,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
-<span class="normal">181</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
@@ -1513,7 +1518,8 @@
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_residuals_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">219</span>
+<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_residuals_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the residuals for the domain given a list of values.</span>
 
@@ -1628,8 +1634,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
-<span class="normal">111</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
@@ -1652,7 +1657,8 @@
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
-<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_shape_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+<span class="normal">134</span>
+<span class="normal">135</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_shape_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the shape of the list when reshaped into a NumPy array.</span>
 
@@ -1742,8 +1748,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
-<span class="normal">137</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
@@ -1784,7 +1789,8 @@
 <span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span>
-<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">178</span>
+<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the domain from a list of values.</span>
 
@@ -1925,8 +1931,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
-<span class="normal">263</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">263</span>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
@@ -2051,7 +2056,11 @@
 <span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
-<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the Jacobian of the system using finite differences.</span>
 
@@ -2088,15 +2097,18 @@
 
     <span class="c1"># Retrieve cells and boundary parameters</span>
     <span class="n">cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">cells</span><span class="p">()</span>
-    <span class="n">nb</span><span class="p">,</span> <span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ilo</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
+    <span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span><span class="p">,</span> <span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span>
+        <span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ilo</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
 
     <span class="c1"># Use same point iteration as system residuals</span>
     <span class="c1"># Iterating over interior points</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
         <span class="c1"># Define the neighborhood and band around the current cell</span>
-        <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb</span><span class="p">,</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
         <span class="c1"># Indices of points that affect the Jacobian (or part of the band)</span>
-        <span class="n">band</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nb</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">nb</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">band</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">nb_left</span><span class="p">),</span>
+                    <span class="nb">min</span><span class="p">(</span><span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
 
         <span class="c1"># Calculate unperturbed residuals</span>
         <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)</span>
@@ -2298,11 +2310,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">394</span>
 <span class="normal">395</span>
 <span class="normal">396</span>
 <span class="normal">397</span>
@@ -2349,7 +2357,11 @@
 <span class="normal">438</span>
 <span class="normal">439</span>
 <span class="normal">440</span>
-<span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">steady_state</span><span class="p">(</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">steady_state</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">armijo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2486,8 +2498,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
-<span class="normal">22</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
@@ -2504,7 +2515,8 @@
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">array_list_reshape</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">array_list_reshape</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reshape a list into a list of 1D NumPy arrays.</span>
 

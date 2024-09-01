@@ -71,9 +71,9 @@
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite Volume Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite Difference Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite-Difference Schemes</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
@@ -729,8 +729,8 @@ periodic boundaries by adding indices from the left or right domain as needed.</
 <span class="sd">    This function works only for symmetric schemes. It handles overflow points for </span>
 <span class="sd">    periodic boundaries by adding indices from the left or right domain as needed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># TODO: Works only for symmetric schemes</span>
-    <span class="n">nb</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">()</span>
+    <span class="n">nb_left</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
+    <span class="n">nb_right</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
 
     <span class="n">ilo</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ilo</span><span class="p">()</span>
     <span class="n">ihi</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
@@ -741,12 +741,12 @@ periodic boundaries by adding indices from the left or right domain as needed.</
         <span class="c1"># If right is periodic, check how much overflow there is</span>
         <span class="c1"># and add the left domain points to the band</span>
         <span class="k">if</span> <span class="nb">dir</span> <span class="o">==</span> <span class="n">btype_map</span><span class="p">[</span><span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">]:</span>
-            <span class="n">overflow</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nb</span> <span class="o">-</span> <span class="p">(</span><span class="n">ihi</span> <span class="o">-</span> <span class="n">i</span><span class="p">))</span>
+            <span class="n">overflow</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nb_right</span> <span class="o">-</span> <span class="p">(</span><span class="n">ihi</span> <span class="o">-</span> <span class="n">i</span><span class="p">))</span>
             <span class="n">addl_points</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ilo</span> <span class="o">+</span> <span class="n">overflow</span><span class="p">)))</span>
         <span class="c1"># If left is periodic, check how much overflow there is</span>
         <span class="c1"># and add the right domain points to the band</span>
         <span class="k">elif</span> <span class="nb">dir</span> <span class="o">==</span> <span class="n">btype_map</span><span class="p">[</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">]:</span>
-            <span class="n">overflow</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nb</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">))</span>
+            <span class="n">overflow</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nb_left</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">ilo</span><span class="p">))</span>
             <span class="n">addl_points</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ihi</span> <span class="o">-</span> <span class="n">overflow</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Incorrect boundary direction encountered&quot;</span><span class="p">)</span>
@@ -909,7 +909,7 @@ conditions are included in the output dictionary.</p>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../ic/" class="btn btn-neutral float-left" title="Initial Conditions"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../flux/" class="btn btn-neutral float-right" title="Finite Volume Schemes">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../flux/" class="btn btn-neutral float-right" title="Finite-Volume Schemes">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>

@@ -61,9 +61,9 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../bc/">Boundary Conditions</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite Volume Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite Difference Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite-Difference Schemes</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
@@ -193,8 +193,7 @@
 </table>
               <details class="quote">
                 <summary>Source code in <code>splitfxm/system.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 5</span>
-<span class="normal"> 6</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 6</span>
 <span class="normal"> 7</span>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
@@ -247,7 +246,12 @@
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">System</span><span class="p">:</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">System</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class representing a system of equations.</span>
 
@@ -287,6 +291,10 @@
         <span class="n">ilo</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ilo</span><span class="p">()</span>
         <span class="n">ihi</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
 
+        <span class="c1"># Get list of boundary points in each direction</span>
+        <span class="n">nb_left</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
+        <span class="n">nb_right</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
+
         <span class="n">rhs_list</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -296,7 +304,7 @@
                 <span class="c1"># Send two-sided stencil</span>
                 <span class="c1"># Let model decide computation</span>
                 <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
-                            <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+                            <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
                 <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
                     <span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)))</span>
             <span class="n">rhs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
@@ -332,12 +340,12 @@
 
             <details class="quote">
               <summary>Source code in <code>splitfxm/system.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
-<span class="normal">18</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
 <span class="normal">21</span>
-<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">scheme</span><span class="p">):</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">scheme</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize a System object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -411,8 +419,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/system.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
-<span class="normal">25</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
@@ -446,7 +453,12 @@
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">):</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the residuals for the system of equations.</span>
 
@@ -467,6 +479,10 @@
     <span class="n">ilo</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ilo</span><span class="p">()</span>
     <span class="n">ihi</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
 
+    <span class="c1"># Get list of boundary points in each direction</span>
+    <span class="n">nb_left</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
+    <span class="n">nb_right</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
+
     <span class="n">rhs_list</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -476,7 +492,7 @@
             <span class="c1"># Send two-sided stencil</span>
             <span class="c1"># Let model decide computation</span>
             <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
-                        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+                        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
             <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)))</span>
         <span class="n">rhs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
