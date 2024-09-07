@@ -74,8 +74,13 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
                     # The shift mirrors the interior on the same side
                     shift = cells[(i + 1) + ilo].x() - xmin
                     b.set_x(xmin - shift)
-                    # Value same as leftmost interior
-                    b.set_value(idx, cells[ilo].value(idx))
+                    # Value same as extrapolated from interior
+                    dy = cells[ilo + 1].value(idx) - cells[ilo].value(idx)
+                    dx = cells[ilo + 1].x() - cells[ilo].x()
+                    delta_x = cells[ilo - i].x() - cells[ilo - (i + 1)].x()
+
+                    b.set_value(
+                        idx, cells[ilo - i].value(idx) - (dy/dx) * delta_x)
 
             elif dir == btype_map[btype.RIGHT]:
                 # right boundary
