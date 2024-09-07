@@ -64,9 +64,6 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
                     b.set_x(xmax + shift)
                     b.set_value(idx, cells[i + ilo].value(idx))
 
-            else:
-                raise SFXM("Incorrect boundary direction encountered")
-
         elif bc_type == "outflow":
             if dir == btype_map[btype.LEFT]:
                 # left boundary
@@ -95,9 +92,6 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
 
                     b.set_value(
                         idx, cells[ihi + i].value(idx) + (dy/dx) * delta_x)
-
-            else:
-                raise SFXM("Incorrect boundary direction encountered")
 
         # Dictionary-based boundary conditions
         # Dirichlet and Neumann BCs require additional values also
@@ -132,9 +126,6 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
                         b.set_value(
                             idx, cells[ihi + i].value(idx) + neumann_value * dx)
 
-                else:
-                    raise SFXM("Incorrect boundary direction encountered")
-
             elif bc_type == "dirichlet":
                 if dir == btype_map[btype.LEFT]:
                     # left boundary
@@ -155,9 +146,6 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
                         b.set_x(xmax + shift)
 
                         b.set_value(idx, dirichlet_value)
-
-                else:
-                    raise SFXM("Incorrect boundary direction encountered")
 
             else:
                 raise SFXM(
