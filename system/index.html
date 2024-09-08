@@ -63,7 +63,13 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite-Difference Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" >Finite-Difference Schemes</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../derivatives/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../generate/">Scheme Generation</a>
+                </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
@@ -157,7 +163,7 @@
     <div class="doc doc-contents ">
 
 
-      <p>A class representing a system of equations.</p>
+        <p>A class representing a system of equations.</p>
 
 
 <table class="field-list">
@@ -193,124 +199,65 @@
 </table>
               <details class="quote">
                 <summary>Source code in <code>splitfxm/system.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">System</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class representing a system of equations.</span>
+                <pre class="highlight"><code class="language-python">class System:
+    """
+    A class representing a system of equations.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    model : Model</span>
-<span class="sd">        The model for which to solve the system of equations.</span>
-<span class="sd">    scheme : Schemes</span>
-<span class="sd">        The discretization scheme to use for the system</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Parameters
+    ----------
+    model : Model
+        The model for which to solve the system of equations.
+    scheme : Schemes
+        The discretization scheme to use for the system
+    """
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">scheme</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize a System object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_scheme</span> <span class="o">=</span> <span class="n">scheme</span>
+    def __init__(self, model, scheme):
+        """
+        Initialize a System object.
+        """
+        self._model = model
+        self._scheme = scheme
 
-    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the residuals for the system of equations.</span>
+    def residuals(self, d: Domain):
+        """
+        Calculate the residuals for the system of equations.
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        d : Domain</span>
-<span class="sd">            The domain for which to calculate the residuals.</span>
+        Parameters
+        ----------
+        d : Domain
+            The domain for which to calculate the residuals.
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        rhs_list : list of ndarray</span>
-<span class="sd">            The list of residual arrays for each cell in the domain.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        Returns
+        -------
+        rhs_list : list of ndarray
+            The list of residual arrays for each cell in the domain.
+        """
 
-        <span class="n">cells</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">cells</span><span class="p">()</span>
+        cells = d.cells()
 
-        <span class="c1"># Interior indices</span>
-        <span class="n">ilo</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ilo</span><span class="p">()</span>
-        <span class="n">ihi</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
+        # Interior indices
+        ilo = d.ilo()
+        ihi = d.ihi()
 
-        <span class="c1"># Get list of boundary points in each direction</span>
-        <span class="n">nb_left</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
-        <span class="n">nb_right</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
+        # Get list of boundary points in each direction
+        nb_left = d.nb(btype.LEFT)
+        nb_right = d.nb(btype.RIGHT)
 
-        <span class="n">rhs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        rhs_list = []
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
-            <span class="c1"># Append residuals from each equation</span>
-            <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">equations</span><span class="p">():</span>
-                <span class="c1"># Send two-sided stencil</span>
-                <span class="c1"># Let model decide computation</span>
-                <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
-                            <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
-                <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)))</span>
-            <span class="n">rhs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
+        for i in range(ilo, ihi + 1):
+            rhs = np.array([])
+            # Append residuals from each equation
+            for eq in self._model.equations():
+                # Send two-sided stencil
+                # Let model decide computation
+                cell_sub = [cells[i + offset]
+                            for offset in range(-nb_left, nb_right + 1)]
+                rhs = np.concatenate(
+                    (rhs, eq.residuals(cell_sub, self._scheme)))
+            rhs_list.append(rhs)
 
-        <span class="k">return</span> <span class="n">rhs_list</span>
-</code></pre></div></td></tr></table></div>
+        return rhs_list</code></pre>
               </details>
 
 
@@ -329,29 +276,23 @@
 
 
 <h3 id="splitfxm.system.System.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">scheme</span><span class="p">)</span></code>
+            <code class="highlight language-python">__init__(model, scheme)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Initialize a System object.</p>
+        <p>Initialize a System object.</p>
 
             <details class="quote">
               <summary>Source code in <code>splitfxm/system.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">scheme</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialize a System object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_scheme</span> <span class="o">=</span> <span class="n">scheme</span>
-</code></pre></div></td></tr></table></div>
+              <pre class="highlight"><code class="language-python">def __init__(self, model, scheme):
+    """
+    Initialize a System object.
+    """
+    self._model = model
+    self._scheme = scheme</code></pre>
             </details>
     </div>
 
@@ -361,14 +302,14 @@
 
 
 <h3 id="splitfxm.system.System.residuals" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">residuals</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></code>
+            <code class="highlight language-python">residuals(d)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Calculate the residuals for the system of equations.</p>
+        <p>Calculate the residuals for the system of equations.</p>
 
 
 <table class="field-list">
@@ -419,86 +360,46 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/system.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the residuals for the system of equations.</span>
+              <pre class="highlight"><code class="language-python">def residuals(self, d: Domain):
+    """
+    Calculate the residuals for the system of equations.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    d : Domain</span>
-<span class="sd">        The domain for which to calculate the residuals.</span>
+    Parameters
+    ----------
+    d : Domain
+        The domain for which to calculate the residuals.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    rhs_list : list of ndarray</span>
-<span class="sd">        The list of residual arrays for each cell in the domain.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Returns
+    -------
+    rhs_list : list of ndarray
+        The list of residual arrays for each cell in the domain.
+    """
 
-    <span class="n">cells</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">cells</span><span class="p">()</span>
+    cells = d.cells()
 
-    <span class="c1"># Interior indices</span>
-    <span class="n">ilo</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ilo</span><span class="p">()</span>
-    <span class="n">ihi</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">ihi</span><span class="p">()</span>
+    # Interior indices
+    ilo = d.ilo()
+    ihi = d.ihi()
 
-    <span class="c1"># Get list of boundary points in each direction</span>
-    <span class="n">nb_left</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
-    <span class="n">nb_right</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">nb</span><span class="p">(</span><span class="n">btype</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
+    # Get list of boundary points in each direction
+    nb_left = d.nb(btype.LEFT)
+    nb_right = d.nb(btype.RIGHT)
 
-    <span class="n">rhs_list</span> <span class="o">=</span> <span class="p">[]</span>
+    rhs_list = []
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ilo</span><span class="p">,</span> <span class="n">ihi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
-        <span class="c1"># Append residuals from each equation</span>
-        <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">equations</span><span class="p">():</span>
-            <span class="c1"># Send two-sided stencil</span>
-            <span class="c1"># Let model decide computation</span>
-            <span class="n">cell_sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span>
-                        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">nb_left</span><span class="p">,</span> <span class="n">nb_right</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
-            <span class="n">rhs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">eq</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="n">cell_sub</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheme</span><span class="p">)))</span>
-        <span class="n">rhs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
+    for i in range(ilo, ihi + 1):
+        rhs = np.array([])
+        # Append residuals from each equation
+        for eq in self._model.equations():
+            # Send two-sided stencil
+            # Let model decide computation
+            cell_sub = [cells[i + offset]
+                        for offset in range(-nb_left, nb_right + 1)]
+            rhs = np.concatenate(
+                (rhs, eq.residuals(cell_sub, self._scheme)))
+        rhs_list.append(rhs)
 
-    <span class="k">return</span> <span class="n">rhs_list</span>
-</code></pre></div></td></tr></table></div>
+    return rhs_list</code></pre>
             </details>
     </div>
 

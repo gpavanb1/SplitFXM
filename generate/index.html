@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>Finite-Volume Schemes - splitfxm</title>
+    <title>Scheme Generation - splitfxm</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -14,8 +14,8 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Finite-Volume Schemes";
-        var mkdocs_page_input_path = "flux.md";
+        var mkdocs_page_name = "Scheme Generation";
+        var mkdocs_page_input_path = "generate.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -61,21 +61,19 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../bc/">Boundary Conditions</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Finite-Volume Schemes</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux">flux</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux.diffusion_fluxes">diffusion_fluxes</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux.fluxes">fluxes</a>
-    </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" >Finite-Difference Schemes</a>
-    <ul>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Finite-Difference Schemes</a>
+    <ul class="current">
                 <li class="toctree-l2"><a class="reference internal" href="../derivatives/">Overview</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../generate/">Scheme Generation</a>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Scheme Generation</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.fdm_schemes.generate">generate</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.fdm_schemes.generate.compact_scheme">compact_scheme</a>
+    </li>
+    </ul>
                 </li>
     </ul>
                   </li>
@@ -113,7 +111,8 @@
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">Code Documentation</li>
-      <li class="breadcrumb-item active">Finite-Volume Schemes</li>
+          <li class="breadcrumb-item">Finite-Difference Schemes</li>
+      <li class="breadcrumb-item active">Scheme Generation</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -122,15 +121,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="finite-volume-schemes">Finite-Volume Schemes</h1>
-<p>This section contains details related to the implementation of finite-volume schemes</p>
+                <h1 id="scheme-generation">Scheme Generation</h1>
+<p>There is a separate helper module for generating finite-difference schemes. Compact schemes have been implemented for the time being.</p>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="splitfxm.flux"></a>
+<a id="splitfxm.fdm_schemes.generate"></a>
     <div class="doc doc-contents first">
 
 
@@ -148,15 +147,15 @@
 <div class="doc doc-object doc-function">
 
 
-<h2 id="splitfxm.flux.diffusion_fluxes" class="doc doc-heading">
-            <code class="highlight language-python">diffusion_fluxes(D, cell_sub, scheme)</code>
+<h2 id="splitfxm.fdm_schemes.generate.compact_scheme" class="doc doc-heading">
+            <code class="highlight language-python">compact_scheme(left_stencil, right_stencil, derivative_order)</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-        <p>Calculate the diffusion fluxes of a given stencil.</p>
+        <p>Generates a compact finite difference scheme for uneven grid spacing.</p>
 
 
 <table class="field-list">
@@ -170,19 +169,27 @@
       <td class="field-body">
         <ul class="first simple">
             <li>
-              <b><code>D</code></b>
-                  (<code>function</code>)
+              <b><code>left_stencil</code></b>
+                  (<code>int</code>)
               –
               <div class="doc-md-description">
-                <p>The diffusion function.</p>
+                <p>The number of points on the left of the reference point in the stencil.</p>
               </div>
             </li>
             <li>
-              <b><code>cell_sub</code></b>
-                  (<code>list of Cell</code>)
+              <b><code>right_stencil</code></b>
+                  (<code>int</code>)
               –
               <div class="doc-md-description">
-                <p>The stencil.</p>
+                <p>The number of points on the right of the reference point in the stencil.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>derivative_order</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>The order of the derivative to approximate (1 for first derivative, 2 for second derivative, etc.).</p>
               </div>
             </li>
         </ul>
@@ -202,10 +209,10 @@
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code>tuple of numpy.ndarray</code>
-              –
+<b><code>solution</code></b>(                  <code>dict</code>
+)              –
               <div class="doc-md-description">
-                <p>The west and east diffusion fluxes.</p>
+                <p>A dictionary containing the coefficients of the finite difference scheme.</p>
               </div>
             </li>
         </ul>
@@ -213,178 +220,90 @@
     </tr>
   </tbody>
 </table>
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>This function creates Taylor series expansions for the stencil points using uneven grid spacing, where
+the grid spacing is denoted by symbols (h_j). The central point is set with a spacing of zero, and the
+coefficients are determined by solving a system of linear equations.</p>
+<p>The sign function from sympy is used to handle the directionality (positive/negative) of the grid spacing.</p>
+</details>
+
+<details class="example" open>
+  <summary>Example</summary>
+  <pre><code class="language-python">&gt;&gt;&gt; left_stencil_size = 1
+&gt;&gt;&gt; right_stencil_size = 1
+&gt;&gt;&gt; order = 1  # First derivative
+&gt;&gt;&gt; coefficients = compact_scheme(left_stencil_size, right_stencil_size, order)
+&gt;&gt;&gt; print(f&quot;Coefficients for f^({order}):&quot;, coefficients)
+</code></pre>
+</details>
             <details class="quote">
-              <summary>Source code in <code>splitfxm/flux.py</code></summary>
-              <pre class="highlight"><code class="language-python">def diffusion_fluxes(D, cell_sub, scheme):
+              <summary>Source code in <code>splitfxm/fdm_schemes/generate.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compact_scheme(left_stencil, right_stencil, derivative_order):
     """
-    Calculate the diffusion fluxes of a given stencil.
+    Generates a compact finite difference scheme for uneven grid spacing.
 
     Parameters
     ----------
-    D : function
-        The diffusion function.
-    cell_sub : list of Cell
-        The stencil.
+    left_stencil : int
+        The number of points on the left of the reference point in the stencil.
+    right_stencil : int
+        The number of points on the right of the reference point in the stencil.
+    derivative_order : int
+        The order of the derivative to approximate (1 for first derivative, 2 for second derivative, etc.).
 
     Returns
     -------
-    tuple of numpy.ndarray
-        The west and east diffusion fluxes.
-    """
+    solution : dict
+        A dictionary containing the coefficients of the finite difference scheme.
 
-    # Only central scheme for diffusion fluxes
-    if scheme == FVSchemes.LF:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for LF scheme")
+    Notes
+    -----
+    This function creates Taylor series expansions for the stencil points using uneven grid spacing, where
+    the grid spacing is denoted by symbols (h_j). The central point is set with a spacing of zero, and the
+    coefficients are determined by solving a system of linear equations.
 
-        # West Flux
-        ul = cell_sub[0].values()
-        uc = cell_sub[1].values()
-        Dl = D(ul)
-        Dr = D(uc)
-        dxw = 0.5 * (cell_sub[1].x() - cell_sub[0].x())
-        Dw = (Dr - Dl) / dxw
+    The sign function from sympy is used to handle the directionality (positive/negative) of the grid spacing.
 
-        # East Flux
-        uc = cell_sub[1].values()
-        ur = cell_sub[2].values()
-        Dl = D(uc)
-        Dr = D(ur)
-        dxe = 0.5 * (cell_sub[2].x() - cell_sub[1].x())
-        De = (Dr - Dl) / dxe
-
-        return Dw, De
-    else:
-        raise SFXM("Unsupported scheme")</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="splitfxm.flux.fluxes" class="doc doc-heading">
-            <code class="highlight language-python">fluxes(F, cell_sub, scheme)</code>
-
-</h2>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Calculate the fluxes of a given stencil.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>F</code></b>
-                  (<code>function</code>)
-              –
-              <div class="doc-md-description">
-                <p>The flux function.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>cell_sub</code></b>
-                  (<code>list of Cell</code>)
-              –
-              <div class="doc-md-description">
-                <p>The stencil.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>scheme</code></b>
-                  (<code>Schemes</code>)
-              –
-              <div class="doc-md-description">
-                <p>The scheme to use.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>tuple of numpy.ndarray</code>
-              –
-              <div class="doc-md-description">
-                <p>The west and east fluxes.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/flux.py</code></summary>
-              <pre class="highlight"><code class="language-python">def fluxes(F, cell_sub, scheme):
-    """
-    Calculate the fluxes of a given stencil.
-
-    Parameters
-    ----------
-    F : function
-        The flux function.
-    cell_sub : list of Cell
-        The stencil.
-    scheme : Schemes
-        The scheme to use.
-
-    Returns
+    Example
     -------
-    tuple of numpy.ndarray
-        The west and east fluxes.
+    ```python
+    &gt;&gt;&gt; left_stencil_size = 1
+    &gt;&gt;&gt; right_stencil_size = 1
+    &gt;&gt;&gt; order = 1  # First derivative
+    &gt;&gt;&gt; coefficients = compact_scheme(left_stencil_size, right_stencil_size, order)
+    &gt;&gt;&gt; print(f"Coefficients for f^({order}):", coefficients)
+    ```
     """
 
-    if scheme == FVSchemes.LF:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for LF scheme")
+    # Create symbols for the coefficients of the scheme
+    coefficients = symbols(f'a0:{left_stencil + right_stencil + 1}')
 
-        # West Flux
-        ul = cell_sub[0].values()
-        ur = cell_sub[1].values()
-        Fl = F(ul)
-        Fr = F(ur)
-        u_diff = ur - ul
-        # TODO: Evaluate spectral radius
-        sigma = 0.1
-        Fw = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
+    # Define the uneven grid spacing symbols
+    # Set the zero element grid distance to zero
+    # Note that h_j denotes distance from the zero element
+    grid_spacing = list(symbols(f'h:{left_stencil + right_stencil + 1}'))
+    grid_spacing[left_stencil] = 0
+    grid_spacing = tuple(grid_spacing)
 
-        # East Flux
-        ul = cell_sub[1].values()
-        ur = cell_sub[2].values()
-        Fl = F(ul)
-        Fr = F(ur)
-        u_diff = ur - ul
-        # TODO: Evaluate spectral radius
-        sigma = 0.1
-        Fe = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
+    # Taylor series expansions for points in the stencil
+    equations = []
 
-        return Fw, Fe
-    else:
-        raise SFXM("Unsupported scheme")</code></pre>
+    # Loop through the orders of the Taylor expansion (0, 1, 2,..., derivative_order)
+    for k in range(derivative_order + 1):
+        # Generate the k-th order Taylor expansion
+        taylor_expansion = sum(((grid_spacing[i + left_stencil] * sign(i)) ** k / factorial(k)) *
+                               coefficients[i + left_stencil] for i in range(-left_stencil, right_stencil + 1))
+
+        # Append the equation: 1 for the target derivative, 0 otherwise
+        expected_value = 1 if k == derivative_order else 0
+        equations.append(Eq(taylor_expansion, expected_value))
+
+    # Solve the system of equations for the coefficients
+    solution = solve(equations, coefficients)
+
+    return solution</code></pre>
             </details>
     </div>
 
@@ -401,8 +320,8 @@
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../bc/" class="btn btn-neutral float-left" title="Boundary Conditions"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../derivatives/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../derivatives/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../visualize/" class="btn btn-neutral float-right" title="Visualization">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -425,10 +344,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../bc/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../derivatives/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../derivatives/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../visualize/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

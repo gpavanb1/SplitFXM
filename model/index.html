@@ -75,7 +75,13 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite-Difference Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" >Finite-Difference Schemes</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../derivatives/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../generate/">Scheme Generation</a>
+                </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
@@ -160,40 +166,23 @@ An example is provided in the <code>examples</code> folder</p>
 
               <details class="quote">
                 <summary>Source code in <code>splitfxm/model.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize a Model object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_equations</span> <span class="o">=</span> <span class="p">[]</span>
+                <pre class="highlight"><code class="language-python">class Model:
+    def __init__(self):
+        """
+        Initialize a Model object.
+        """
+        self._equations = []
 
-    <span class="k">def</span> <span class="nf">equations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the list of equations associated with this Model.</span>
+    def equations(self):
+        """
+        Get the list of equations associated with this Model.
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list</span>
-<span class="sd">            The list of equations</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_equations</span>
-</code></pre></div></td></tr></table></div>
+        Returns
+        -------
+        list
+            The list of equations
+        """
+        return self._equations</code></pre>
               </details>
 
 
@@ -212,27 +201,22 @@ An example is provided in the <code>examples</code> folder</p>
 
 
 <h3 id="splitfxm.model.Model.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">()</span></code>
+            <code class="highlight language-python">__init__()</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Initialize a Model object.</p>
+        <p>Initialize a Model object.</p>
 
             <details class="quote">
               <summary>Source code in <code>splitfxm/model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initialize a Model object.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_equations</span> <span class="o">=</span> <span class="p">[]</span>
-</code></pre></div></td></tr></table></div>
+              <pre class="highlight"><code class="language-python">def __init__(self):
+    """
+    Initialize a Model object.
+    """
+    self._equations = []</code></pre>
             </details>
     </div>
 
@@ -242,14 +226,14 @@ An example is provided in the <code>examples</code> folder</p>
 
 
 <h3 id="splitfxm.model.Model.equations" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">equations</span><span class="p">()</span></code>
+            <code class="highlight language-python">equations()</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Get the list of equations associated with this Model.</p>
+        <p>Get the list of equations associated with this Model.</p>
 
 
 <table class="field-list">
@@ -276,26 +260,16 @@ An example is provided in the <code>examples</code> folder</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get the list of equations associated with this Model.</span>
+              <pre class="highlight"><code class="language-python">def equations(self):
+    """
+    Get the list of equations associated with this Model.
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    list</span>
-<span class="sd">        The list of equations</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_equations</span>
-</code></pre></div></td></tr></table></div>
+    Returns
+    -------
+    list
+        The list of equations
+    """
+    return self._equations</code></pre>
             </details>
     </div>
 

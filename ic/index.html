@@ -69,7 +69,13 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite-Difference Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" >Finite-Difference Schemes</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../derivatives/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../generate/">Scheme Generation</a>
+                </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
@@ -141,14 +147,14 @@
 
 
 <h2 id="splitfxm.initialize.set_initial_condition" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_initial_condition</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">)</span></code>
+            <code class="highlight language-python">set_initial_condition(d, v, type='gaussian')</code>
 
 </h2>
 
 
     <div class="doc doc-contents ">
 
-      <p>Set the initial condition of a given component in a domain.</p>
+        <p>Set the initial condition of a given component in a domain.</p>
 
 
 <table class="field-list">
@@ -217,94 +223,50 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/initialize.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_initial_condition</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Set the initial condition of a given component in a domain.</span>
+              <pre class="highlight"><code class="language-python">def set_initial_condition(d: Domain, v: str, type="gaussian"):
+    """
+    Set the initial condition of a given component in a domain.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    d : Domain</span>
-<span class="sd">        The domain to set the initial condition in.</span>
-<span class="sd">    v : str</span>
-<span class="sd">        The component to set the initial condition for.</span>
-<span class="sd">    type : str, optional</span>
-<span class="sd">        The type of initial condition to set. Options are: &#39;tophat&#39;, &#39;sine&#39;, &#39;rarefaction&#39;, &#39;gaussian&#39;. Default is &#39;gaussian&#39;.</span>
+    Parameters
+    ----------
+    d : Domain
+        The domain to set the initial condition in.
+    v : str
+        The component to set the initial condition for.
+    type : str, optional
+        The type of initial condition to set. Options are: 'tophat', 'sine', 'rarefaction', 'gaussian'. Default is 'gaussian'.
 
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    NotImplementedError</span>
-<span class="sd">        If the specified type of initial condition is not implemented.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Raises
+    ------
+    NotImplementedError
+        If the specified type of initial condition is not implemented.
+    """
 
-    <span class="c1"># Find index of component</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">component_index</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    # Find index of component
+    idx = d.component_index(v)
 
-    <span class="c1"># Some initial conditions</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;tophat&quot;</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
-            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span>
-                <span class="n">idx</span><span class="p">,</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mf">0.333</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.666</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span>
-            <span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;sine&quot;</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
-            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span>
-                <span class="n">idx</span><span class="p">,</span>
-                <span class="mf">1.0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.333</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.333</span><span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mf">0.333</span> <span class="ow">and</span> <span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.666</span><span class="p">)</span>
-                <span class="k">else</span> <span class="mf">1.0</span><span class="p">,</span>
-            <span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;rarefaction&quot;</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
-            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="mf">2.0</span> <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">():</span>
-            <span class="n">cell</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span> <span class="o">*</span> <span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-</code></pre></div></td></tr></table></div>
+    # Some initial conditions
+    if type == "tophat":
+        for cell in d.interior():
+            cell.set_value(
+                idx, 1.0 if (cell.x() &gt;= 0.333 and cell.x() &lt;= 0.666) else 0.0
+            )
+    elif type == "sine":
+        for cell in d.interior():
+            cell.set_value(
+                idx,
+                1.0 + 0.5 * np.sin(2.0 * np.pi * (cell.x() - 0.333) / 0.333)
+                if (cell.x() &gt;= 0.333 and cell.x() &lt;= 0.666)
+                else 1.0,
+            )
+    elif type == "rarefaction":
+        for cell in d.interior():
+            cell.set_value(idx, 2.0 if cell.x() &gt; 0.5 else 1.0)
+    elif type == "gaussian":
+        for cell in d.interior():
+            cell.set_value(idx, np.exp(-200 * (cell.x() - 0.25) ** 2.0))
+    else:
+        raise NotImplementedError</code></pre>
             </details>
     </div>
 

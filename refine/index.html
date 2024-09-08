@@ -63,7 +63,13 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../flux/">Finite-Volume Schemes</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../derivatives/">Finite-Difference Schemes</a>
+                  <li class="toctree-l1"><a class="reference internal" >Finite-Difference Schemes</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../derivatives/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../generate/">Scheme Generation</a>
+                </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
@@ -162,7 +168,7 @@
     <div class="doc doc-contents ">
 
 
-      <p>Class for refining grids using slope, curve, and prune.</p>
+        <p>Class for refining grids using slope, curve, and prune.</p>
 
 
 <table class="field-list">
@@ -189,612 +195,309 @@
 </table>
               <details class="quote">
                 <summary>Source code in <code>splitfxm/refine.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 10</span>
-<span class="normal"> 11</span>
-<span class="normal"> 12</span>
-<span class="normal"> 13</span>
-<span class="normal"> 14</span>
-<span class="normal"> 15</span>
-<span class="normal"> 16</span>
-<span class="normal"> 17</span>
-<span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Refiner</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class for refining grids using slope, curve, and prune.</span>
+                <pre class="highlight"><code class="language-python">class Refiner:
+    """
+    Class for refining grids using slope, curve, and prune.
 
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    SFXM</span>
-<span class="sd">        If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Raises
+    ------
+    SFXM
+        If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.
+    """
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Default values</span>
-        <span class="c1"># Borrowed from Cantera</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">=</span> <span class="mf">10.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">=</span> <span class="mf">0.8</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_curve</span> <span class="o">=</span> <span class="mf">0.8</span>
-        <span class="c1"># Negative prune factor disables it</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.001</span>
+    def __init__(self):
+        # Default values
+        # Borrowed from Cantera
+        self._ratio = 10.0
+        self._slope = 0.8
+        self._curve = 0.8
+        # Negative prune factor disables it
+        self._prune = -0.001
 
-        <span class="c1"># Maximum points in grid</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_npmax</span> <span class="o">=</span> <span class="mi">1000</span>
+        # Maximum points in grid
+        self._npmax = 1000
 
-        <span class="c1"># Minimum range span factor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_min_range</span> <span class="o">=</span> <span class="mf">0.01</span>
+        # Minimum range span factor
+        self._min_range = 0.01
 
-        <span class="c1"># Minimum grid spacing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_min_grid</span> <span class="o">=</span> <span class="mf">1e-10</span>
+        # Minimum grid spacing
+        self._min_grid = 1e-10
 
-    <span class="k">def</span> <span class="nf">set_criteria</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">prune</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the refinement criteria.</span>
+    def set_criteria(self, ratio, slope, curve, prune):
+        """
+        Sets the refinement criteria.
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        ratio : float</span>
-<span class="sd">            The desired refinement ratio.</span>
-<span class="sd">        slope : float</span>
-<span class="sd">            The slope tolerance.</span>
-<span class="sd">        curve : float</span>
-<span class="sd">            The curve tolerance.</span>
-<span class="sd">        prune : float</span>
-<span class="sd">            The prune tolerance.</span>
+        Parameters
+        ----------
+        ratio : float
+            The desired refinement ratio.
+        slope : float
+            The slope tolerance.
+        curve : float
+            The curve tolerance.
+        prune : float
+            The prune tolerance.
 
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        SFXM</span>
-<span class="sd">            If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        Raises
+        ------
+        SFXM
+            If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.
+        """
 
-        <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;ratio must be greater than 2.0 (</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2"> was specified).&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">slope</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">slope</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;slope must be between 0.0 and 1.0 (</span><span class="si">{</span><span class="n">slope</span><span class="si">}</span><span class="s2"> was specified).&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">curve</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">curve</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;curve must be between 0.0 and 1.0 (</span><span class="si">{</span><span class="n">curve</span><span class="si">}</span><span class="s2"> was specified).&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">prune</span> <span class="o">&gt;</span> <span class="n">curve</span> <span class="ow">or</span> <span class="n">prune</span> <span class="o">&gt;</span> <span class="n">slope</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;prune must be less than &#39;curve&#39; and &#39;slope&#39; (</span><span class="si">{</span><span class="n">prune</span><span class="si">}</span><span class="s2"> was specified).&quot;</span>
-            <span class="p">)</span>
+        if ratio &lt; 2.0:
+            raise SFXM(
+                f"ratio must be greater than 2.0 ({ratio} was specified).")
+        elif slope &lt; 0.0 or slope &gt; 1.0:
+            raise SFXM(
+                f"slope must be between 0.0 and 1.0 ({slope} was specified).")
+        elif curve &lt; 0.0 or curve &gt; 1.0:
+            raise SFXM(
+                f"curve must be between 0.0 and 1.0 ({curve} was specified).")
+        elif prune &gt; curve or prune &gt; slope:
+            raise (
+                f"prune must be less than 'curve' and 'slope' ({prune} was specified)."
+            )
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">=</span> <span class="n">ratio</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">=</span> <span class="n">slope</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_curve</span> <span class="o">=</span> <span class="n">curve</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span> <span class="o">=</span> <span class="n">prune</span>
+        self._ratio = ratio
+        self._slope = slope
+        self._curve = curve
+        self._prune = prune
 
-    <span class="k">def</span> <span class="nf">set_max_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npmax</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets the maximum number of points in the grid.</span>
+    def set_max_points(self, npmax):
+        """
+        Sets the maximum number of points in the grid.
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        npmax : int</span>
-<span class="sd">            Maximum number of points in the grid.</span>
+        Parameters
+        ----------
+        npmax : int
+            Maximum number of points in the grid.
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_npmax</span> <span class="o">=</span> <span class="n">npmax</span>
+        """
+        self._npmax = npmax
 
-    <span class="k">def</span> <span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Refines the grid using given criteria.</span>
+    def refine(self, d: Domain):
+        """
+        Refines the grid using given criteria.
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        d : Domain</span>
-<span class="sd">            Domain object to be refined.</span>
+        Parameters
+        ----------
+        d : Domain
+            Domain object to be refined.
 
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        SFXM</span>
-<span class="sd">            If maximum number of points in the grid is exceeded.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        Raises
+        ------
+        SFXM
+            If maximum number of points in the grid is exceeded.
+        """
 
-        <span class="c1"># https://cantera.org/documentation/docs-2.5/doxygen/html/dd/d3c/refine_8cpp_source.html</span>
-        <span class="c1"># Using only slope, curve and prune</span>
-        <span class="n">cells</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">()</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+        # https://cantera.org/documentation/docs-2.5/doxygen/html/dd/d3c/refine_8cpp_source.html
+        # Using only slope, curve and prune
+        cells = d.interior()
+        n = len(cells)
 
-        <span class="c1"># Keep map</span>
-        <span class="c1"># 1 means cell stays and -1 means it goes</span>
-        <span class="c1"># Loc map</span>
-        <span class="c1"># 1 means add a point there</span>
-        <span class="c1"># c map</span>
-        <span class="c1"># Addition due to that variable</span>
-        <span class="n">keep</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">loc</span> <span class="o">=</span> <span class="p">{}</span>
+        # Keep map
+        # 1 means cell stays and -1 means it goes
+        # Loc map
+        # 1 means add a point there
+        # c map
+        # Addition due to that variable
+        keep = {}
+        c = {}
+        loc = {}
 
-        <span class="c1"># Preserve border points</span>
-        <span class="n">keep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">keep</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # Preserve border points
+        keep[0] = 1
+        keep[n - 1] = 1
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_npmax</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Exceeded maximum number of points&quot;</span><span class="p">)</span>
+        if len(cells) &gt; self._npmax:
+            raise SFXM("Exceeded maximum number of points")
 
-        <span class="n">z</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
-        <span class="n">dz</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
-        <span class="c1"># nv -&gt; Number of variables</span>
-        <span class="n">nv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        z = [cells[i].x() for i in range(n)]
+        dz = [cells[i + 1].x() - cells[i].x() for i in range(n - 1)]
+        # nv -&gt; Number of variables
+        nv = len(cells[1].values())
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">component_name</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        for i in range(nv):
+            name = d.component_name(i)
 
-            <span class="c1"># Get components at all points</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+            # Get components at all points
+            v = [cells[j].value(i) for j in range(n)]
 
-            <span class="c1"># Slopes (s) for component i</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">cells</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="p">]</span>
+            # Slopes (s) for component i
+            s = [
+                (cells[j + 1].value(i) - cells[j].value(i)) / (z[j + 1] - z[j])
+                for j in range(n - 1)
+            ]
 
-            <span class="c1"># Range of values</span>
-            <span class="n">vmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="n">vmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="c1"># Range of slopes</span>
-            <span class="n">smin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-            <span class="n">smax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            # Range of values
+            vmin = min(v)
+            vmax = max(v)
+            # Range of slopes
+            smin = min(s)
+            smax = max(s)
 
-            <span class="c1"># Max absolute values of values and slopes</span>
-            <span class="n">aa</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">vmin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">vmax</span><span class="p">))</span>
-            <span class="n">ss</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">smin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">smax</span><span class="p">))</span>
+            # Max absolute values of values and slopes
+            aa = max(abs(vmin), abs(vmax))
+            ss = max(abs(smin), abs(smax))
 
-            <span class="c1"># refine based on component i only if the range of v is</span>
-            <span class="c1"># greater than a fraction &#39;min_range&#39; of max |v|. This</span>
-            <span class="c1"># eliminates components that consist of small fluctuations</span>
-            <span class="c1"># on a constant background.</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_range</span> <span class="o">*</span> <span class="n">aa</span><span class="p">:</span>
-                <span class="c1"># maximum allowable difference in value between adjacent</span>
-                <span class="c1"># points.</span>
-                <span class="n">dmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">*</span> <span class="p">(</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">)</span> <span class="o">+</span> <span class="n">eps</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                    <span class="n">r</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="n">dmax</span>
-                    <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="ow">and</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_grid</span><span class="p">:</span>
-                        <span class="n">loc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                        <span class="n">c</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            # refine based on component i only if the range of v is
+            # greater than a fraction 'min_range' of max |v|. This
+            # eliminates components that consist of small fluctuations
+            # on a constant background.
+            if (vmax - vmin) &gt; self._min_range * aa:
+                # maximum allowable difference in value between adjacent
+                # points.
+                dmax = self._slope * (vmax - vmin) + eps
+                for j in range(n - 1):
+                    r = abs(v[j + 1] - v[j]) / dmax
+                    if r &gt; 1.0 and dz[j] &gt;= 2 * self._min_grid:
+                        loc[j] = 1
+                        c[name] = 1
 
-                    <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span><span class="p">:</span>
-                        <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                        <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="k">elif</span> <span class="n">j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
-                        <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                    if r &gt;= self._prune:
+                        keep[j] = 1
+                        keep[j + 1] = 1
+                    elif j not in keep:
+                        keep[j] = -1
 
-            <span class="c1"># refine based on the slope of component i only if the</span>
-            <span class="c1"># range of s is greater than a fraction &#39;min_range&#39; of max</span>
-            <span class="c1"># |s|. This eliminates components that consist of small</span>
-            <span class="c1"># fluctuations on a constant slope background.</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">smax</span> <span class="o">-</span> <span class="n">smin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_range</span> <span class="o">*</span> <span class="n">ss</span><span class="p">:</span>
-                <span class="c1"># maximum allowable difference in slope between</span>
-                <span class="c1"># adjacent points</span>
-                <span class="n">dmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curve</span> <span class="o">*</span> <span class="p">(</span><span class="n">smax</span> <span class="o">-</span> <span class="n">smin</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
-                    <span class="n">r</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">dmax</span> <span class="o">+</span> <span class="p">(</span><span class="n">eps</span> <span class="o">/</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">r</span> <span class="o">&gt;</span> <span class="mf">1.0</span>
-                        <span class="ow">and</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_grid</span>
-                        <span class="ow">and</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_grid</span>
-                    <span class="p">):</span>
-                        <span class="n">c</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                        <span class="n">loc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                        <span class="n">loc</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            # refine based on the slope of component i only if the
+            # range of s is greater than a fraction 'min_range' of max
+            # |s|. This eliminates components that consist of small
+            # fluctuations on a constant slope background.
+            if (smax - smin) &gt; self._min_range * ss:
+                # maximum allowable difference in slope between
+                # adjacent points
+                dmax = self._curve * (smax - smin)
+                for j in range(n - 2):
+                    r = abs(s[j + 1] - s[j]) / (dmax + (eps / dz[j]))
+                    if (
+                        r &gt; 1.0
+                        and dz[j] &gt;= 2 * self._min_grid
+                        and dz[j + 1] &gt;= 2 * self._min_grid
+                    ):
+                        c[name] = 1
+                        loc[j] = 1
+                        loc[j + 1] = 1
 
-                    <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span><span class="p">:</span>
-                        <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="k">elif</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
-                        <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                    if r &gt;= self._prune:
+                        keep[j + 1] = 1
+                    elif (j + 1) not in keep:
+                        keep[j + 1] = -1
 
-        <span class="c1"># Refine based on properties of the grid itself</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="c1"># Add a new point if the ratio with left interval is too large</span>
-            <span class="k">if</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">*</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
-                <span class="n">loc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">c</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;point </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # Refine based on properties of the grid itself
+        for j in range(1, n - 1):
+            # Add a new point if the ratio with left interval is too large
+            if dz[j] &gt; self._ratio * dz[j - 1]:
+                loc[j] = 1
+                c[f"point {j}"] = 1
+                keep[j - 1] = 1
+                keep[j] = 1
+                keep[j + 1] = 1
+                keep[j + 2] = 1
 
-            <span class="c1"># Add a point if the ratio with right interval is too large</span>
-            <span class="k">if</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span><span class="p">:</span>
-                <span class="n">loc</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">c</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;point </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            # Add a point if the ratio with right interval is too large
+            if dz[j] &lt; dz[j - 1] / self._ratio:
+                loc[j - 1] = 1
+                c[f"point {max(j-1, 0)}"] = 1
+                keep[j - 2] = 1
+                keep[j - 1] = 1
+                keep[j] = 1
+                keep[j + 1] = 1
 
-            <span class="c1"># Keep the point if removing would make the ratio with the left</span>
-            <span class="c1"># interval too large.</span>
-            <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">*</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]:</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            # Keep the point if removing would make the ratio with the left
+            # interval too large.
+            if j &gt; 1 and z[j + 1] - z[j - 1] &gt; self._ratio * dz[j - 2]:
+                keep[j] = 1
 
-            <span class="c1"># Keep the point if removing would make the ratio with the right</span>
-            <span class="c1"># interval too large.</span>
-            <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">*</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            # Keep the point if removing would make the ratio with the right
+            # interval too large.
+            if j &lt; n - 2 and z[j + 1] - z[j - 1] &gt; self._ratio * dz[j + 1]:
+                keep[j] = 1
 
-        <span class="c1"># Don&#39;t allow pruning to remove multiple adjacent grid points</span>
-        <span class="c1"># in a single pass.</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # Don't allow pruning to remove multiple adjacent grid points
+        # in a single pass.
+        for j in range(2, n - 1):
+            if j in keep and j - 1 in keep and keep[j] == -1 and keep[j - 1] == -1:
+                keep[j] = 1
 
-        <span class="c1"># Finalize AMR changes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">show_changes</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">perform_changes</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
+        # Finalize AMR changes
+        self.show_changes(loc, c, keep)
+        self.perform_changes(d, loc, keep)
 
-    <span class="k">def</span> <span class="nf">perform_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">keep</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Perform changes to the domain d according to the changes specified in</span>
-<span class="sd">        loc and keep.</span>
+    def perform_changes(self, d, loc, keep):
+        """
+        Perform changes to the domain d according to the changes specified in
+        loc and keep.
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        d : Domain</span>
-<span class="sd">            The domain to perform changes on.</span>
-<span class="sd">        loc : Dict[int, int]</span>
-<span class="sd">            A dictionary with locations where insertions are to happen</span>
-<span class="sd">        keep : Dict[int, int]</span>
-<span class="sd">            A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">#######</span>
-        <span class="c1"># AMR</span>
-        <span class="c1"># Need to mark for deletion before deleting</span>
-        <span class="c1"># as cell addition indices need to make sense</span>
-        <span class="c1">#######</span>
-        <span class="n">cells</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">()</span>
-        <span class="c1"># Iterate over keep and remove points</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="n">cell</span><span class="o">.</span><span class="n">to_delete</span> <span class="o">=</span> <span class="kc">True</span>
+        Parameters
+        ----------
+        d : Domain
+            The domain to perform changes on.
+        loc : Dict[int, int]
+            A dictionary with locations where insertions are to happen
+        keep : Dict[int, int]
+            A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation
+        """
+        #######
+        # AMR
+        # Need to mark for deletion before deleting
+        # as cell addition indices need to make sense
+        #######
+        cells = d.interior()
+        # Iterate over keep and remove points
+        for i, cell in enumerate(cells):
+            if i in keep and keep[i] == -1:
+                cell.to_delete = True
 
-        <span class="c1"># Add cells at loc</span>
-        <span class="c1"># Create separate list of cells and merge</span>
-        <span class="n">to_merge</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">loc</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">+</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-            <span class="n">to_merge</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cell</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        # Add cells at loc
+        # Create separate list of cells and merge
+        to_merge = []
+        for i in loc.keys():
+            x = 0.5 * (cells[i + 1].x() + cells[i].x())
+            value = 0.5 * (cells[i + 1].values() + cells[i].values())
+            to_merge.append(Cell(x, value))
 
-        <span class="c1"># Delete marked cells</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_delete</span><span class="p">:</span>
-                <span class="k">del</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        # Delete marked cells
+        for i, cell in enumerate(cells):
+            if cell.to_delete:
+                del cells[i]
 
-        <span class="c1"># Merge cells and sort by x</span>
-        <span class="n">cells</span> <span class="o">+=</span> <span class="n">to_merge</span>
-        <span class="n">cells</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        # Merge cells and sort by x
+        cells += to_merge
+        cells.sort()
 
-        <span class="c1"># Set interior to cells</span>
-        <span class="n">d</span><span class="o">.</span><span class="n">set_interior</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+        # Set interior to cells
+        d.set_interior(cells)
 
-    <span class="k">def</span> <span class="nf">show_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">keep</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Print information about changes made to the domain.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="mi">78</span><span class="p">)</span>
-        <span class="c1"># Show additions</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Refining grid...&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New points inserted after grid points &quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">loc</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    to resolve &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No new points needed&quot;</span><span class="p">)</span>
+    def show_changes(self, loc, c, keep):
+        """
+        Print information about changes made to the domain.
+        """
+        print("#" * 78)
+        # Show additions
+        if len(loc) != 0:
+            print("Refining grid...")
+            print("New points inserted after grid points ")
+            for i in loc.keys():
+                print(i, end=" ")
+            print("    to resolve ", end="")
+            for name in c.keys():
+                print(name, end=" ")
+            print("")
+        else:
+            print("No new points needed")
 
-        <span class="c1"># Show deletions</span>
-        <span class="n">num_deleted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keep</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">num_deleted</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Deleted points at &quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keep</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No new points deleted&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="mi">78</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+        # Show deletions
+        num_deleted = list(keep.values()).count(-1)
+        if num_deleted != 0:
+            print("Deleted points at ")
+            for i in keep.keys():
+                if keep[i] == -1:
+                    print(i, end=" ")
+            print("")
+        else:
+            print("No new points deleted")
+        print("#" * 78)</code></pre>
               </details>
 
 
@@ -813,14 +516,14 @@
 
 
 <h3 id="splitfxm.refine.Refiner.perform_changes" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">perform_changes</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span></code>
+            <code class="highlight language-python">perform_changes(d, loc, keep)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Perform changes to the domain d according to the changes specified in
+        <p>Perform changes to the domain d according to the changes specified in
 loc and keep.</p>
 
 
@@ -865,94 +568,50 @@ loc and keep.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">perform_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">keep</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform changes to the domain d according to the changes specified in</span>
-<span class="sd">    loc and keep.</span>
+              <pre class="highlight"><code class="language-python">def perform_changes(self, d, loc, keep):
+    """
+    Perform changes to the domain d according to the changes specified in
+    loc and keep.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    d : Domain</span>
-<span class="sd">        The domain to perform changes on.</span>
-<span class="sd">    loc : Dict[int, int]</span>
-<span class="sd">        A dictionary with locations where insertions are to happen</span>
-<span class="sd">    keep : Dict[int, int]</span>
-<span class="sd">        A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#######</span>
-    <span class="c1"># AMR</span>
-    <span class="c1"># Need to mark for deletion before deleting</span>
-    <span class="c1"># as cell addition indices need to make sense</span>
-    <span class="c1">#######</span>
-    <span class="n">cells</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">()</span>
-    <span class="c1"># Iterate over keep and remove points</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">cell</span><span class="o">.</span><span class="n">to_delete</span> <span class="o">=</span> <span class="kc">True</span>
+    Parameters
+    ----------
+    d : Domain
+        The domain to perform changes on.
+    loc : Dict[int, int]
+        A dictionary with locations where insertions are to happen
+    keep : Dict[int, int]
+        A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation
+    """
+    #######
+    # AMR
+    # Need to mark for deletion before deleting
+    # as cell addition indices need to make sense
+    #######
+    cells = d.interior()
+    # Iterate over keep and remove points
+    for i, cell in enumerate(cells):
+        if i in keep and keep[i] == -1:
+            cell.to_delete = True
 
-    <span class="c1"># Add cells at loc</span>
-    <span class="c1"># Create separate list of cells and merge</span>
-    <span class="n">to_merge</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">loc</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="o">+</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-        <span class="n">to_merge</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cell</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    # Add cells at loc
+    # Create separate list of cells and merge
+    to_merge = []
+    for i in loc.keys():
+        x = 0.5 * (cells[i + 1].x() + cells[i].x())
+        value = 0.5 * (cells[i + 1].values() + cells[i].values())
+        to_merge.append(Cell(x, value))
 
-    <span class="c1"># Delete marked cells</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_delete</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    # Delete marked cells
+    for i, cell in enumerate(cells):
+        if cell.to_delete:
+            del cells[i]
 
-    <span class="c1"># Merge cells and sort by x</span>
-    <span class="n">cells</span> <span class="o">+=</span> <span class="n">to_merge</span>
-    <span class="n">cells</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    # Merge cells and sort by x
+    cells += to_merge
+    cells.sort()
 
-    <span class="c1"># Set interior to cells</span>
-    <span class="n">d</span><span class="o">.</span><span class="n">set_interior</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    # Set interior to cells
+    d.set_interior(cells)</code></pre>
             </details>
     </div>
 
@@ -962,14 +621,14 @@ loc and keep.</p>
 
 
 <h3 id="splitfxm.refine.Refiner.refine" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">refine</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></code>
+            <code class="highlight language-python">refine(d)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Refines the grid using given criteria.</p>
+        <p>Refines the grid using given criteria.</p>
 
 
 <table class="field-list">
@@ -1020,302 +679,154 @@ loc and keep.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Domain</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Refines the grid using given criteria.</span>
+              <pre class="highlight"><code class="language-python">def refine(self, d: Domain):
+    """
+    Refines the grid using given criteria.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    d : Domain</span>
-<span class="sd">        Domain object to be refined.</span>
+    Parameters
+    ----------
+    d : Domain
+        Domain object to be refined.
 
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    SFXM</span>
-<span class="sd">        If maximum number of points in the grid is exceeded.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Raises
+    ------
+    SFXM
+        If maximum number of points in the grid is exceeded.
+    """
 
-    <span class="c1"># https://cantera.org/documentation/docs-2.5/doxygen/html/dd/d3c/refine_8cpp_source.html</span>
-    <span class="c1"># Using only slope, curve and prune</span>
-    <span class="n">cells</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">interior</span><span class="p">()</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+    # https://cantera.org/documentation/docs-2.5/doxygen/html/dd/d3c/refine_8cpp_source.html
+    # Using only slope, curve and prune
+    cells = d.interior()
+    n = len(cells)
 
-    <span class="c1"># Keep map</span>
-    <span class="c1"># 1 means cell stays and -1 means it goes</span>
-    <span class="c1"># Loc map</span>
-    <span class="c1"># 1 means add a point there</span>
-    <span class="c1"># c map</span>
-    <span class="c1"># Addition due to that variable</span>
-    <span class="n">keep</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">loc</span> <span class="o">=</span> <span class="p">{}</span>
+    # Keep map
+    # 1 means cell stays and -1 means it goes
+    # Loc map
+    # 1 means add a point there
+    # c map
+    # Addition due to that variable
+    keep = {}
+    c = {}
+    loc = {}
 
-    <span class="c1"># Preserve border points</span>
-    <span class="n">keep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">keep</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    # Preserve border points
+    keep[0] = 1
+    keep[n - 1] = 1
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_npmax</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span><span class="s2">&quot;Exceeded maximum number of points&quot;</span><span class="p">)</span>
+    if len(cells) &gt; self._npmax:
+        raise SFXM("Exceeded maximum number of points")
 
-    <span class="n">z</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
-    <span class="n">dz</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">-</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
-    <span class="c1"># nv -&gt; Number of variables</span>
-    <span class="n">nv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    z = [cells[i].x() for i in range(n)]
+    dz = [cells[i + 1].x() - cells[i].x() for i in range(n - 1)]
+    # nv -&gt; Number of variables
+    nv = len(cells[1].values())
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nv</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">component_name</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    for i in range(nv):
+        name = d.component_name(i)
 
-        <span class="c1"># Get components at all points</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">cells</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+        # Get components at all points
+        v = [cells[j].value(i) for j in range(n)]
 
-        <span class="c1"># Slopes (s) for component i</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="n">cells</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">cells</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="p">]</span>
+        # Slopes (s) for component i
+        s = [
+            (cells[j + 1].value(i) - cells[j].value(i)) / (z[j + 1] - z[j])
+            for j in range(n - 1)
+        ]
 
-        <span class="c1"># Range of values</span>
-        <span class="n">vmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        <span class="n">vmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        <span class="c1"># Range of slopes</span>
-        <span class="n">smin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="n">smax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        # Range of values
+        vmin = min(v)
+        vmax = max(v)
+        # Range of slopes
+        smin = min(s)
+        smax = max(s)
 
-        <span class="c1"># Max absolute values of values and slopes</span>
-        <span class="n">aa</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">vmin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">vmax</span><span class="p">))</span>
-        <span class="n">ss</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">smin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">smax</span><span class="p">))</span>
+        # Max absolute values of values and slopes
+        aa = max(abs(vmin), abs(vmax))
+        ss = max(abs(smin), abs(smax))
 
-        <span class="c1"># refine based on component i only if the range of v is</span>
-        <span class="c1"># greater than a fraction &#39;min_range&#39; of max |v|. This</span>
-        <span class="c1"># eliminates components that consist of small fluctuations</span>
-        <span class="c1"># on a constant background.</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_range</span> <span class="o">*</span> <span class="n">aa</span><span class="p">:</span>
-            <span class="c1"># maximum allowable difference in value between adjacent</span>
-            <span class="c1"># points.</span>
-            <span class="n">dmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">*</span> <span class="p">(</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">)</span> <span class="o">+</span> <span class="n">eps</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">r</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="n">dmax</span>
-                <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="ow">and</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_grid</span><span class="p">:</span>
-                    <span class="n">loc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="n">c</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # refine based on component i only if the range of v is
+        # greater than a fraction 'min_range' of max |v|. This
+        # eliminates components that consist of small fluctuations
+        # on a constant background.
+        if (vmax - vmin) &gt; self._min_range * aa:
+            # maximum allowable difference in value between adjacent
+            # points.
+            dmax = self._slope * (vmax - vmin) + eps
+            for j in range(n - 1):
+                r = abs(v[j + 1] - v[j]) / dmax
+                if r &gt; 1.0 and dz[j] &gt;= 2 * self._min_grid:
+                    loc[j] = 1
+                    c[name] = 1
 
-                <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span><span class="p">:</span>
-                    <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="n">j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
-                    <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                if r &gt;= self._prune:
+                    keep[j] = 1
+                    keep[j + 1] = 1
+                elif j not in keep:
+                    keep[j] = -1
 
-        <span class="c1"># refine based on the slope of component i only if the</span>
-        <span class="c1"># range of s is greater than a fraction &#39;min_range&#39; of max</span>
-        <span class="c1"># |s|. This eliminates components that consist of small</span>
-        <span class="c1"># fluctuations on a constant slope background.</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">smax</span> <span class="o">-</span> <span class="n">smin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_range</span> <span class="o">*</span> <span class="n">ss</span><span class="p">:</span>
-            <span class="c1"># maximum allowable difference in slope between</span>
-            <span class="c1"># adjacent points</span>
-            <span class="n">dmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curve</span> <span class="o">*</span> <span class="p">(</span><span class="n">smax</span> <span class="o">-</span> <span class="n">smin</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
-                <span class="n">r</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">dmax</span> <span class="o">+</span> <span class="p">(</span><span class="n">eps</span> <span class="o">/</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">r</span> <span class="o">&gt;</span> <span class="mf">1.0</span>
-                    <span class="ow">and</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_grid</span>
-                    <span class="ow">and</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_grid</span>
-                <span class="p">):</span>
-                    <span class="n">c</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="n">loc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="n">loc</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # refine based on the slope of component i only if the
+        # range of s is greater than a fraction 'min_range' of max
+        # |s|. This eliminates components that consist of small
+        # fluctuations on a constant slope background.
+        if (smax - smin) &gt; self._min_range * ss:
+            # maximum allowable difference in slope between
+            # adjacent points
+            dmax = self._curve * (smax - smin)
+            for j in range(n - 2):
+                r = abs(s[j + 1] - s[j]) / (dmax + (eps / dz[j]))
+                if (
+                    r &gt; 1.0
+                    and dz[j] &gt;= 2 * self._min_grid
+                    and dz[j + 1] &gt;= 2 * self._min_grid
+                ):
+                    c[name] = 1
+                    loc[j] = 1
+                    loc[j + 1] = 1
 
-                <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span><span class="p">:</span>
-                    <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
-                    <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                if r &gt;= self._prune:
+                    keep[j + 1] = 1
+                elif (j + 1) not in keep:
+                    keep[j + 1] = -1
 
-    <span class="c1"># Refine based on properties of the grid itself</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># Add a new point if the ratio with left interval is too large</span>
-        <span class="k">if</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">*</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
-            <span class="n">loc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">c</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;point </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    # Refine based on properties of the grid itself
+    for j in range(1, n - 1):
+        # Add a new point if the ratio with left interval is too large
+        if dz[j] &gt; self._ratio * dz[j - 1]:
+            loc[j] = 1
+            c[f"point {j}"] = 1
+            keep[j - 1] = 1
+            keep[j] = 1
+            keep[j + 1] = 1
+            keep[j + 2] = 1
 
-        <span class="c1"># Add a point if the ratio with right interval is too large</span>
-        <span class="k">if</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span><span class="p">:</span>
-            <span class="n">loc</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">c</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;point </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # Add a point if the ratio with right interval is too large
+        if dz[j] &lt; dz[j - 1] / self._ratio:
+            loc[j - 1] = 1
+            c[f"point {max(j-1, 0)}"] = 1
+            keep[j - 2] = 1
+            keep[j - 1] = 1
+            keep[j] = 1
+            keep[j + 1] = 1
 
-        <span class="c1"># Keep the point if removing would make the ratio with the left</span>
-        <span class="c1"># interval too large.</span>
-        <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">*</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]:</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # Keep the point if removing would make the ratio with the left
+        # interval too large.
+        if j &gt; 1 and z[j + 1] - z[j - 1] &gt; self._ratio * dz[j - 2]:
+            keep[j] = 1
 
-        <span class="c1"># Keep the point if removing would make the ratio with the right</span>
-        <span class="c1"># interval too large.</span>
-        <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">*</span> <span class="n">dz</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        # Keep the point if removing would make the ratio with the right
+        # interval too large.
+        if j &lt; n - 2 and z[j + 1] - z[j - 1] &gt; self._ratio * dz[j + 1]:
+            keep[j] = 1
 
-    <span class="c1"># Don&#39;t allow pruning to remove multiple adjacent grid points</span>
-    <span class="c1"># in a single pass.</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">keep</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">keep</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    # Don't allow pruning to remove multiple adjacent grid points
+    # in a single pass.
+    for j in range(2, n - 1):
+        if j in keep and j - 1 in keep and keep[j] == -1 and keep[j - 1] == -1:
+            keep[j] = 1
 
-    <span class="c1"># Finalize AMR changes</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">show_changes</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">perform_changes</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    # Finalize AMR changes
+    self.show_changes(loc, c, keep)
+    self.perform_changes(d, loc, keep)</code></pre>
             </details>
     </div>
 
@@ -1325,14 +836,14 @@ loc and keep.</p>
 
 
 <h3 id="splitfxm.refine.Refiner.set_criteria" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_criteria</span><span class="p">(</span><span class="n">ratio</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">prune</span><span class="p">)</span></code>
+            <code class="highlight language-python">set_criteria(ratio, slope, curve, prune)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Sets the refinement criteria.</p>
+        <p>Sets the refinement criteria.</p>
 
 
 <table class="field-list">
@@ -1407,84 +918,45 @@ loc and keep.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_criteria</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">prune</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sets the refinement criteria.</span>
+              <pre class="highlight"><code class="language-python">def set_criteria(self, ratio, slope, curve, prune):
+    """
+    Sets the refinement criteria.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    ratio : float</span>
-<span class="sd">        The desired refinement ratio.</span>
-<span class="sd">    slope : float</span>
-<span class="sd">        The slope tolerance.</span>
-<span class="sd">    curve : float</span>
-<span class="sd">        The curve tolerance.</span>
-<span class="sd">    prune : float</span>
-<span class="sd">        The prune tolerance.</span>
+    Parameters
+    ----------
+    ratio : float
+        The desired refinement ratio.
+    slope : float
+        The slope tolerance.
+    curve : float
+        The curve tolerance.
+    prune : float
+        The prune tolerance.
 
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    SFXM</span>
-<span class="sd">        If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    Raises
+    ------
+    SFXM
+        If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.
+    """
 
-    <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;ratio must be greater than 2.0 (</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2"> was specified).&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">slope</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">slope</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;slope must be between 0.0 and 1.0 (</span><span class="si">{</span><span class="n">slope</span><span class="si">}</span><span class="s2"> was specified).&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">curve</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">curve</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">SFXM</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;curve must be between 0.0 and 1.0 (</span><span class="si">{</span><span class="n">curve</span><span class="si">}</span><span class="s2"> was specified).&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">prune</span> <span class="o">&gt;</span> <span class="n">curve</span> <span class="ow">or</span> <span class="n">prune</span> <span class="o">&gt;</span> <span class="n">slope</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;prune must be less than &#39;curve&#39; and &#39;slope&#39; (</span><span class="si">{</span><span class="n">prune</span><span class="si">}</span><span class="s2"> was specified).&quot;</span>
-        <span class="p">)</span>
+    if ratio &lt; 2.0:
+        raise SFXM(
+            f"ratio must be greater than 2.0 ({ratio} was specified).")
+    elif slope &lt; 0.0 or slope &gt; 1.0:
+        raise SFXM(
+            f"slope must be between 0.0 and 1.0 ({slope} was specified).")
+    elif curve &lt; 0.0 or curve &gt; 1.0:
+        raise SFXM(
+            f"curve must be between 0.0 and 1.0 ({curve} was specified).")
+    elif prune &gt; curve or prune &gt; slope:
+        raise (
+            f"prune must be less than 'curve' and 'slope' ({prune} was specified)."
+        )
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ratio</span> <span class="o">=</span> <span class="n">ratio</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">=</span> <span class="n">slope</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_curve</span> <span class="o">=</span> <span class="n">curve</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span> <span class="o">=</span> <span class="n">prune</span>
-</code></pre></div></td></tr></table></div>
+    self._ratio = ratio
+    self._slope = slope
+    self._curve = curve
+    self._prune = prune</code></pre>
             </details>
     </div>
 
@@ -1494,14 +966,14 @@ loc and keep.</p>
 
 
 <h3 id="splitfxm.refine.Refiner.set_max_points" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_max_points</span><span class="p">(</span><span class="n">npmax</span><span class="p">)</span></code>
+            <code class="highlight language-python">set_max_points(npmax)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Sets the maximum number of points in the grid.</p>
+        <p>Sets the maximum number of points in the grid.</p>
 
 
 <table class="field-list">
@@ -1529,28 +1001,17 @@ loc and keep.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_max_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npmax</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sets the maximum number of points in the grid.</span>
+              <pre class="highlight"><code class="language-python">def set_max_points(self, npmax):
+    """
+    Sets the maximum number of points in the grid.
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    npmax : int</span>
-<span class="sd">        Maximum number of points in the grid.</span>
+    Parameters
+    ----------
+    npmax : int
+        Maximum number of points in the grid.
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_npmax</span> <span class="o">=</span> <span class="n">npmax</span>
-</code></pre></div></td></tr></table></div>
+    """
+    self._npmax = npmax</code></pre>
             </details>
     </div>
 
@@ -1560,75 +1021,46 @@ loc and keep.</p>
 
 
 <h3 id="splitfxm.refine.Refiner.show_changes" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">show_changes</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span></code>
+            <code class="highlight language-python">show_changes(loc, c, keep)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>Print information about changes made to the domain.</p>
+        <p>Print information about changes made to the domain.</p>
 
             <details class="quote">
               <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">show_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">keep</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Print information about changes made to the domain.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="mi">78</span><span class="p">)</span>
-    <span class="c1"># Show additions</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Refining grid...&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New points inserted after grid points &quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">loc</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    to resolve &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No new points needed&quot;</span><span class="p">)</span>
+              <pre class="highlight"><code class="language-python">def show_changes(self, loc, c, keep):
+    """
+    Print information about changes made to the domain.
+    """
+    print("#" * 78)
+    # Show additions
+    if len(loc) != 0:
+        print("Refining grid...")
+        print("New points inserted after grid points ")
+        for i in loc.keys():
+            print(i, end=" ")
+        print("    to resolve ", end="")
+        for name in c.keys():
+            print(name, end=" ")
+        print("")
+    else:
+        print("No new points needed")
 
-    <span class="c1"># Show deletions</span>
-    <span class="n">num_deleted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keep</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">num_deleted</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Deleted points at &quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keep</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No new points deleted&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="mi">78</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+    # Show deletions
+    num_deleted = list(keep.values()).count(-1)
+    if num_deleted != 0:
+        print("Deleted points at ")
+        for i in keep.keys():
+            if keep[i] == -1:
+                print(i, end=" ")
+        print("")
+    else:
+        print("No new points deleted")
+    print("#" * 78)</code></pre>
             </details>
     </div>
 
