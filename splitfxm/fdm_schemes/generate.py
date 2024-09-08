@@ -30,11 +30,13 @@ def compact_scheme(left_stencil, right_stencil, derivative_order):
 
     Example
     -------
+    ```python
     >>> left_stencil_size = 1
     >>> right_stencil_size = 1
     >>> order = 1  # First derivative
     >>> coefficients = compact_scheme(left_stencil_size, right_stencil_size, order)
     >>> print(f"Coefficients for f^({order}):", coefficients)
+    ```
     """
 
     # Create symbols for the coefficients of the scheme
