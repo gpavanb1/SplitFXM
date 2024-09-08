@@ -130,13 +130,23 @@ def test_apply_BC_invalid_direction():
         apply_BC(d, "u", bcs)
 
 
-def test_apply_BC_invalid_data():
+def test_apply_BC_invalid_dictionary_bc():
     # Test invalid boundary direction in dictionary-based BCs
     with pytest.raises(SFXM):
         d = Domain.from_size(10, 1, 1, ["u", "v", "w"])
         set_initial_condition(d, "u", "gaussian")
         bcs = {"left": {"dirichlet": 2.0},
                "right": {"invalid": 2.0}}
+        apply_BC(d, "u", bcs)
+
+
+def test_apply_BC_invalid_dictionary_data():
+    # Test invalid boundary direction in dictionary-based BCs
+    with pytest.raises(SFXM):
+        d = Domain.from_size(10, 1, 1, ["u", "v", "w"])
+        set_initial_condition(d, "u", "gaussian")
+        bcs = {"left": {"dirichlet": 2.0},
+               "right": {"neumann": [2.0, 3.0]}}
         apply_BC(d, "u", bcs)
 
 

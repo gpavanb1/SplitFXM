@@ -99,6 +99,11 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
             bc_data = list(bc_type.values())[0]
             bc_type = list(bc_type.keys())[0]
 
+            # Check if BC data is valid
+            if not isinstance(bc_data, (float, int)):
+                raise SFXM(
+                    "Incorrect data specified for dictionary-type boundaries")
+
             if bc_type == "neumann":
                 if dir == btype_map[btype.LEFT]:
                     # left boundary
