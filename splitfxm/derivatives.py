@@ -1,156 +1,165 @@
 from enum import Enum
 from .error import SFXM
 
-# TODO: Add more schemes
-FDSchemes = Enum("FDSchemes", "CENTRAL")
-Directions = Enum("Directions", "WEST EAST")
+FDSchemes = Enum("FDSchemes", "CENTRAL RIGHT_BIAS")
+
+
+def derivative(F, cell_sub, scheme, order=1, is_values=False):
+    """
+    General function to calculate the first or second derivative based on a given function or precomputed values.
+
+    Parameters
+    ----------
+    F : function or list/numpy.ndarray
+        If `is_values` is False, this is a function that takes the values at the stencil points.
+        If `is_values` is True, this is the precomputed values of the function at the stencil points.
+    cell_sub : list of Cell
+        The stencil, a list of cells around the point of interest.
+    scheme : FDSchemes
+        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
+    order : int, optional
+        The order of the derivative (1 for first derivative, 2 for second derivative). Default is 1.
+    is_values : bool, optional
+        If True, `F` is treated as precomputed values of the function at the stencil points. If False, `F` is treated as a function. Default is False.
+
+    Returns
+    -------
+    numpy.ndarray
+        The computed derivative based on the selected scheme and order.
+
+    Raises
+    ------
+    SFXM
+        If an improper stencil size is provided or an unsupported scheme is used.
+    """
+    if scheme == FDSchemes.CENTRAL and len(cell_sub) != 3:
+        raise SFXM(f"Improper stencil size for {scheme.name.lower()} scheme")
+    elif scheme == FDSchemes.RIGHT_BIAS and len(cell_sub) != 4:
+        raise SFXM(f"Improper stencil size for {scheme.name.lower()} scheme")
+
+    if order == 1:
+        if scheme == FDSchemes.CENTRAL:
+            Fl = F[0] if is_values else F(
+                cell_sub[0].values())
+            Fr = F[2] if is_values else F(
+                cell_sub[2].values())
+            dx = cell_sub[2].x() - cell_sub[0].x()
+            return (Fr - Fl) / dx
+        elif scheme == FDSchemes.RIGHT_BIAS:
+            F_vals = F if is_values else [
+                F(cell_sub[i].values()) for i in range(4)]
+            dx = cell_sub[1].x() - cell_sub[0].x()
+            return (-F_vals[0] - F_vals[1] + F_vals[2] + F_vals[3]) / (4 * dx)
+
+    elif order == 2:
+        if scheme == FDSchemes.CENTRAL:
+            Dl = F[0] if is_values else F(
+                cell_sub[0].values())
+            Dr = F[1] if is_values else F(
+                cell_sub[1].values())
+            dx_w = cell_sub[1].x() - cell_sub[0].x()
+            Dw = (Dr - Dl) / dx_w
+
+            Dl = F[1] if is_values else F(
+                cell_sub[1].values())
+            Dr = F[2] if is_values else F(
+                cell_sub[2].values())
+            dx_e = cell_sub[2].x() - cell_sub[1].x()
+            De = (Dr - Dl) / dx_e
+
+            return (De - Dw) / ((dx_w + dx_e) / 2)
+        elif scheme == FDSchemes.RIGHT_BIAS:
+            D_vals = F if is_values else [
+                F(cell_sub[i].values()) for i in range(4)]
+            dx = cell_sub[1].x() - cell_sub[0].x()
+            return (D_vals[0] - D_vals[1] - D_vals[2] + D_vals[3]) / (2 * dx**2)
+
+    raise SFXM("Unsupported scheme or order")
+
+# First derivative functions
 
 
 def Dx(F, cell_sub, scheme):
     """
-    Calculate the first derivative of a given stencil.
+    Calculate the first derivative using a given function and stencil.
 
     Parameters
     ----------
     F : function
-        The function.
+        A function that takes the values at the stencil points.
     cell_sub : list of Cell
-        The stencil.
-    scheme : Schemes
-        The scheme to use.
+        The stencil, a list of cells around the point of interest.
+    scheme : FDSchemes
+        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
 
     Returns
     -------
     numpy.ndarray
-        The first derivative.
+        The computed first derivative based on the selected scheme.
     """
-
-    if scheme == FDSchemes.CENTRAL:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for central difference scheme")
-
-        ul = cell_sub[0].values()
-        ur = cell_sub[2].values()
-        Fl = F(ul)
-        Fr = F(ur)
-        dx = cell_sub[2].x() - cell_sub[0].x()
-
-        return (Fr - Fl) / dx
-    else:
-        raise SFXM("Unsupported scheme")
-
-
-def D2x(D, cell_sub, scheme):
-    """
-    Calculate the second derivative of a given stencil.
-
-    Parameters
-    ----------
-    D : function
-        The function.
-    cell_sub : list of Cell
-        The stencil.
-
-    Returns
-    -------
-    numpy.ndarray
-        The second derivative.
-    """
-
-    # Only central scheme
-    if scheme == FDSchemes.CENTRAL:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for central difference scheme")
-
-        # West derivative
-        ul = cell_sub[0].values()
-        uc = cell_sub[1].values()
-        Dl = D(ul)
-        Dr = D(uc)
-        dxw = cell_sub[1].x() - cell_sub[0].x()
-        Dw = (Dr - Dl) / dxw
-
-        # East derivative
-        uc = cell_sub[1].values()
-        ur = cell_sub[2].values()
-        Dl = D(uc)
-        Dr = D(ur)
-        dxe = cell_sub[2].x() - cell_sub[1].x()
-        De = (Dr - Dl) / dxe
-
-        dx = 0.5 * (dxw + dxe)
-        return (De - Dw) / dx
-    else:
-        raise SFXM("Unsupported scheme")
+    return derivative(F, cell_sub, scheme, order=1)
 
 
 def dx(values, cell_sub, scheme):
     """
-    Calculate the first derivative of a given stencil.
+    Calculate the first derivative using precomputed function values at grid points.
 
     Parameters
     ----------
-    values : values of a function at the grid points
-        The function.
+    values : list or numpy.ndarray
+        Precomputed values of the function at the stencil points.
     cell_sub : list of Cell
-        The stencil.
-    scheme : Schemes
-        The scheme to use.
+        The stencil, a list of cells around the point of interest.
+    scheme : FDSchemes
+        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
 
     Returns
     -------
     numpy.ndarray
-        The first derivative.
+        The computed first derivative based on the selected scheme.
     """
+    return derivative(values, cell_sub, scheme, order=1, is_values=True)
 
-    if scheme == FDSchemes.CENTRAL:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for central difference scheme")
+# Second derivative functions
 
-        Fl = values[0]
-        Fr = values[2]
-        dx = cell_sub[2].x() - cell_sub[0].x()
 
-        return (Fr - Fl) / dx
-    else:
-        raise SFXM("Unsupported scheme")
+def D2x(D, cell_sub, scheme):
+    """
+    Calculate the second derivative using a given function and stencil.
+
+    Parameters
+    ----------
+    D : function
+        A function that takes the values at the stencil points.
+    cell_sub : list of Cell
+        The stencil, a list of cells around the point of interest.
+    scheme : FDSchemes
+        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
+
+    Returns
+    -------
+    numpy.ndarray
+        The computed second derivative based on the selected scheme.
+    """
+    return derivative(D, cell_sub, scheme, order=2)
 
 
 def d2x(values, cell_sub, scheme):
     """
-    Calculate the second derivative of a given stencil.
+    Calculate the second derivative using precomputed function values at grid points.
 
     Parameters
     ----------
-    values : values of a function at the grid points
-        The function.
+    values : list or numpy.ndarray
+        Precomputed values of the function at the stencil points.
     cell_sub : list of Cell
-        The stencil.
+        The stencil, a list of cells around the point of interest.
+    scheme : FDSchemes
+        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
 
     Returns
     -------
     numpy.ndarray
-        The second derivative.
+        The computed second derivative based on the selected scheme.
     """
-
-    # Only central scheme
-    if scheme == FDSchemes.CENTRAL:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for central difference scheme")
-
-        # West derivative
-        Dl = values[0]
-        Dr = values[1]
-        dxw = cell_sub[1].x() - cell_sub[0].x()
-        Dw = (Dr - Dl) / dxw
-
-        # East derivative
-        Dl = values[1]
-        Dr = values[2]
-        dxe = cell_sub[2].x() - cell_sub[1].x()
-        De = (Dr - Dl) / dxe
-
-        dx = 0.5 * (dxw + dxe)
-        return (De - Dw) / dx
-    else:
-        raise SFXM("Unsupported scheme")
+    return derivative(values, cell_sub, scheme, order=2, is_values=True)
