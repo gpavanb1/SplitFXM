@@ -277,6 +277,10 @@
         for c, bctype in self._bcs.items():
             apply_BC(self._d, c, bctype)
 
+        # Check if stencil size matches
+        if (stencil_size(self._s._scheme) - 1) != len(self._d.boundaries()):
+            raise SFXM("Stencil size does not match boundary conditions")
+
     def evolve(self, dt: float, refinement: bool = False):
         """
         Evolve the simulation for a given time step.
@@ -689,7 +693,11 @@
 
     # Fill BCs
     for c, bctype in self._bcs.items():
-        apply_BC(self._d, c, bctype)</code></pre>
+        apply_BC(self._d, c, bctype)
+
+    # Check if stencil size matches
+    if (stencil_size(self._s._scheme) - 1) != len(self._d.boundaries()):
+        raise SFXM("Stencil size does not match boundary conditions")</code></pre>
             </details>
     </div>
 

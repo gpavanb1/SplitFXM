@@ -418,7 +418,8 @@
 
     <div class="doc doc-contents ">
 
-        <p>Extends a list of band indices to include points affected by periodic boundary conditions.</p>
+        <p>Extends a list of band indices to include points affected by periodic boundary conditions.
+It handles overflow points for periodic boundaries by adding indices from the left or right domain as needed.</p>
 
 
 <table class="field-list">
@@ -493,17 +494,12 @@ affected by periodic boundary conditions.</p>
     </tr>
   </tbody>
 </table>
-
-<details class="note" open>
-  <summary>Notes</summary>
-  <p>This function works only for symmetric schemes. It handles overflow points for 
-periodic boundaries by adding indices from the left or right domain as needed.</p>
-</details>
             <details class="quote">
               <summary>Source code in <code>splitfxm/bc.py</code></summary>
               <pre class="highlight"><code class="language-python">def extend_band(band, dirs: list, i: int, d: Domain):
     """
     Extends a list of band indices to include points affected by periodic boundary conditions.
+    It handles overflow points for periodic boundaries by adding indices from the left or right domain as needed.
 
     Parameters
     ----------
@@ -522,11 +518,6 @@ periodic boundaries by adding indices from the left or right domain as needed.</
     list
         A new list containing the union of the original band and additional indices 
         affected by periodic boundary conditions.
-
-    Notes
-    -----
-    This function works only for symmetric schemes. It handles overflow points for 
-    periodic boundaries by adding indices from the left or right domain as needed.
     """
     nb_left = d.nb(btype.LEFT)
     nb_right = d.nb(btype.RIGHT)
