@@ -195,6 +195,7 @@ def get_periodic_bcs(bc_dict: dict, d: Domain):
 def extend_band(band, dirs: list, i: int, d: Domain):
     """
     Extends a list of band indices to include points affected by periodic boundary conditions.
+    It handles overflow points for periodic boundaries by adding indices from the left or right domain as needed.
 
     Parameters
     ----------
@@ -213,11 +214,6 @@ def extend_band(band, dirs: list, i: int, d: Domain):
     list
         A new list containing the union of the original band and additional indices 
         affected by periodic boundary conditions.
-
-    Notes
-    -----
-    This function works only for symmetric schemes. It handles overflow points for 
-    periodic boundaries by adding indices from the left or right domain as needed.
     """
     nb_left = d.nb(btype.LEFT)
     nb_right = d.nb(btype.RIGHT)

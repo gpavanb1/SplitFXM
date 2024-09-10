@@ -2,6 +2,7 @@ from enum import Enum
 from .error import SFXM
 
 FDSchemes = Enum("FDSchemes", "CENTRAL RIGHT_BIAS")
+stencil_sizes = {FDSchemes.CENTRAL: 3, FDSchemes.RIGHT_BIAS: 4}
 
 
 def derivative(F, cell_sub, scheme, order=1, is_values=False):
@@ -32,10 +33,9 @@ def derivative(F, cell_sub, scheme, order=1, is_values=False):
     SFXM
         If an improper stencil size is provided or an unsupported scheme is used.
     """
-    if scheme == FDSchemes.CENTRAL and len(cell_sub) != 3:
-        raise SFXM(f"Improper stencil size for {scheme.name.lower()} scheme")
-    elif scheme == FDSchemes.RIGHT_BIAS and len(cell_sub) != 4:
-        raise SFXM(f"Improper stencil size for {scheme.name.lower()} scheme")
+    if len(cell_sub) != stencil_size(scheme):
+        raise SFXM(
+            f"Improper stencil size for {scheme.name.lower()} scheme. Expected {stencil_size(scheme)}, got {len(cell_sub)}")
 
     if order == 1:
         if scheme == FDSchemes.CENTRAL:
