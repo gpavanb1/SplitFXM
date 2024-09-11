@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>Visualization - splitfxm</title>
+    <title>Pricing - splitfxm</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -14,8 +14,8 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Visualization";
-        var mkdocs_page_input_path = "visualize.md";
+        var mkdocs_page_name = "Pricing";
+        var mkdocs_page_input_path = "pricing.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -49,12 +49,14 @@
                 <li class="toctree-l1"><a class="reference internal" href="../benchmark/">Benchmark</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../pricing/">Pricing</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Pricing</a>
+    <ul class="current">
+    </ul>
                 </li>
               </ul>
               <p class="caption"><span class="caption-text">Code Documentation</span></p>
-              <ul class="current">
+              <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../api/">Overview</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../model/">Model</a>
@@ -75,13 +77,7 @@
                 </li>
     </ul>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Visualization</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.visualize">visualize</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.visualize.draw">draw</a>
-    </li>
-    </ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../refine/">Adaptive Mesh Refinement</a>
                   </li>
@@ -114,8 +110,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Code Documentation</li>
-      <li class="breadcrumb-item active">Visualization</li>
+      <li class="breadcrumb-item active">Pricing</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -124,108 +119,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="visualization">Visualization</h1>
-<p>(Work in progress)</p>
-<p>This section contains details related to the various helper functions that are available to visualize the results of a simulation.</p>
-
-
-<div class="doc doc-object doc-module">
-
-
-
-<a id="splitfxm.visualize"></a>
-    <div class="doc doc-contents first">
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="splitfxm.visualize.draw" class="doc doc-heading">
-            <code class="highlight language-python">draw(d, l, interior=False)</code>
-
-</h2>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Plot the values of the domain.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>d</code></b>
-                  (<code><a class="autorefs autorefs-internal" title="splitfxm.domain.Domain" href="../domain/#splitfxm.domain.Domain">Domain</a></code>)
-              –
-              <div class="doc-md-description">
-                <p>The domain to plot values for.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>l</code></b>
-                  (<code>str</code>)
-              –
-              <div class="doc-md-description">
-                <p>The label to use for the plot.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
+                <h1 id="pricing">Pricing</h1>
+<p>The <code>splitfxm</code> package follows a dual-licensing model. This means that the software is available for both commercial and non-commercial use. The commercial license is designed for businesses and organizations that require a commercial license for their use of the software.</p>
+<p>To obtain a commercial license, please contact the <a href="mailto:gpavanb@gmail.com">author</a>.</p>
+<p>If you are interested in using the software for personal or research purposes, you can use the non-commercial license. This license is suitable for individuals and organizations that do not require a commercial license for their use of the software.</p>
+<p>More details on the licensing model can be found in the <a href="https://github.com/gpavanb/splitfxm/blob/main/LICENSE">LICENSE</a> file.</p>
+<table>
+<thead>
+<tr>
+<th>Usage Type</th>
+<th>Description</th>
+<th>Pricing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Non-Commercial</strong></td>
+<td>For research, educational, and personal use. <br> Free to use under the <br>Creative Commons Attribution-NonCommercial 4.0 <br> International (CC BY-NC 4.0).</td>
+<td>Free</td>
+</tr>
+<tr>
+<td><strong>Commercial</strong></td>
+<td>For business purposes or any use that generates revenue. <br> Requires a separate commercial license.</td>
+<td>On Request</td>
+</tr>
+</tbody>
 </table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/visualize.py</code></summary>
-              <pre class="highlight"><code class="language-python">def draw(d: Domain, l: str, interior=False):
-    """
-    Plot the values of the domain.
-
-    Parameters
-    ----------
-    d : Domain
-        The domain to plot values for.
-    l : str
-        The label to use for the plot.
-    """
-
-    plot(d.positions(interior), d.values(interior), "-o", label=l)</code></pre>
-            </details>
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../generate/" class="btn btn-neutral float-left" title="Scheme Generation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../refine/" class="btn btn-neutral float-right" title="Adaptive Mesh Refinement">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../benchmark/" class="btn btn-neutral float-left" title="Benchmark"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../api/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -248,10 +173,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../generate/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../benchmark/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../refine/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../api/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
