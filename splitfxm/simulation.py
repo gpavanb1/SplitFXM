@@ -5,7 +5,7 @@ from splitnewton.split_newton import split_newton
 
 from .constants import btype
 from .domain import Domain
-from .derivatives import stencil_size
+from .derivatives import stencil_sizes
 from .error import SFXM
 from .system import System
 from .refine import Refiner
@@ -80,7 +80,7 @@ class Simulation:
             apply_BC(self._d, c, bctype)
 
         # Check if stencil size matches
-        if (stencil_size(self._s._scheme) - 1) != len(self._d.boundaries()):
+        if (stencil_sizes[self._s._scheme] - 1) != len(self._d.boundaries()):
             raise SFXM("Stencil size does not match boundary conditions")
 
     def evolve(self, dt: float, refinement: bool = False):
@@ -161,6 +161,9 @@ class Simulation:
 
             if split_loc is None:
                 raise SFXM("Split location must be specified in this case")
+
+            if split_loc > nv or split_loc < 0:
+                raise SFXM("Split location must be between 0 and nv-1")
 
             # Same as SplitNewton convention
             # Outer system will be excluding `loc`
