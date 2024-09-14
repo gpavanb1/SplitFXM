@@ -66,7 +66,7 @@ class Refiner:
             raise SFXM(
                 f"curve must be between 0.0 and 1.0 ({curve} was specified).")
         elif prune > curve or prune > slope:
-            raise (
+            raise SFXM(
                 f"prune must be less than 'curve' and 'slope' ({prune} was specified)."
             )
 
