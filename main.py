@@ -4,7 +4,7 @@ from splitfxm.schemes import default_scheme
 from splitfxm.visualize import draw
 from matplotlib.pyplot import legend, show
 
-from examples.advection_diffusion import AdvectionDiffusion
+from splitfxm.models.advection_diffusion import AdvectionDiffusion
 
 import argparse
 import logging

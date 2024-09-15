@@ -1,8 +1,9 @@
 import numpy as np
+
+from splitfxm.error import SFXM
 from splitfxm.model import Model
 from splitfxm.equations.fd_transport import FDTransportEquation
 from splitfxm.equations.fv_transport import FVTransportEquation
-from splitfxm.error import SFXM
 
 
 class AdvectionDiffusion(Model):

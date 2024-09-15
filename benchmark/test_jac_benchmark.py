@@ -3,11 +3,12 @@ import numpy as np
 import pytest
 import time
 
-from examples.advection_diffusion import AdvectionDiffusion
+
 from splitfxm.domain import Domain
 from splitfxm.schemes import FDSchemes
 from splitfxm.simulation import Simulation
 from splitfxm.schemes import default_scheme
+from splitfxm.models.advection_diffusion import AdvectionDiffusion
 
 
 def test_dense_sparse_jac_comparison():

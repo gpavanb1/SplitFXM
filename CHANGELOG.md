@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.3.0] - 2024-09-15
 ## Added
-- PyTest with 100% coverage
+- PyTest with ~100% coverage
 - Compact scheme generation for uneven grid spacing
 - Asymmetric finite difference scheme example and benchmark
 - Updated benchmark to compare for both symmetric and asymmetric stencil

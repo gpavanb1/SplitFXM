@@ -9,7 +9,7 @@ from splitfxm.error import SFXM
 from splitfxm.refine import Refiner
 from splitfxm.schemes import default_scheme
 from splitfxm.simulation import Simulation
-from examples.advection_diffusion import AdvectionDiffusion
+from splitfxm.models.advection_diffusion import AdvectionDiffusion
 
 
 class MockEquation:

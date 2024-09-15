@@ -4,11 +4,17 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 
 from splitfxm.domain import Domain
+from splitfxm.error import SFXM
+from splitfxm.initialize import set_initial_condition
+from splitfxm.models.advection_diffusion import AdvectionDiffusion
 from splitfxm.simulation import Simulation
 from splitfxm.schemes import default_scheme
-from splitfxm.initialize import set_initial_condition
-from examples.advection_diffusion import AdvectionDiffusion
 from splitfxm.visualize import draw
+
+
+def test_invalid_method():
+    with pytest.raises(SFXM):
+        m = AdvectionDiffusion(c=0.1, nu=0.0, method="INVALID_METHOD")
 
 
 def test_validation():
@@ -46,11 +52,6 @@ def test_validation():
 
     actual_u = s._d.values(interior=True)[0]
     actual_v = s._d.values(interior=True)[1]
-
-    print("Expected u:", expected_u)
-    print("Actual u:", actual_u)
-    print("Expected v:", expected_v)
-    print("Actual v:", actual_v)
 
     draw(s._d, "actual", interior=True)
     draw(d_copy, "expected", interior=True)
