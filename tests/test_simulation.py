@@ -223,3 +223,27 @@ def test_dense_sparse_jac_comparison_steady_state():
 
     # Show timing results in prompt in pytest
     assert np.allclose(jac_sparse.toarray(), jac_dense, atol=1e-7)
+
+    # Repeat the same with FVM
+    method = 'FVM'
+    m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
+    s = Simulation(d, m, ics, bcs, default_scheme(method))
+    split = True
+    split_loc = 1
+
+    # Construct initial vector
+    x0 = d.listify_interior(split, split_loc)
+
+    # Construct dense Jacobian
+    def _f(u): return s.get_residuals_from_list(u, split, split_loc)
+    jac_dense = nd.Jacobian(_f, method='forward', step=1e-8)(x0)
+
+    # Construct Jacobian with no split location
+    with pytest.raises(SFXM):
+        jac_sparse = s.jacobian(x0, split)
+
+    # Construct sparse Jacobian
+    jac_sparse = s.jacobian(x0, split, split_loc)
+
+    # Show timing results in prompt in pytest
+    assert np.allclose(jac_sparse.toarray(), jac_dense, atol=1e-7)
