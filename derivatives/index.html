@@ -198,7 +198,7 @@
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.derivatives.FDSchemes">FDSchemes</span></code>)
+                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
@@ -300,7 +300,7 @@
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.derivatives.FDSchemes">FDSchemes</span></code>)
+                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
@@ -402,7 +402,7 @@
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.derivatives.FDSchemes">FDSchemes</span></code>)
+                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
@@ -505,7 +505,7 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.derivatives.FDSchemes">FDSchemes</span></code>)
+                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
@@ -612,9 +612,9 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
     SFXM
         If an improper stencil size is provided or an unsupported scheme is used.
     """
-    if len(cell_sub) != stencil_sizes[scheme]:
+    if len(cell_sub) != stencil_sizes.get(scheme):
         raise SFXM(
-            f"Improper stencil size for {scheme.name.lower()} scheme. Expected {stencil_sizes[scheme]}, got {len(cell_sub)}")
+            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
 
     if order == 1:
         if scheme == FDSchemes.CENTRAL:
@@ -701,7 +701,7 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.derivatives.FDSchemes">FDSchemes</span></code>)
+                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>

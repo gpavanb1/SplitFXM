@@ -281,6 +281,9 @@ coefficients are determined by solving a system of linear equations.</p>
     ```
     """
 
+    if left_stencil &lt; 0 or right_stencil &lt; 0 or derivative_order &lt; 0:
+        raise SFXM("Invalid stencil size or derivative order")
+
     # Create symbols for the coefficients of the scheme
     coefficients = symbols(f'a0:{left_stencil + right_stencil + 1}')
 

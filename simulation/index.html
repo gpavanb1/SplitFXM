@@ -282,7 +282,8 @@
             apply_BC(self._d, c, bctype)
 
         # Check if stencil size matches
-        if (stencil_size(self._s._scheme) - 1) != len(self._d.boundaries()):
+        boundary_cells = self._d.boundaries()[0] + self._d.boundaries()[1]
+        if stencil_sizes.get(self._s._scheme) != len(boundary_cells) + 1:
             raise SFXM("Stencil size does not match boundary conditions")
 
     def evolve(self, dt: float, refinement: bool = False):
@@ -363,6 +364,9 @@
 
             if split_loc is None:
                 raise SFXM("Split location must be specified in this case")
+
+            if split_loc &gt; nv or split_loc &lt; 0:
+                raise SFXM("Split location must be between 0 and nv-1")
 
             # Same as SplitNewton convention
             # Outer system will be excluding `loc`
@@ -567,10 +571,7 @@
                         col_idx = (loc - ilo) * nv + j
                         jac[row_idx:row_idx + nv, col_idx] = col
                     else:
-                        if split_loc is None:
-                            raise ValueError(
-                                "Split location must be specified if split is True")
-
+                        # Split location will be checked in initialize_from_list
                         # Sizes of the sub-Jacobians
                         na, nc = split_loc, (nv - split_loc)
                         # Jumps of block_offset instead of nv here
@@ -640,9 +641,7 @@
                 _f, _jac, x0, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo,
                 bounds=ext_bounds)
         else:
-            if split_loc is None:
-                raise SFXM("Split location must be specified in this case")
-
+            # Split location will be checked in initialize_from_list
             loc = num_points * split_loc
             xf, _, iter = split_newton(
                 _f, _jac, x0, loc, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo, bounds=ext_bounds
@@ -700,7 +699,8 @@
         apply_BC(self._d, c, bctype)
 
     # Check if stencil size matches
-    if (stencil_size(self._s._scheme) - 1) != len(self._d.boundaries()):
+    boundary_cells = self._d.boundaries()[0] + self._d.boundaries()[1]
+    if stencil_sizes.get(self._s._scheme) != len(boundary_cells) + 1:
         raise SFXM("Stencil size does not match boundary conditions")</code></pre>
             </details>
     </div>
@@ -1237,6 +1237,9 @@
         if split_loc is None:
             raise SFXM("Split location must be specified in this case")
 
+        if split_loc &gt; nv or split_loc &lt; 0:
+            raise SFXM("Split location must be between 0 and nv-1")
+
         # Same as SplitNewton convention
         # Outer system will be excluding `loc`
         outer_block = array_list_reshape(
@@ -1454,10 +1457,7 @@
                     col_idx = (loc - ilo) * nv + j
                     jac[row_idx:row_idx + nv, col_idx] = col
                 else:
-                    if split_loc is None:
-                        raise ValueError(
-                            "Split location must be specified if split is True")
-
+                    # Split location will be checked in initialize_from_list
                     # Sizes of the sub-Jacobians
                     na, nc = split_loc, (nv - split_loc)
                     # Jumps of block_offset instead of nv here
@@ -1645,9 +1645,7 @@
             _f, _jac, x0, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo,
             bounds=ext_bounds)
     else:
-        if split_loc is None:
-            raise SFXM("Split location must be specified in this case")
-
+        # Split location will be checked in initialize_from_list
         loc = num_points * split_loc
         xf, _, iter = split_newton(
             _f, _jac, x0, loc, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo, bounds=ext_bounds

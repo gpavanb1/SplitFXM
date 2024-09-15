@@ -235,12 +235,12 @@
     tuple of numpy.ndarray
         The west and east diffusion fluxes.
     """
+    if len(cell_sub) != stencil_sizes.get(scheme):
+        raise SFXM(
+            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
 
     # Only central scheme for diffusion fluxes
     if scheme == FVSchemes.LF:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for LF scheme")
-
         # West Flux
         ul = cell_sub[0].values()
         uc = cell_sub[1].values()
@@ -257,9 +257,7 @@
         dxe = 0.5 * (cell_sub[2].x() - cell_sub[1].x())
         De = (Dr - Dl) / dxe
 
-        return Dw, De
-    else:
-        raise SFXM("Unsupported scheme")</code></pre>
+        return Dw, De</code></pre>
             </details>
     </div>
 
@@ -362,10 +360,11 @@
         The west and east fluxes.
     """
 
-    if scheme == FVSchemes.LF:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for LF scheme")
+    if len(cell_sub) != stencil_sizes.get(scheme):
+        raise SFXM(
+            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
 
+    if scheme == FVSchemes.LF:
         # West Flux
         ul = cell_sub[0].values()
         ur = cell_sub[1].values()
@@ -386,9 +385,7 @@
         sigma = 0.1
         Fe = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
 
-        return Fw, Fe
-    else:
-        raise SFXM("Unsupported scheme")</code></pre>
+        return Fw, Fe</code></pre>
             </details>
     </div>
 
