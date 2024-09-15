@@ -56,3 +56,8 @@ def test_model_equations_method():
     equations = model.equations()
     assert isinstance(
         equations[0], FDTransportEquation), "equations() method should return a Advection-Diffusion equations"
+
+    model = AdvectionDiffusion(c=0.2, nu=0.001, method='FVM')
+    equations = model.equations()
+    assert isinstance(
+        equations[0], FVTransportEquation), "equations() method should return a Advection-Diffusion equations"

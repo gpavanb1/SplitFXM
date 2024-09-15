@@ -5,7 +5,7 @@ from splitnewton.split_newton import split_newton
 
 from .constants import btype
 from .domain import Domain
-from .derivatives import stencil_sizes
+from .schemes import stencil_sizes
 from .error import SFXM
 from .system import System
 from .refine import Refiner
@@ -81,7 +81,7 @@ class Simulation:
 
         # Check if stencil size matches
         boundary_cells = self._d.boundaries()[0] + self._d.boundaries()[1]
-        if (stencil_sizes[self._s._scheme] - 1) != len(boundary_cells):
+        if stencil_sizes.get(self._s._scheme) != len(boundary_cells) + 1:
             raise SFXM("Stencil size does not match boundary conditions")
 
     def evolve(self, dt: float, refinement: bool = False):

@@ -5,7 +5,7 @@ import time
 
 from examples.advection_diffusion import AdvectionDiffusion
 from splitfxm.domain import Domain
-from splitfxm.derivatives import FDSchemes
+from splitfxm.schemes import FDSchemes
 from splitfxm.simulation import Simulation
 from splitfxm.schemes import default_scheme
 

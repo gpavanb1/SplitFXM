@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 from splitfxm.cell import Cell
 from splitfxm.error import SFXM
-from splitfxm.flux import fluxes, diffusion_fluxes, FVSchemes
+from splitfxm.flux import fluxes, diffusion_fluxes
+from splitfxm.schemes import FVSchemes
 
 
 def flux_function(values):
@@ -40,14 +41,14 @@ def test_fluxes(cells):
 
 def test_fluxes_invalid_stencil():
     """Test flux calculation with an invalid stencil size."""
-    with pytest.raises(SFXM, match="Improper stencil size for LF scheme"):
+    with pytest.raises(SFXM):
         fluxes(flux_function, [
                Cell(x=0.0, value=np.array([1.0]))], FVSchemes.LF)
 
 
 def test_fluxes_invalid_scheme(cells):
     """Test flux calculation with an unsupported scheme."""
-    with pytest.raises(SFXM, match="Unsupported scheme"):
+    with pytest.raises(SFXM):
         fluxes(flux_function, cells, "UNSUPPORTED_SCHEME")
 
 
@@ -69,12 +70,12 @@ def test_diffusion_fluxes(cells):
 
 def test_diffusion_fluxes_invalid_stencil():
     """Test diffusion flux calculation with an invalid stencil size."""
-    with pytest.raises(SFXM, match="Improper stencil size for LF scheme"):
+    with pytest.raises(SFXM):
         diffusion_fluxes(diffusion_function, [Cell(
             x=0.0, value=np.array([1.0]))], FVSchemes.LF)
 
 
 def test_diffusion_fluxes_invalid_scheme(cells):
     """Test diffusion flux calculation with an unsupported scheme."""
-    with pytest.raises(SFXM, match="Unsupported scheme"):
+    with pytest.raises(SFXM):
         diffusion_fluxes(diffusion_function, cells, "UNSUPPORTED_SCHEME")

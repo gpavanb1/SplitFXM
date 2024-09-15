@@ -1,9 +1,5 @@
-from enum import Enum
 from .error import SFXM
-
-# TODO: Add more schemes
-FVSchemes = Enum("FVSchemes", "LF")
-Directions = Enum("Directions", "WEST EAST")
+from .schemes import stencil_sizes, FVSchemes
 
 
 def fluxes(F, cell_sub, scheme):
@@ -25,10 +21,11 @@ def fluxes(F, cell_sub, scheme):
         The west and east fluxes.
     """
 
-    if scheme == FVSchemes.LF:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for LF scheme")
+    if len(cell_sub) != stencil_sizes.get(scheme):
+        raise SFXM(
+            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
 
+    if scheme == FVSchemes.LF:
         # West Flux
         ul = cell_sub[0].values()
         ur = cell_sub[1].values()
@@ -50,8 +47,6 @@ def fluxes(F, cell_sub, scheme):
         Fe = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
 
         return Fw, Fe
-    else:
-        raise SFXM("Unsupported scheme")
 
 
 def diffusion_fluxes(D, cell_sub, scheme):
@@ -70,12 +65,12 @@ def diffusion_fluxes(D, cell_sub, scheme):
     tuple of numpy.ndarray
         The west and east diffusion fluxes.
     """
+    if len(cell_sub) != stencil_sizes.get(scheme):
+        raise SFXM(
+            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
 
     # Only central scheme for diffusion fluxes
     if scheme == FVSchemes.LF:
-        if len(cell_sub) != 3:
-            raise SFXM("Improper stencil size for LF scheme")
-
         # West Flux
         ul = cell_sub[0].values()
         uc = cell_sub[1].values()
@@ -93,5 +88,3 @@ def diffusion_fluxes(D, cell_sub, scheme):
         De = (Dr - Dl) / dxe
 
         return Dw, De
-    else:
-        raise SFXM("Unsupported scheme")

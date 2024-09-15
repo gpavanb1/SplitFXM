@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 
 from splitfxm.cell import Cell
-from splitfxm.derivatives import FDSchemes, derivative, Dx, dx, D2x, d2x
+from splitfxm.derivatives import derivative, Dx, dx, D2x, d2x
+from splitfxm.schemes import FDSchemes
 from splitfxm.error import SFXM
 
 
