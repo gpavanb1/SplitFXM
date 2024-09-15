@@ -80,7 +80,8 @@ class Simulation:
             apply_BC(self._d, c, bctype)
 
         # Check if stencil size matches
-        if (stencil_sizes[self._s._scheme] - 1) != len(self._d.boundaries()):
+        boundary_cells = self._d.boundaries()[0] + self._d.boundaries()[1]
+        if (stencil_sizes[self._s._scheme] - 1) != len(boundary_cells):
             raise SFXM("Stencil size does not match boundary conditions")
 
     def evolve(self, dt: float, refinement: bool = False):
@@ -368,10 +369,7 @@ class Simulation:
                         col_idx = (loc - ilo) * nv + j
                         jac[row_idx:row_idx + nv, col_idx] = col
                     else:
-                        if split_loc is None:
-                            raise ValueError(
-                                "Split location must be specified if split is True")
-
+                        # Split location will be checked in initialize_from_list
                         # Sizes of the sub-Jacobians
                         na, nc = split_loc, (nv - split_loc)
                         # Jumps of block_offset instead of nv here
@@ -441,9 +439,7 @@ class Simulation:
                 _f, _jac, x0, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo,
                 bounds=ext_bounds)
         else:
-            if split_loc is None:
-                raise SFXM("Split location must be specified in this case")
-
+            # Split location will be checked in initialize_from_list
             loc = num_points * split_loc
             xf, _, iter = split_newton(
                 _f, _jac, x0, loc, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo, bounds=ext_bounds

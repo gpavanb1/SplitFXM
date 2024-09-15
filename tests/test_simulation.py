@@ -1,11 +1,15 @@
 import pytest
 import numpy as np
+import numdifftools as nd
 
 from splitfxm.bc import apply_BC
 from splitfxm.derivatives import Dx, FDSchemes
 from splitfxm.domain import Domain
+from splitfxm.error import SFXM
 from splitfxm.refine import Refiner
+from splitfxm.schemes import default_scheme
 from splitfxm.simulation import Simulation
+from examples.advection_diffusion import AdvectionDiffusion
 
 
 class MockEquation:
@@ -75,14 +79,29 @@ def test_simulation_initialization(mock_domain, mock_model, mock_scheme, mock_ic
     assert simulation._ss == {}
 
 
+def test_improper_stencil_size():
+    # Test for improper stencil size that raises SFXM
+    d = Domain.from_size(5, 1, 2, ["u", "v"])
+    m = MockModel([MockEquation()])
+    with pytest.raises(SFXM):
+        s = Simulation(d, m, {}, {}, FDSchemes.CENTRAL)
+
+
 def test_evolve(simulation):
-    simulation.evolve(dt=0.1, refinement=False)
+    simulation.evolve(dt=0.1, refinement=True)
 
 
 def test_initialize_from_list(simulation):
     # Initialize with a simple list of values
     values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     simulation.initialize_from_list(values)
+
+
+def test_initialize_from_list_wrong_length(simulation):
+    # Initialize with a simple list of values
+    values = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    with pytest.raises(SFXM):
+        simulation.initialize_from_list(values)
 
 
 def test_get_residuals_from_list(simulation):
@@ -98,7 +117,109 @@ def test_steady_state(simulation):
     # Additional assertions can be added based on the specific implementation of steady_state
 
 
+def test_steady_state_split(simulation):
+    num_iterations = simulation.steady_state(
+        split=True, split_loc=1, sparse=True, dt0=0.0, dtmax=1.0, armijo=False)
+
+    assert num_iterations >= 0  # Ensure the number of iterations is non-negative
+    # Additional assertions can be added based on the specific implementation of steady_state
+
+
 def test_initialize_from_list_split(simulation):
     values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     split_loc = 1
     simulation.initialize_from_list(values, split=True, split_loc=split_loc)
+
+
+def test_initialize_from_list_split_wrong_loc(simulation):
+    values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    split_loc = 4
+    with pytest.raises(SFXM):
+        simulation.initialize_from_list(
+            values, split=True, split_loc=split_loc)
+
+
+def test_extend_bounds_no_split(simulation):
+    bounds = [[1, 2], [3, 4]]
+    nv = 2
+    num_points = 3
+    result = simulation.extend_bounds(bounds, num_points, nv, split=False)
+    assert result == [[1, 2] * num_points, [3, 4] *
+                      num_points], "Bounds should extend without split"
+
+
+def test_extend_bounds_split(simulation):
+    bounds = [[1, 2], [3, 4]]
+    nv = 2
+    num_points = 2
+    split_loc = 1
+    result = simulation.extend_bounds(
+        bounds, num_points, nv, split=True, split_loc=split_loc)
+    expected_result = [[1] * num_points + [2] *
+                       num_points, [3] * num_points + [4] * num_points]
+    assert result == expected_result, "Bounds should extend with split at the given location"
+
+
+def test_extend_bounds_invalid_size(simulation):
+    bounds = [[1], [2, 3]]  # Mismatched sizes
+    nv = 2
+    num_points = 2
+    with pytest.raises(SFXM):
+        simulation.extend_bounds(bounds, num_points, nv)
+
+
+def test_extend_bounds_invalid_input(simulation):
+    bounds = [[1], [2], [3]]  # Mismatched sizes
+    nv = 2
+    num_points = 2
+    with pytest.raises(SFXM):
+        simulation.extend_bounds(bounds, num_points, nv)
+
+
+def test_extend_bounds_invalid_split_loc(simulation):
+    bounds = [[1, 2], [3, 4]]
+    nv = 2
+    num_points = 3
+    with pytest.raises(SFXM):
+        simulation.extend_bounds(bounds, num_points, nv, split=True)
+
+
+def test_dense_sparse_jac_comparison_steady_state():
+    method = 'FDM'
+    m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
+    d = Domain.from_size(15, 1, 1, ["u", "v", "w"])
+    ics = {"u": "gaussian", "v": "rarefaction"}
+    bcs = {
+        "u": {
+            "left": "periodic",
+            "right": "periodic"
+        },
+        "v": {
+            "left": {"dirichlet": 3},
+            "right": {"dirichlet": 4}
+        },
+        "w": {
+            "left": {"dirichlet": 2},
+            "right": "periodic"
+        }
+    }
+    s = Simulation(d, m, ics, bcs, default_scheme(method))
+    split = True
+    split_loc = 1
+
+    # Construct initial vector
+    x0 = d.listify_interior(split, split_loc)
+
+    # Construct dense Jacobian
+    def _f(u): return s.get_residuals_from_list(u, split, split_loc)
+    jac_dense = nd.Jacobian(_f, method='forward', step=1e-8)(x0)
+
+    # Construct Jacobian with no split location
+    with pytest.raises(SFXM):
+        jac_sparse = s.jacobian(x0, split)
+
+    # Construct sparse Jacobian
+    jac_sparse = s.jacobian(x0, split, split_loc)
+
+    # Show timing results in prompt in pytest
+    assert np.allclose(jac_sparse.toarray(), jac_dense, atol=1e-7)
