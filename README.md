@@ -1,6 +1,8 @@
 # SplitFXM
 
 [![Downloads](https://pepy.tech/badge/splitfxm)](https://pepy.tech/project/splitfxm)
+![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
+
 
 ![img](https://github.com/gpavanb1/SplitFXM/blob/main/assets/logo.jpg)
 
@@ -78,6 +80,27 @@ For N=250,
 The benchmark can be executed from the parent folder using the command
 
 `python -m pytest -s benchmark`
+
+## How to run tests?
+
+To run the tests, execute the following command from the parent folder:
+```
+python -m pytest tests
+```
+
+You can use the `-s` flag to show `print` outputs of the tests
+
+## How to get coverage?
+
+To get coverage, execute the following command from the parent folder:
+```
+python -m pytest --cov=splitfxm --cov-report <option> tests
+```
+
+The `option` can be related to showing covered/missed lines or specifying the output format of the report. For example, to get a line-by-line report, use the following command:
+```
+python -m pytest --cov=splitfxm --cov-report term-missing tests
+```
 
 ## Whom to contact?
 
