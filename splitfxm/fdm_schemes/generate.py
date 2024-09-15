@@ -1,6 +1,8 @@
 import numpy as np
 from sympy import symbols, Eq, solve, factorial, sign
 
+from splitfxm.error import SFXM
+
 
 def compact_scheme(left_stencil, right_stencil, derivative_order):
     """
@@ -38,6 +40,9 @@ def compact_scheme(left_stencil, right_stencil, derivative_order):
     >>> print(f"Coefficients for f^({order}):", coefficients)
     ```
     """
+
+    if left_stencil < 0 or right_stencil < 0 or derivative_order < 0:
+        raise SFXM("Invalid stencil size or derivative order")
 
     # Create symbols for the coefficients of the scheme
     coefficients = symbols(f'a0:{left_stencil + right_stencil + 1}')
