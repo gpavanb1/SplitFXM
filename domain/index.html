@@ -67,35 +67,35 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.__init__">__init__</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.boundaries">boundaries</a>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.from_size">from_size</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.ilo">ilo</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.ihi">ihi</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.nb">nb</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.cells">cells</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.boundaries">boundaries</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.interior">interior</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.set_interior">set_interior</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.num_components">num_components</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.component_index">component_index</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.component_name">component_name</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.from_size">from_size</a>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.positions">positions</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.ihi">ihi</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.ilo">ilo</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.interior">interior</a>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.values">values</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.listify_interior">listify_interior</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.nb">nb</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.num_components">num_components</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.positions">positions</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.set_interior">set_interior</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.update">update</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.values">values</a>
     </li>
         </ul>
     </li>
@@ -587,6 +587,384 @@
 <div class="doc doc-object doc-function">
 
 
+<h3 id="splitfxm.domain.Domain.from_size" class="doc doc-heading">
+            <code class="highlight language-python">from_size(nx, nb_left, nb_right, components, xmin=0.0, xmax=1.0)</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize a <code>Domain</code> object with a uniform grid of cells.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>nx</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>The number of cells in the domain.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>nb_left</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>The number of ghost cells on the left side of the domain.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>nb_right</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>The number of ghost cells on the right side of the domain.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>components</code></b>
+                  (<code>list of str</code>)
+              –
+              <div class="doc-md-description">
+                <p>The names of the components in the domain.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>xmin</code></b>
+                  (<code>float</code>, default:
+                      <code>0.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The minimum x-value of the domain. Default is 0.0.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>xmax</code></b>
+                  (<code>float</code>, default:
+                      <code>1.0</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The maximum x-value of the domain. Default is 1.0.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><a class="autorefs autorefs-internal" title="splitfxm.domain.Domain" href="#splitfxm.domain.Domain">Domain</a></code>
+              –
+              <div class="doc-md-description">
+                <p>The initialized <code>Domain</code> object.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">@ classmethod
+def from_size(
+    cls,
+    nx: int,
+    nb_left: int,
+    nb_right: int,
+    components: list[str],
+    xmin: float = 0.0,
+    xmax: float = 1.0,
+):
+    """
+    Initialize a `Domain` object with a uniform grid of cells.
+
+    Parameters
+    ----------
+    nx : int
+        The number of cells in the domain.
+    nb_left: int
+        The number of ghost cells on the left side of the domain.
+    nb_right: int
+        The number of ghost cells on the right side of the domain.
+    components : list of str
+        The names of the components in the domain.
+    xmin : float, optional
+        The minimum x-value of the domain. Default is 0.0.
+    xmax : float, optional
+        The maximum x-value of the domain. Default is 1.0.
+
+    Returns
+    -------
+    Domain
+        The initialized `Domain` object.
+    """
+
+    # Initialize a uniform grid
+    xarr = linspace(xmin, xmax, nx)
+    nv = len(components)
+    interior = [Cell(x, zeros(nv)) for x in xarr]
+
+    # Create boundaries
+    dx = (xmax - xmin) / nx
+    left_boundaries = [
+        Boundary(xmin - (i + 1) * dx, btype.LEFT, zeros(nv))
+        for i in range(nb_left)
+    ]
+    right_boundaries = [
+        Boundary(xmax + (i + 1) * dx, btype.RIGHT, zeros(nv))
+        for i in range(nb_right)
+    ]
+
+    return Domain(interior, left_boundaries, right_boundaries, components)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.ilo" class="doc doc-heading">
+            <code class="highlight language-python">ilo()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the index of the leftmost interior cell.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>int</code>
+              –
+              <div class="doc-md-description">
+                <p>The index of the leftmost interior cell.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def ilo(self):
+    """
+    Get the index of the leftmost interior cell.
+
+    Returns
+    -------
+    int
+        The index of the leftmost interior cell.
+    """
+    return self._nb[btype.LEFT]</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.ihi" class="doc doc-heading">
+            <code class="highlight language-python">ihi()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the index of the rightmost interior cell.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>int</code>
+              –
+              <div class="doc-md-description">
+                <p>The index of the rightmost interior cell.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def ihi(self):
+    """
+    Get the index of the rightmost interior cell.
+
+    Returns
+    -------
+    int
+        The index of the rightmost interior cell.
+    """
+    return self._nb[btype.LEFT] + self._nx - 1</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.nb" class="doc doc-heading">
+            <code class="highlight language-python">nb(dir)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the number of ghost cells on each side of the domain.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>int</code>
+              –
+              <div class="doc-md-description">
+                <p>The number of ghost cells on each side of the domain.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def nb(self, dir: btype):
+    """
+    Get the number of ghost cells on each side of the domain.
+
+    Returns
+    -------
+    int
+        The number of ghost cells on each side of the domain.
+    """
+    return self._nb[dir]</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.cells" class="doc doc-heading">
+            <code class="highlight language-python">cells(interior=False)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the cells in the domain.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>list of Cell</code>
+              –
+              <div class="doc-md-description">
+                <p>The cells in the domain.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def cells(self, interior=False):
+    """
+    Get the cells in the domain.
+
+    Returns
+    -------
+    list of Cell
+        The cells in the domain.
+    """
+    return self._domain if not interior else self.interior()</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="splitfxm.domain.Domain.boundaries" class="doc doc-heading">
             <code class="highlight language-python">boundaries()</code>
 
@@ -641,15 +1019,15 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.domain.Domain.cells" class="doc doc-heading">
-            <code class="highlight language-python">cells(interior=False)</code>
+<h3 id="splitfxm.domain.Domain.interior" class="doc doc-heading">
+            <code class="highlight language-python">interior()</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Get the cells in the domain.</p>
+        <p>Get the interior cells in the domain.</p>
 
 
 <table class="field-list">
@@ -666,7 +1044,7 @@
                   <code>list of Cell</code>
               –
               <div class="doc-md-description">
-                <p>The cells in the domain.</p>
+                <p>The interior cells in the domain.</p>
               </div>
             </li>
         </ul>
@@ -676,16 +1054,127 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def cells(self, interior=False):
+              <pre class="highlight"><code class="language-python">def interior(self):
     """
-    Get the cells in the domain.
+    Get the interior cells in the domain.
 
     Returns
     -------
     list of Cell
-        The cells in the domain.
+        The interior cells in the domain.
     """
-    return self._domain if not interior else self.interior()</code></pre>
+    nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
+    return self._domain[nb_left: -nb_right]</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.set_interior" class="doc doc-heading">
+            <code class="highlight language-python">set_interior(cells)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Set the interior cells in the domain.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>cells</code></b>
+                  (<code>list of Cell</code>)
+              –
+              <div class="doc-md-description">
+                <p>The new interior cells in the domain.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def set_interior(self, cells):
+    """
+    Set the interior cells in the domain.
+
+    Parameters
+    ----------
+    cells : list of Cell
+        The new interior cells in the domain.
+    """
+    self._nx = len(cells)
+    nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
+    self._domain = [*self._domain[: nb_left],
+                    *cells, *self._domain[-nb_right:]]</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.num_components" class="doc doc-heading">
+            <code class="highlight language-python">num_components()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the number of components/variables associated in the domain.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>int</code>
+              –
+              <div class="doc-md-description">
+                <p>The number of components in the domain.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def num_components(self):
+    """
+    Get the number of components/variables associated in the domain.
+
+    Returns
+    -------
+    int
+        The number of components in the domain.
+    """
+    return len(self._components)</code></pre>
             </details>
     </div>
 
@@ -859,88 +1348,16 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.domain.Domain.from_size" class="doc doc-heading">
-            <code class="highlight language-python">from_size(nx, nb_left, nb_right, components, xmin=0.0, xmax=1.0)</code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
-  </span>
+<h3 id="splitfxm.domain.Domain.positions" class="doc doc-heading">
+            <code class="highlight language-python">positions(interior=False)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Initialize a <code>Domain</code> object with a uniform grid of cells.</p>
+        <p>Get the positions of all cells in the domain.</p>
 
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>nx</code></b>
-                  (<code>int</code>)
-              –
-              <div class="doc-md-description">
-                <p>The number of cells in the domain.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>nb_left</code></b>
-                  (<code>int</code>)
-              –
-              <div class="doc-md-description">
-                <p>The number of ghost cells on the left side of the domain.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>nb_right</code></b>
-                  (<code>int</code>)
-              –
-              <div class="doc-md-description">
-                <p>The number of ghost cells on the right side of the domain.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>components</code></b>
-                  (<code>list of str</code>)
-              –
-              <div class="doc-md-description">
-                <p>The names of the components in the domain.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>xmin</code></b>
-                  (<code>float</code>, default:
-                      <code>0.0</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The minimum x-value of the domain. Default is 0.0.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>xmax</code></b>
-                  (<code>float</code>, default:
-                      <code>1.0</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The maximum x-value of the domain. Default is 1.0.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
 <table class="field-list">
   <colgroup>
@@ -953,10 +1370,10 @@
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code><a class="autorefs autorefs-internal" title="splitfxm.domain.Domain" href="#splitfxm.domain.Domain">Domain</a></code>
+                  <code>list of float</code>
               –
               <div class="doc-md-description">
-                <p>The initialized <code>Domain</code> object.</p>
+                <p>The positions of all cells in the domain.</p>
               </div>
             </li>
         </ul>
@@ -966,57 +1383,16 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">@ classmethod
-def from_size(
-    cls,
-    nx: int,
-    nb_left: int,
-    nb_right: int,
-    components: list[str],
-    xmin: float = 0.0,
-    xmax: float = 1.0,
-):
+              <pre class="highlight"><code class="language-python">def positions(self, interior=False):
     """
-    Initialize a `Domain` object with a uniform grid of cells.
-
-    Parameters
-    ----------
-    nx : int
-        The number of cells in the domain.
-    nb_left: int
-        The number of ghost cells on the left side of the domain.
-    nb_right: int
-        The number of ghost cells on the right side of the domain.
-    components : list of str
-        The names of the components in the domain.
-    xmin : float, optional
-        The minimum x-value of the domain. Default is 0.0.
-    xmax : float, optional
-        The maximum x-value of the domain. Default is 1.0.
+    Get the positions of all cells in the domain.
 
     Returns
     -------
-    Domain
-        The initialized `Domain` object.
+    list of float
+        The positions of all cells in the domain.
     """
-
-    # Initialize a uniform grid
-    xarr = linspace(xmin, xmax, nx)
-    nv = len(components)
-    interior = [Cell(x, zeros(nv)) for x in xarr]
-
-    # Create boundaries
-    dx = (xmax - xmin) / nx
-    left_boundaries = [
-        Boundary(xmin - (i + 1) * dx, btype.LEFT, zeros(nv))
-        for i in range(nb_left)
-    ]
-    right_boundaries = [
-        Boundary(xmax + (i + 1) * dx, btype.RIGHT, zeros(nv))
-        for i in range(nb_right)
-    ]
-
-    return Domain(interior, left_boundaries, right_boundaries, components)</code></pre>
+    return [cell.x() for cell in self.cells(interior)]</code></pre>
             </details>
     </div>
 
@@ -1025,15 +1401,15 @@ def from_size(
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.domain.Domain.ihi" class="doc doc-heading">
-            <code class="highlight language-python">ihi()</code>
+<h3 id="splitfxm.domain.Domain.values" class="doc doc-heading">
+            <code class="highlight language-python">values(interior=False)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Get the index of the rightmost interior cell.</p>
+        <p>Get the values of all cells in the domain.</p>
 
 
 <table class="field-list">
@@ -1047,10 +1423,10 @@ def from_size(
       <td class="field-body">
         <ul class="first simple">
             <li>
-                  <code>int</code>
+                  <code>list of numpy.ndarray</code>
               –
               <div class="doc-md-description">
-                <p>The index of the rightmost interior cell.</p>
+                <p>The values of all cells in the domain.</p>
               </div>
             </li>
         </ul>
@@ -1060,123 +1436,20 @@ def from_size(
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def ihi(self):
+              <pre class="highlight"><code class="language-python">def values(self, interior=False):
     """
-    Get the index of the rightmost interior cell.
+    Get the values of all cells in the domain.
 
     Returns
     -------
-    int
-        The index of the rightmost interior cell.
+    list of numpy.ndarray
+        The values of all cells in the domain.
     """
-    return self._nb[btype.LEFT] + self._nx - 1</code></pre>
-            </details>
-    </div>
+    value_list = []
+    for cell in self.cells(interior):
+        value_list.append(cell.values())
 
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.domain.Domain.ilo" class="doc doc-heading">
-            <code class="highlight language-python">ilo()</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the index of the leftmost interior cell.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>int</code>
-              –
-              <div class="doc-md-description">
-                <p>The index of the leftmost interior cell.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def ilo(self):
-    """
-    Get the index of the leftmost interior cell.
-
-    Returns
-    -------
-    int
-        The index of the leftmost interior cell.
-    """
-    return self._nb[btype.LEFT]</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.domain.Domain.interior" class="doc doc-heading">
-            <code class="highlight language-python">interior()</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the interior cells in the domain.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>list of Cell</code>
-              –
-              <div class="doc-md-description">
-                <p>The interior cells in the domain.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def interior(self):
-    """
-    Get the interior cells in the domain.
-
-    Returns
-    -------
-    list of Cell
-        The interior cells in the domain.
-    """
-    nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
-    return self._domain[nb_left: -nb_right]</code></pre>
+    return value_list</code></pre>
             </details>
     </div>
 
@@ -1295,222 +1568,6 @@ def from_size(
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.domain.Domain.nb" class="doc doc-heading">
-            <code class="highlight language-python">nb(dir)</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the number of ghost cells on each side of the domain.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>int</code>
-              –
-              <div class="doc-md-description">
-                <p>The number of ghost cells on each side of the domain.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def nb(self, dir: btype):
-    """
-    Get the number of ghost cells on each side of the domain.
-
-    Returns
-    -------
-    int
-        The number of ghost cells on each side of the domain.
-    """
-    return self._nb[dir]</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.domain.Domain.num_components" class="doc doc-heading">
-            <code class="highlight language-python">num_components()</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the number of components/variables associated in the domain.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>int</code>
-              –
-              <div class="doc-md-description">
-                <p>The number of components in the domain.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def num_components(self):
-    """
-    Get the number of components/variables associated in the domain.
-
-    Returns
-    -------
-    int
-        The number of components in the domain.
-    """
-    return len(self._components)</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.domain.Domain.positions" class="doc doc-heading">
-            <code class="highlight language-python">positions(interior=False)</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the positions of all cells in the domain.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>list of float</code>
-              –
-              <div class="doc-md-description">
-                <p>The positions of all cells in the domain.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def positions(self, interior=False):
-    """
-    Get the positions of all cells in the domain.
-
-    Returns
-    -------
-    list of float
-        The positions of all cells in the domain.
-    """
-    return [cell.x() for cell in self.cells(interior)]</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.domain.Domain.set_interior" class="doc doc-heading">
-            <code class="highlight language-python">set_interior(cells)</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Set the interior cells in the domain.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>cells</code></b>
-                  (<code>list of Cell</code>)
-              –
-              <div class="doc-md-description">
-                <p>The new interior cells in the domain.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def set_interior(self, cells):
-    """
-    Set the interior cells in the domain.
-
-    Parameters
-    ----------
-    cells : list of Cell
-        The new interior cells in the domain.
-    """
-    self._nx = len(cells)
-    nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
-    self._domain = [*self._domain[: nb_left],
-                    *cells, *self._domain[-nb_right:]]</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h3 id="splitfxm.domain.Domain.update" class="doc doc-heading">
             <code class="highlight language-python">update(dt, interior_residual_block)</code>
 
@@ -1569,63 +1626,6 @@ def from_size(
 
     for i, cell in enumerate(self.interior()):
         cell.update(dt, interior_residual_block[i])</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.domain.Domain.values" class="doc doc-heading">
-            <code class="highlight language-python">values(interior=False)</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the values of all cells in the domain.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>list of numpy.ndarray</code>
-              –
-              <div class="doc-md-description">
-                <p>The values of all cells in the domain.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/domain.py</code></summary>
-              <pre class="highlight"><code class="language-python">def values(self, interior=False):
-    """
-    Get the values of all cells in the domain.
-
-    Returns
-    -------
-    list of numpy.ndarray
-        The values of all cells in the domain.
-    """
-    value_list = []
-    for cell in self.cells(interior):
-        value_list.append(cell.values())
-
-    return value_list</code></pre>
             </details>
     </div>
 

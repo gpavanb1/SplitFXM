@@ -154,7 +154,7 @@ s = Simulation(d, m, ics, bcs, default_scheme(method))
 
 
 # Advance in time or to steady state
-s.evolve(dt=0.1)
+s.evolve(t_diff=0.1)
 bounds = [[-1., -2., 0.], [5., 4., 3.]]
 iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
 

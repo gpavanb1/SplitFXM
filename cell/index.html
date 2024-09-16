@@ -89,23 +89,23 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.cell.Cell">Cell</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.__eq__">__eq__</a>
-    </li>
     <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.__init__">__init__</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.__eq__">__eq__</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.__lt__">__lt__</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.x">x</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.values">values</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.value">value</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.set_value">set_value</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.set_values">set_values</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.update">update</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.value">value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.values">values</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.cell.Cell.x">x</a>
     </li>
         </ul>
     </li>
@@ -371,6 +371,36 @@
 <div class="doc doc-object doc-function">
 
 
+<h3 id="splitfxm.cell.Cell.__init__" class="doc doc-heading">
+            <code class="highlight language-python">__init__(x=None, value=np.array([]))</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize a <code>Cell</code> object.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/cell.py</code></summary>
+              <pre class="highlight"><code class="language-python">def __init__(self, x=None, value=np.array([])):
+    """
+    Initialize a `Cell` object.
+    """
+    self._value = value
+    # X co-ordinate
+    self._x = x
+
+    # AMR deletion flag
+    self.to_delete = False</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="splitfxm.cell.Cell.__eq__" class="doc doc-heading">
             <code class="highlight language-python">__eq__(other)</code>
 
@@ -453,36 +483,6 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.cell.Cell.__init__" class="doc doc-heading">
-            <code class="highlight language-python">__init__(x=None, value=np.array([]))</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Initialize a <code>Cell</code> object.</p>
-
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/cell.py</code></summary>
-              <pre class="highlight"><code class="language-python">def __init__(self, x=None, value=np.array([])):
-    """
-    Initialize a `Cell` object.
-    """
-    self._value = value
-    # X co-ordinate
-    self._x = x
-
-    # AMR deletion flag
-    self.to_delete = False</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h3 id="splitfxm.cell.Cell.__lt__" class="doc doc-heading">
             <code class="highlight language-python">__lt__(other)</code>
 
@@ -557,6 +557,196 @@
         `True` if the x-coordinate of this cell is less than the x-coordinate of the other cell, `False` otherwise.
     """
     return self._x &lt; other._x</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.cell.Cell.x" class="doc doc-heading">
+            <code class="highlight language-python">x()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the x-coordinate of the cell.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>float</code>
+              –
+              <div class="doc-md-description">
+                <p>The x-coordinate of the cell.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/cell.py</code></summary>
+              <pre class="highlight"><code class="language-python">def x(self):
+    """
+    Return the x-coordinate of the cell.
+
+    Returns
+    -------
+    float
+        The x-coordinate of the cell.
+    """
+    return self._x</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.cell.Cell.values" class="doc doc-heading">
+            <code class="highlight language-python">values()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the values at the cell.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+              –
+              <div class="doc-md-description">
+                <p>The values at the cell.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/cell.py</code></summary>
+              <pre class="highlight"><code class="language-python">def values(self):
+    """
+    Return the values at the cell.
+
+    Returns
+    -------
+    numpy.ndarray
+        The values at the cell.
+    """
+    return self._value</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.cell.Cell.value" class="doc doc-heading">
+            <code class="highlight language-python">value(i)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the value at the cell for the given component index.
+Used primarily in AMR.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>i</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>The index of the component to retrieve.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>float</code>
+              –
+              <div class="doc-md-description">
+                <p>The value at the cell for the given component index.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/cell.py</code></summary>
+              <pre class="highlight"><code class="language-python">def value(self, i: int):
+    """
+    Return the value at the cell for the given component index.
+    Used primarily in AMR.
+
+    Parameters
+    ----------
+    i : int
+        The index of the component to retrieve.
+
+    Returns
+    -------
+    float
+        The value at the cell for the given component index.
+    """
+    return self._value[i]</code></pre>
             </details>
     </div>
 
@@ -741,196 +931,6 @@ Used primarily in initial and boundary condition definitions.</p>
         The residual to use in the update.
     """
     self._value += dt * residual</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.cell.Cell.value" class="doc doc-heading">
-            <code class="highlight language-python">value(i)</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Return the value at the cell for the given component index.
-Used primarily in AMR.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>i</code></b>
-                  (<code>int</code>)
-              –
-              <div class="doc-md-description">
-                <p>The index of the component to retrieve.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>float</code>
-              –
-              <div class="doc-md-description">
-                <p>The value at the cell for the given component index.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/cell.py</code></summary>
-              <pre class="highlight"><code class="language-python">def value(self, i: int):
-    """
-    Return the value at the cell for the given component index.
-    Used primarily in AMR.
-
-    Parameters
-    ----------
-    i : int
-        The index of the component to retrieve.
-
-    Returns
-    -------
-    float
-        The value at the cell for the given component index.
-    """
-    return self._value[i]</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.cell.Cell.values" class="doc doc-heading">
-            <code class="highlight language-python">values()</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Return the values at the cell.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-              –
-              <div class="doc-md-description">
-                <p>The values at the cell.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/cell.py</code></summary>
-              <pre class="highlight"><code class="language-python">def values(self):
-    """
-    Return the values at the cell.
-
-    Returns
-    -------
-    numpy.ndarray
-        The values at the cell.
-    """
-    return self._value</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.cell.Cell.x" class="doc doc-heading">
-            <code class="highlight language-python">x()</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Return the x-coordinate of the cell.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>float</code>
-              –
-              <div class="doc-md-description">
-                <p>The x-coordinate of the cell.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/cell.py</code></summary>
-              <pre class="highlight"><code class="language-python">def x(self):
-    """
-    Return the x-coordinate of the cell.
-
-    Returns
-    -------
-    float
-        The x-coordinate of the cell.
-    """
-    return self._x</code></pre>
             </details>
     </div>
 

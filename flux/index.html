@@ -69,9 +69,9 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux">flux</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux.diffusion_fluxes">diffusion_fluxes</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux.fluxes">fluxes</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux.diffusion_fluxes">diffusion_fluxes</a>
     </li>
     </ul>
                   </li>
@@ -148,120 +148,6 @@
 
 
 
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="splitfxm.flux.diffusion_fluxes" class="doc doc-heading">
-            <code class="highlight language-python">diffusion_fluxes(D, cell_sub, scheme)</code>
-
-</h2>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Calculate the diffusion fluxes of a given stencil.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>D</code></b>
-                  (<code>function</code>)
-              –
-              <div class="doc-md-description">
-                <p>The diffusion function.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>cell_sub</code></b>
-                  (<code>list of Cell</code>)
-              –
-              <div class="doc-md-description">
-                <p>The stencil.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>tuple of numpy.ndarray</code>
-              –
-              <div class="doc-md-description">
-                <p>The west and east diffusion fluxes.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/flux.py</code></summary>
-              <pre class="highlight"><code class="language-python">def diffusion_fluxes(D, cell_sub, scheme):
-    """
-    Calculate the diffusion fluxes of a given stencil.
-
-    Parameters
-    ----------
-    D : function
-        The diffusion function.
-    cell_sub : list of Cell
-        The stencil.
-
-    Returns
-    -------
-    tuple of numpy.ndarray
-        The west and east diffusion fluxes.
-    """
-    if len(cell_sub) != stencil_sizes.get(scheme):
-        raise SFXM(
-            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
-
-    # Only central scheme for diffusion fluxes
-    if scheme == FVSchemes.LF:
-        # West Flux
-        ul = cell_sub[0].values()
-        uc = cell_sub[1].values()
-        Dl = D(ul)
-        Dr = D(uc)
-        dxw = 0.5 * (cell_sub[1].x() - cell_sub[0].x())
-        Dw = (Dr - Dl) / dxw
-
-        # East Flux
-        uc = cell_sub[1].values()
-        ur = cell_sub[2].values()
-        Dl = D(uc)
-        Dr = D(ur)
-        dxe = 0.5 * (cell_sub[2].x() - cell_sub[1].x())
-        De = (Dr - Dl) / dxe
-
-        return Dw, De</code></pre>
-            </details>
-    </div>
-
-</div>
 
 <div class="doc doc-object doc-function">
 
@@ -386,6 +272,120 @@
         Fe = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
 
         return Fw, Fe</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="splitfxm.flux.diffusion_fluxes" class="doc doc-heading">
+            <code class="highlight language-python">diffusion_fluxes(D, cell_sub, scheme)</code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Calculate the diffusion fluxes of a given stencil.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>D</code></b>
+                  (<code>function</code>)
+              –
+              <div class="doc-md-description">
+                <p>The diffusion function.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>cell_sub</code></b>
+                  (<code>list of Cell</code>)
+              –
+              <div class="doc-md-description">
+                <p>The stencil.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>tuple of numpy.ndarray</code>
+              –
+              <div class="doc-md-description">
+                <p>The west and east diffusion fluxes.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/flux.py</code></summary>
+              <pre class="highlight"><code class="language-python">def diffusion_fluxes(D, cell_sub, scheme):
+    """
+    Calculate the diffusion fluxes of a given stencil.
+
+    Parameters
+    ----------
+    D : function
+        The diffusion function.
+    cell_sub : list of Cell
+        The stencil.
+
+    Returns
+    -------
+    tuple of numpy.ndarray
+        The west and east diffusion fluxes.
+    """
+    if len(cell_sub) != stencil_sizes.get(scheme):
+        raise SFXM(
+            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
+
+    # Only central scheme for diffusion fluxes
+    if scheme == FVSchemes.LF:
+        # West Flux
+        ul = cell_sub[0].values()
+        uc = cell_sub[1].values()
+        Dl = D(ul)
+        Dr = D(uc)
+        dxw = 0.5 * (cell_sub[1].x() - cell_sub[0].x())
+        Dw = (Dr - Dl) / dxw
+
+        # East Flux
+        uc = cell_sub[1].values()
+        ur = cell_sub[2].values()
+        Dl = D(uc)
+        Dr = D(ur)
+        dxe = 0.5 * (cell_sub[2].x() - cell_sub[1].x())
+        De = (Dr - Dl) / dxe
+
+        return Dw, De</code></pre>
             </details>
     </div>
 

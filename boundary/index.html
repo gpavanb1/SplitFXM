@@ -93,15 +93,15 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.__init__">__init__</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.set_value">set_value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.set_x">set_x</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.value">value</a>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.x">x</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.values">values</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.x">x</a>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.value">value</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.set_x">set_x</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#splitfxm.boundary.Boundary.set_value">set_value</a>
     </li>
         </ul>
     </li>
@@ -434,15 +434,121 @@ This ensures that some of the interior cell methods are not unintentionally call
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.boundary.Boundary.set_value" class="doc doc-heading">
-            <code class="highlight language-python">set_value(i, val)</code>
+<h3 id="splitfxm.boundary.Boundary.x" class="doc doc-heading">
+            <code class="highlight language-python">x()</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Set the value at the boundary cell for the given component index.</p>
+        <p>Return the x-coordinate of the boundary cell.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>float</code>
+              –
+              <div class="doc-md-description">
+                <p>The x-coordinate of the boundary cell.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/boundary.py</code></summary>
+              <pre class="highlight"><code class="language-python">def x(self):
+    """
+    Return the x-coordinate of the boundary cell.
+
+    Returns
+    -------
+    float
+        The x-coordinate of the boundary cell.
+    """
+    return self._x</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.boundary.Boundary.values" class="doc doc-heading">
+            <code class="highlight language-python">values()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the values at the boundary cell.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+              –
+              <div class="doc-md-description">
+                <p>The values at the boundary cell.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/boundary.py</code></summary>
+              <pre class="highlight"><code class="language-python">def values(self):
+    """
+    Return the values at the boundary cell.
+
+    Returns
+    -------
+    numpy.ndarray
+        The values at the boundary cell.
+    """
+    return self._value</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.boundary.Boundary.value" class="doc doc-heading">
+            <code class="highlight language-python">value(i)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the value at the boundary cell for the given component index.</p>
 
 
 <table class="field-list">
@@ -460,15 +566,30 @@ This ensures that some of the interior cell methods are not unintentionally call
                   (<code>int</code>)
               –
               <div class="doc-md-description">
-                <p>The index of the component to set.</p>
+                <p>The index of the component to retrieve.</p>
               </div>
             </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
             <li>
-              <b><code>val</code></b>
-                  (<code>float</code>)
+                  <code>float</code>
               –
               <div class="doc-md-description">
-                <p>The new value for the given component.</p>
+                <p>The value at the boundary cell for the given component index.</p>
               </div>
             </li>
         </ul>
@@ -478,18 +599,21 @@ This ensures that some of the interior cell methods are not unintentionally call
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/boundary.py</code></summary>
-              <pre class="highlight"><code class="language-python">def set_value(self, i: int, val):
+              <pre class="highlight"><code class="language-python">def value(self, i: int):
     """
-    Set the value at the boundary cell for the given component index.
+    Return the value at the boundary cell for the given component index.
 
     Parameters
     ----------
     i : int
-        The index of the component to set.
-    val : float
-        The new value for the given component.
+        The index of the component to retrieve.
+
+    Returns
+    -------
+    float
+        The value at the boundary cell for the given component index.
     """
-    self._value[i] = val</code></pre>
+    return self._value[i]</code></pre>
             </details>
     </div>
 
@@ -612,15 +736,15 @@ This ensures that some of the interior cell methods are not unintentionally call
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.boundary.Boundary.value" class="doc doc-heading">
-            <code class="highlight language-python">value(i)</code>
+<h3 id="splitfxm.boundary.Boundary.set_value" class="doc doc-heading">
+            <code class="highlight language-python">set_value(i, val)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Return the value at the boundary cell for the given component index.</p>
+        <p>Set the value at the boundary cell for the given component index.</p>
 
 
 <table class="field-list">
@@ -638,30 +762,15 @@ This ensures that some of the interior cell methods are not unintentionally call
                   (<code>int</code>)
               –
               <div class="doc-md-description">
-                <p>The index of the component to retrieve.</p>
+                <p>The index of the component to set.</p>
               </div>
             </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
             <li>
-                  <code>float</code>
+              <b><code>val</code></b>
+                  (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>The value at the boundary cell for the given component index.</p>
+                <p>The new value for the given component.</p>
               </div>
             </li>
         </ul>
@@ -671,127 +780,18 @@ This ensures that some of the interior cell methods are not unintentionally call
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/boundary.py</code></summary>
-              <pre class="highlight"><code class="language-python">def value(self, i: int):
+              <pre class="highlight"><code class="language-python">def set_value(self, i: int, val):
     """
-    Return the value at the boundary cell for the given component index.
+    Set the value at the boundary cell for the given component index.
 
     Parameters
     ----------
     i : int
-        The index of the component to retrieve.
-
-    Returns
-    -------
-    float
-        The value at the boundary cell for the given component index.
+        The index of the component to set.
+    val : float
+        The new value for the given component.
     """
-    return self._value[i]</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.boundary.Boundary.values" class="doc doc-heading">
-            <code class="highlight language-python">values()</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Return the values at the boundary cell.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-              –
-              <div class="doc-md-description">
-                <p>The values at the boundary cell.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/boundary.py</code></summary>
-              <pre class="highlight"><code class="language-python">def values(self):
-    """
-    Return the values at the boundary cell.
-
-    Returns
-    -------
-    numpy.ndarray
-        The values at the boundary cell.
-    """
-    return self._value</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.boundary.Boundary.x" class="doc doc-heading">
-            <code class="highlight language-python">x()</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Return the x-coordinate of the boundary cell.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code>float</code>
-              –
-              <div class="doc-md-description">
-                <p>The x-coordinate of the boundary cell.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/boundary.py</code></summary>
-              <pre class="highlight"><code class="language-python">def x(self):
-    """
-    Return the x-coordinate of the boundary cell.
-
-    Returns
-    -------
-    float
-        The x-coordinate of the boundary cell.
-    """
-    return self._x</code></pre>
+    self._value[i] = val</code></pre>
             </details>
     </div>
 

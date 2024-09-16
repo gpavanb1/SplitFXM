@@ -83,13 +83,13 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#splitfxm.refine.Refiner">Refiner</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.refine.Refiner.perform_changes">perform_changes</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.refine.Refiner.refine">refine</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.refine.Refiner.set_criteria">set_criteria</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.refine.Refiner.set_max_points">set_max_points</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.refine.Refiner.refine">refine</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.refine.Refiner.perform_changes">perform_changes</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.refine.Refiner.show_changes">show_changes</a>
     </li>
@@ -519,16 +519,15 @@
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.refine.Refiner.perform_changes" class="doc doc-heading">
-            <code class="highlight language-python">perform_changes(d, loc, keep)</code>
+<h3 id="splitfxm.refine.Refiner.set_criteria" class="doc doc-heading">
+            <code class="highlight language-python">set_criteria(ratio, slope, curve, prune)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Perform changes to the domain d according to the changes specified in
-loc and keep.</p>
+        <p>Sets the refinement criteria.</p>
 
 
 <table class="field-list">
@@ -542,27 +541,58 @@ loc and keep.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-              <b><code>d</code></b>
-                  (<code><a class="autorefs autorefs-internal" title="splitfxm.domain.Domain" href="../domain/#splitfxm.domain.Domain">Domain</a></code>)
+              <b><code>ratio</code></b>
+                  (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>The domain to perform changes on.</p>
+                <p>The desired refinement ratio.</p>
               </div>
             </li>
             <li>
-              <b><code>loc</code></b>
-                  (<code>Dict[int, int]</code>)
+              <b><code>slope</code></b>
+                  (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>A dictionary with locations where insertions are to happen</p>
+                <p>The slope tolerance.</p>
               </div>
             </li>
             <li>
-              <b><code>keep</code></b>
-                  (<code>Dict[int, int]</code>)
+              <b><code>curve</code></b>
+                  (<code>float</code>)
               –
               <div class="doc-md-description">
-                <p>A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation</p>
+                <p>The curve tolerance.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>prune</code></b>
+                  (<code>float</code>)
+              –
+              <div class="doc-md-description">
+                <p>The prune tolerance.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Raises:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="splitfxm.error.SFXM">SFXM</span></code>
+              –
+              <div class="doc-md-description">
+                <p>If the <code>ratio</code> is less than 2.0, if <code>slope</code> or <code>curve</code> is not between 0.0 and 1.0, or if <code>prune</code> is not less than <code>curve</code> and <code>slope</code>.</p>
               </div>
             </li>
         </ul>
@@ -572,50 +602,100 @@ loc and keep.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <pre class="highlight"><code class="language-python">def perform_changes(self, d, loc, keep):
+              <pre class="highlight"><code class="language-python">def set_criteria(self, ratio, slope, curve, prune):
     """
-    Perform changes to the domain d according to the changes specified in
-    loc and keep.
+    Sets the refinement criteria.
 
     Parameters
     ----------
-    d : Domain
-        The domain to perform changes on.
-    loc : Dict[int, int]
-        A dictionary with locations where insertions are to happen
-    keep : Dict[int, int]
-        A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation
+    ratio : float
+        The desired refinement ratio.
+    slope : float
+        The slope tolerance.
+    curve : float
+        The curve tolerance.
+    prune : float
+        The prune tolerance.
+
+    Raises
+    ------
+    SFXM
+        If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.
     """
-    #######
-    # AMR
-    # Need to mark for deletion before deleting
-    # as cell addition indices need to make sense
-    #######
-    cells = d.interior()
-    # Iterate over keep and remove points
-    for i, cell in enumerate(cells):
-        if i in keep and keep[i] == -1:
-            cell.to_delete = True
 
-    # Add cells at loc
-    # Create separate list of cells and merge
-    to_merge = []
-    for i in loc.keys():
-        x = 0.5 * (cells[i + 1].x() + cells[i].x())
-        value = 0.5 * (cells[i + 1].values() + cells[i].values())
-        to_merge.append(Cell(x, value))
+    if ratio &lt; 2.0:
+        raise SFXM(
+            f"ratio must be greater than 2.0 ({ratio} was specified).")
+    elif slope &lt; 0.0 or slope &gt; 1.0:
+        raise SFXM(
+            f"slope must be between 0.0 and 1.0 ({slope} was specified).")
+    elif curve &lt; 0.0 or curve &gt; 1.0:
+        raise SFXM(
+            f"curve must be between 0.0 and 1.0 ({curve} was specified).")
+    elif prune &gt; curve or prune &gt; slope:
+        raise SFXM(
+            f"prune must be less than 'curve' and 'slope' ({prune} was specified)."
+        )
 
-    # Delete marked cells
-    for i, cell in enumerate(cells):
-        if cell.to_delete:
-            del cells[i]
+    self._ratio = ratio
+    self._slope = slope
+    self._curve = curve
+    self._prune = prune</code></pre>
+            </details>
+    </div>
 
-    # Merge cells and sort by x
-    cells += to_merge
-    cells.sort()
+</div>
 
-    # Set interior to cells
-    d.set_interior(cells)</code></pre>
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.refine.Refiner.set_max_points" class="doc doc-heading">
+            <code class="highlight language-python">set_max_points(npmax)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Sets the maximum number of points in the grid.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>npmax</code></b>
+                  (<code>int</code>)
+              –
+              <div class="doc-md-description">
+                <p>Maximum number of points in the grid.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/refine.py</code></summary>
+              <pre class="highlight"><code class="language-python">def set_max_points(self, npmax):
+    """
+    Sets the maximum number of points in the grid.
+
+    Parameters
+    ----------
+    npmax : int
+        Maximum number of points in the grid.
+
+    """
+    self._npmax = npmax</code></pre>
             </details>
     </div>
 
@@ -839,15 +919,16 @@ loc and keep.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.refine.Refiner.set_criteria" class="doc doc-heading">
-            <code class="highlight language-python">set_criteria(ratio, slope, curve, prune)</code>
+<h3 id="splitfxm.refine.Refiner.perform_changes" class="doc doc-heading">
+            <code class="highlight language-python">perform_changes(d, loc, keep)</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Sets the refinement criteria.</p>
+        <p>Perform changes to the domain d according to the changes specified in
+loc and keep.</p>
 
 
 <table class="field-list">
@@ -861,58 +942,27 @@ loc and keep.</p>
       <td class="field-body">
         <ul class="first simple">
             <li>
-              <b><code>ratio</code></b>
-                  (<code>float</code>)
+              <b><code>d</code></b>
+                  (<code><a class="autorefs autorefs-internal" title="splitfxm.domain.Domain" href="../domain/#splitfxm.domain.Domain">Domain</a></code>)
               –
               <div class="doc-md-description">
-                <p>The desired refinement ratio.</p>
+                <p>The domain to perform changes on.</p>
               </div>
             </li>
             <li>
-              <b><code>slope</code></b>
-                  (<code>float</code>)
+              <b><code>loc</code></b>
+                  (<code>Dict[int, int]</code>)
               –
               <div class="doc-md-description">
-                <p>The slope tolerance.</p>
+                <p>A dictionary with locations where insertions are to happen</p>
               </div>
             </li>
             <li>
-              <b><code>curve</code></b>
-                  (<code>float</code>)
+              <b><code>keep</code></b>
+                  (<code>Dict[int, int]</code>)
               –
               <div class="doc-md-description">
-                <p>The curve tolerance.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>prune</code></b>
-                  (<code>float</code>)
-              –
-              <div class="doc-md-description">
-                <p>The prune tolerance.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Raises:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code><span title="splitfxm.error.SFXM">SFXM</span></code>
-              –
-              <div class="doc-md-description">
-                <p>If the <code>ratio</code> is less than 2.0, if <code>slope</code> or <code>curve</code> is not between 0.0 and 1.0, or if <code>prune</code> is not less than <code>curve</code> and <code>slope</code>.</p>
+                <p>A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation</p>
               </div>
             </li>
         </ul>
@@ -922,100 +972,50 @@ loc and keep.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <pre class="highlight"><code class="language-python">def set_criteria(self, ratio, slope, curve, prune):
+              <pre class="highlight"><code class="language-python">def perform_changes(self, d, loc, keep):
     """
-    Sets the refinement criteria.
+    Perform changes to the domain d according to the changes specified in
+    loc and keep.
 
     Parameters
     ----------
-    ratio : float
-        The desired refinement ratio.
-    slope : float
-        The slope tolerance.
-    curve : float
-        The curve tolerance.
-    prune : float
-        The prune tolerance.
-
-    Raises
-    ------
-    SFXM
-        If the `ratio` is less than 2.0, if `slope` or `curve` is not between 0.0 and 1.0, or if `prune` is not less than `curve` and `slope`.
+    d : Domain
+        The domain to perform changes on.
+    loc : Dict[int, int]
+        A dictionary with locations where insertions are to happen
+    keep : Dict[int, int]
+        A dictionary that indicates whether a cell is to be kept or deleted. -1 indicates deletion and 1 indicates preservation
     """
+    #######
+    # AMR
+    # Need to mark for deletion before deleting
+    # as cell addition indices need to make sense
+    #######
+    cells = d.interior()
+    # Iterate over keep and remove points
+    for i, cell in enumerate(cells):
+        if i in keep and keep[i] == -1:
+            cell.to_delete = True
 
-    if ratio &lt; 2.0:
-        raise SFXM(
-            f"ratio must be greater than 2.0 ({ratio} was specified).")
-    elif slope &lt; 0.0 or slope &gt; 1.0:
-        raise SFXM(
-            f"slope must be between 0.0 and 1.0 ({slope} was specified).")
-    elif curve &lt; 0.0 or curve &gt; 1.0:
-        raise SFXM(
-            f"curve must be between 0.0 and 1.0 ({curve} was specified).")
-    elif prune &gt; curve or prune &gt; slope:
-        raise SFXM(
-            f"prune must be less than 'curve' and 'slope' ({prune} was specified)."
-        )
+    # Add cells at loc
+    # Create separate list of cells and merge
+    to_merge = []
+    for i in loc.keys():
+        x = 0.5 * (cells[i + 1].x() + cells[i].x())
+        value = 0.5 * (cells[i + 1].values() + cells[i].values())
+        to_merge.append(Cell(x, value))
 
-    self._ratio = ratio
-    self._slope = slope
-    self._curve = curve
-    self._prune = prune</code></pre>
-            </details>
-    </div>
+    # Delete marked cells
+    for i, cell in enumerate(cells):
+        if cell.to_delete:
+            del cells[i]
 
-</div>
+    # Merge cells and sort by x
+    cells += to_merge
+    cells.sort()
 
-<div class="doc doc-object doc-function">
-
-
-<h3 id="splitfxm.refine.Refiner.set_max_points" class="doc doc-heading">
-            <code class="highlight language-python">set_max_points(npmax)</code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Sets the maximum number of points in the grid.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>npmax</code></b>
-                  (<code>int</code>)
-              –
-              <div class="doc-md-description">
-                <p>Maximum number of points in the grid.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/refine.py</code></summary>
-              <pre class="highlight"><code class="language-python">def set_max_points(self, npmax):
-    """
-    Sets the maximum number of points in the grid.
-
-    Parameters
-    ----------
-    npmax : int
-        Maximum number of points in the grid.
-
-    """
-    self._npmax = npmax</code></pre>
+    # Set interior to cells
+    d.set_interior(cells)</code></pre>
             </details>
     </div>
 
