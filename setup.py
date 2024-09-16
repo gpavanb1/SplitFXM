@@ -17,7 +17,6 @@ setup(
     long_description_content_type="text/markdown",
     classifiers=[
         "Topic :: Scientific/Engineering :: Mathematics",
-        "License :: OSI Approved :: Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)",
         "License :: Other/Proprietary License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
