@@ -1,5 +1,7 @@
 import numpy as np
 import numdifftools as nd
+from scipy.integrate import solve_ivp
+from scipy.optimize import OptimizeResult
 from splitnewton.newton import newton
 from splitnewton.split_newton import split_newton
 
@@ -18,6 +20,15 @@ from .initialize import set_initial_condition
 
 # Sparse matrix for Jacobian
 from scipy.sparse import lil_matrix
+
+# Methods that require a Jacobian
+JAC_REQUIRED = ["Radau", "BDF"]
+
+# Basic class to assign solution for Euler timestep
+
+
+class Solution(OptimizeResult):
+    pass
 
 
 def array_list_reshape(l, shape):
@@ -83,32 +94,6 @@ class Simulation:
         boundary_cells = self._d.boundaries()[0] + self._d.boundaries()[1]
         if stencil_sizes.get(self._s._scheme) != len(boundary_cells) + 1:
             raise SFXM("Stencil size does not match boundary conditions")
-
-    def evolve(self, dt: float, refinement: bool = False):
-        """
-        Evolve the simulation for a given time step.
-
-        Parameters
-        ----------
-        dt : float
-            The time step for the evolution.
-        refinement : bool, optional
-            Whether to perform mesh refinement. Defaults to False.
-        """
-
-        # Fill BCs
-        for c, bctype in self._bcs.items():
-            apply_BC(self._d, c, bctype)
-
-        # Evaluate residuals (values, derivatives) from equations
-        interior_residual_block = self._s.residuals(self._d)
-
-        # Update cell values
-        self._d.update(dt, interior_residual_block)
-
-        # Perform mesh refinement if enabled
-        if refinement:
-            self._r.refine(self._d)
 
     ############
     # List related methods
@@ -269,6 +254,10 @@ class Simulation:
             return [bounds[0][:split_loc] * num_points + bounds[0][split_loc:] * num_points,
                     bounds[1][:split_loc] * num_points + bounds[1][split_loc:] * num_points]
 
+    ############
+    # Solution related methods
+    ############
+
     def jacobian(self, l, split=False, split_loc=None, epsilon=1e-8):
         """
         Calculate the Jacobian of the system using finite differences.
@@ -396,6 +385,64 @@ class Simulation:
                         jac[row_idx:row_idx + nc, col_idx] = col[na:]
 
         return jac
+
+    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-6, atol=1e-6):
+        """
+        Evolve the system in time using an ODE solver for a given time step.
+
+        Parameters
+        ----------
+        t_diff : float
+            The time advancement to be made.
+        split : bool, optional
+            If True, applies a domain splitting technique. Defaults to False.
+        split_loc : optional
+            Specifies the location or configuration for domain splitting. Default is None.
+        method : str, optional
+            The integration method to use for solving the system. Defaults to 'RK45'.
+            Possible options include 'RK45', 'RK23', 'DOP853', etc. 
+            Refer to the scipy documentation for a full list of supported methods.
+            Only non-Jacobian methods supported for the time being
+        rtol : float, optional
+            The relative tolerance for the solver. Defaults to 1e-6.
+        atol : float, optional
+            The absolute tolerance for the solver. Defaults to 1e-6.
+
+        Notes
+        -----
+        This method uses `scipy.integrate.solve_ivp` to solve the system of residuals in time.
+        The system's state is updated using the computed solution at the end of the time step.
+
+        The `get_residuals_from_list` function is used to obtain the system's residuals, and
+        `initialize_from_list` updates the domain's state after solving.
+
+        Returns
+        -------
+        None
+            The system's state is updated in-place.
+        """
+
+        def f(_, y): return self.get_residuals_from_list(y, split, split_loc)
+
+        # Get the initial state from the domain
+        y0 = self._d.listify_interior(split, split_loc)
+
+        # Compute Jacobian if required
+        jac = None
+        if method in JAC_REQUIRED:
+            jac = self.jacobian(y0, split, split_loc)
+
+        # Use solve_ivp to evolve the system
+        # Implement basic Euler as part of same wrapper
+        sol = Solution()
+        if method == "Euler":
+            sol.y = y0 + t_diff * f(0., y0)
+        else:
+            sol = solve_ivp(f, (0, t_diff), y0, method=method,
+                            t_eval=[t_diff], jac=jac)
+
+        # Update the values of the domain
+        self.initialize_from_list(sol.y, split, split_loc)
 
     def steady_state(
         self, split=False, split_loc=None, sparse=True, dt0=0.0, dtmax=1.0, armijo=False, bounds=None

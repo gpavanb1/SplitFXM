@@ -88,7 +88,7 @@ def test_improper_stencil_size():
 
 
 def test_evolve(simulation):
-    simulation.evolve(dt=0.1, refinement=True)
+    simulation.evolve(t_diff=0.1, split=True, split_loc=1, method='Radau')
 
 
 def test_initialize_from_list(simulation):

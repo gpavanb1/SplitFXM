@@ -36,11 +36,12 @@ def test_validation():
     }
     s = Simulation(d, m, ics, bcs, default_scheme(method))
     split = False
+    split_loc = None
 
-    # Evolve over time
-    # Keep CFL as close to 1 to avoid dissipation
+    # Evolve over time using Euler
+    dt = 10./101
     for i in range(101):
-        s.evolve(10./101)
+        s.evolve(dt, split, split_loc, method='Euler')
 
     # Construct expected solution
     set_initial_condition(d_copy, "u", "sine")
