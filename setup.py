@@ -5,19 +5,20 @@ with open("README.md", "r") as fh:
 
 setup(
     name="SplitFXM",
-    version="0.3.1",
+    version="0.3.2",
     description="1D Finite-Difference/Volume Split Newton Solver",
     url="https://github.com/gpavanb1/SplitFXM",
     author="gpavanb1",
     author_email="gpavanb@gmail.com",
-    license="MIT",
+    license="CC BY-NC 4.0 for non-commercial use, commercial license available",
     packages=["splitfxm", "splitfxm.equations", "splitfxm.models"],
     install_requires=["numpy", "numdifftools", "matplotlib", "splitnewton"],
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
         "Topic :: Scientific/Engineering :: Mathematics",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)",
+        "License :: Other/Proprietary License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
     ],

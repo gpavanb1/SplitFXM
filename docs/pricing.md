@@ -6,7 +6,7 @@ To obtain a commercial license, please contact the [author](mailto:gpavanb@gmail
 
 If you are interested in using the software for personal or research purposes, you can use the non-commercial license. This license is suitable for individuals and organizations that do not require a commercial license for their use of the software.
 
-More details on the licensing model can be found in the [LICENSE](https://github.com/gpavanb1/splitfxm/blob/main/LICENSE) file.
+More details on the licensing model can be found in the [LICENSE](https://github.com/gpavanb1/splitfxm/blob/main/LICENSE.md) file.
 
 | Usage Type           | Description                                              | Pricing         |
 |----------------------|----------------------------------------------------------|-----------------|

@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.3.1] - 2024-09-15
+## [0.3.2] - 2024-09-16
+## Fixed
+- License terms in `setup.py` and license file rendering
+- Correction to simulation docs regarding Jacobian-based time integration
+
+
+## [0.3.1] - 2024-09-16
 ## Added
 - Scipy-based time integration with Euler support
 

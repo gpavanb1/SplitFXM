@@ -402,7 +402,6 @@ class Simulation:
             The integration method to use for solving the system. Defaults to 'RK45'.
             Possible options include 'RK45', 'RK23', 'DOP853', etc. 
             Refer to the scipy documentation for a full list of supported methods.
-            Only non-Jacobian methods supported for the time being
         rtol : float, optional
             The relative tolerance for the solver. Defaults to 1e-6.
         atol : float, optional
