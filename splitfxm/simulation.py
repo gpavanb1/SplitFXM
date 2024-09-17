@@ -386,7 +386,7 @@ class Simulation:
 
         return jac
 
-    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-6, atol=1e-6):
+    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-3, atol=1e-6, max_step=np.inf):
         """
         Evolve the system in time using an ODE solver for a given time step.
 
@@ -438,7 +438,7 @@ class Simulation:
             sol.y = y0 + t_diff * f(0., y0)
         else:
             sol = solve_ivp(f, (0, t_diff), y0, method=method,
-                            t_eval=[t_diff], jac=jac)
+                            t_eval=[t_diff], jac=jac, max_step=max_step)
 
         # Update the values of the domain
         self.initialize_from_list(sol.y, split, split_loc)
