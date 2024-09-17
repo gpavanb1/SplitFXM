@@ -315,16 +315,18 @@ Typically, this list contains 3 or more cells.</p>
               –
               <div class="doc-md-description">
                 <p>The finite volume scheme to use for flux calculations.
-Available options include:
-- LAX_FRIEDRICHS: Lax-Friedrichs scheme
-- UPWIND: Upwind differencing scheme
-- CENTRAL: Central differencing scheme
-- LAX_WENDROFF: Lax-Wendroff scheme
-- QUICK: Quadratic upwind interpolation
-- BQUICK: Bounded QUICK scheme
-- MUSCL: Monotonic Upwind Scheme for Conservation Laws
-- ENO: Essentially Non-Oscillatory scheme
-- WENO: Weighted Essentially Non-Oscillatory scheme</p>
+Available options include:</p>
+<ul>
+<li>LAX_FRIEDRICHS: Lax-Friedrichs scheme</li>
+<li>UPWIND: Upwind differencing scheme</li>
+<li>CENTRAL: Central differencing scheme</li>
+<li>LAX_WENDROFF: Lax-Wendroff scheme</li>
+<li>QUICK: Quadratic upwind interpolation</li>
+<li>BQUICK: Bounded QUICK scheme</li>
+<li>MUSCL: Monotonic Upwind Scheme for Conservation Laws</li>
+<li>ENO: Essentially Non-Oscillatory scheme</li>
+<li>WENO: Weighted Essentially Non-Oscillatory scheme</li>
+</ul>
               </div>
             </li>
         </ul>
@@ -381,16 +383,18 @@ Available options include:
 
 <details class="note" open>
   <summary>Notes</summary>
-  <p>Each scheme has its own method of calculating fluxes:
-- LAX_FRIEDRICHS: Uses a central average with a diffusive term.
-- UPWIND: Chooses fluxes based on the direction of the flow.
-- CENTRAL: Takes a simple average of fluxes at the cell interfaces.
-- LAX_WENDROFF: Uses a Taylor series expansion to improve accuracy.
-- QUICK: A 3rd-order upwind-biased scheme.
-- BQUICK: A bounded version of QUICK to prevent oscillations.
-- MUSCL: Uses a slope limiter to prevent non-physical oscillations.
-- ENO: Selects the smoothest stencil for flux calculation.
-- WENO: A higher-order extension of ENO using weighted averages.</p>
+  <p>Each scheme has its own method of calculating fluxes:</p>
+<ul>
+<li>LAX_FRIEDRICHS: Uses a central average with a diffusive term.</li>
+<li>UPWIND: Chooses fluxes based on the direction of the flow.</li>
+<li>CENTRAL: Takes a simple average of fluxes at the cell interfaces.</li>
+<li>LAX_WENDROFF: Uses a Taylor series expansion to improve accuracy.</li>
+<li>QUICK: A 3rd-order upwind-biased scheme.</li>
+<li>BQUICK: A bounded version of QUICK to prevent oscillations.</li>
+<li>MUSCL: Uses a slope limiter to prevent non-physical oscillations.</li>
+<li>ENO: Selects the smoothest stencil for flux calculation.</li>
+<li>WENO: A higher-order extension of ENO using weighted averages.</li>
+</ul>
 </details>
             <details class="quote">
               <summary>Source code in <code>splitfxm/flux.py</code></summary>
@@ -414,6 +418,7 @@ Available options include:
     scheme : FVSchemes
         The finite volume scheme to use for flux calculations.
         Available options include:
+
         - LAX_FRIEDRICHS: Lax-Friedrichs scheme
         - UPWIND: Upwind differencing scheme
         - CENTRAL: Central differencing scheme
@@ -437,6 +442,7 @@ Available options include:
     Notes
     -----
     Each scheme has its own method of calculating fluxes:
+
     - LAX_FRIEDRICHS: Uses a central average with a diffusive term.
     - UPWIND: Chooses fluxes based on the direction of the flow.
     - CENTRAL: Takes a simple average of fluxes at the cell interfaces.
