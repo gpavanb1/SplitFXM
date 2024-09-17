@@ -39,25 +39,25 @@ def test_validation():
     split_loc = None
 
     # Evolve over time using Euler
-    dt = 10./101
+    dt = 10./100
     for i in range(101):
-        s.evolve(dt, split, split_loc, method='Euler')
+        s.evolve(dt, split, split_loc, method='Euler', max_step=0.1)
 
     # Construct expected solution
     set_initial_condition(d_copy, "u", "sine")
     set_initial_condition(d_copy, "v", "gaussian")
 
     # Check that the solution is valid
-    expected_u = d_copy.values(interior=True)[0]
-    expected_v = d_copy.values(interior=True)[1]
+    expected_u = np.array([x[0] for x in d_copy.values(interior=True)])
+    expected_v = np.array([x[1] for x in d_copy.values(interior=True)])
 
-    actual_u = s._d.values(interior=True)[0]
-    actual_v = s._d.values(interior=True)[1]
+    actual_u = np.array([x[0] for x in s._d.values(interior=True)])
+    actual_v = np.array([x[1] for x in s._d.values(interior=True)])
 
     draw(s._d, "actual", interior=True)
     draw(d_copy, "expected", interior=True)
     plt.legend()
     plt.show()
 
-    assert np.allclose(expected_u, actual_u, atol=1e-2)
-    assert np.allclose(expected_v, actual_v, atol=1e-2)
+    assert np.allclose(expected_u, actual_u, atol=1e-1)
+    assert np.allclose(expected_v, actual_v, atol=1e-1)

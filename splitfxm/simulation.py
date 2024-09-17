@@ -435,7 +435,8 @@ class Simulation:
         # Implement basic Euler as part of same wrapper
         sol = Solution()
         if method == "Euler":
-            sol.y = y0 + t_diff * f(0., y0)
+            delta_t = min(t_diff, max_step)
+            sol.y = y0 + delta_t * f(0., y0)
         else:
             sol = solve_ivp(f, (0, t_diff), y0, method=method,
                             t_eval=[t_diff], jac=jac, max_step=max_step)
