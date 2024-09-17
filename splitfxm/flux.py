@@ -58,6 +58,7 @@ def fluxes(F, cell_sub, scheme):
     scheme : FVSchemes
         The finite volume scheme to use for flux calculations.
         Available options include:
+
         - LAX_FRIEDRICHS: Lax-Friedrichs scheme
         - UPWIND: Upwind differencing scheme
         - CENTRAL: Central differencing scheme
@@ -81,6 +82,7 @@ def fluxes(F, cell_sub, scheme):
     Notes
     -----
     Each scheme has its own method of calculating fluxes:
+
     - LAX_FRIEDRICHS: Uses a central average with a diffusive term.
     - UPWIND: Chooses fluxes based on the direction of the flow.
     - CENTRAL: Takes a simple average of fluxes at the cell interfaces.
