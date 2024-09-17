@@ -9,7 +9,7 @@ def test_default_scheme_fvm():
     Test default_scheme with 'FVM' method.
     """
     assert default_scheme(
-        "FVM") == FVSchemes.LF, "default_scheme('FVM') should return FVSchemes.LF"
+        "FVM") == FVSchemes.LAX_FRIEDRICHS, "default_scheme('FVM') should return FVSchemes.LAX_FRIEDRICHS"
 
 
 def test_default_scheme_fdm():

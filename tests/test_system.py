@@ -60,7 +60,7 @@ def test_fd_residuals(mock_domain):
 
 def test_fv_residuals(mock_domain):
     model = MockModel([MockFVEquation()])
-    fv_scheme = FVSchemes.LF
+    fv_scheme = FVSchemes.LAX_FRIEDRICHS
 
     # Check for FV
     system = System(model, fv_scheme)
