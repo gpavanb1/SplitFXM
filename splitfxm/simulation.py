@@ -403,9 +403,11 @@ class Simulation:
             Possible options include 'RK45', 'RK23', 'DOP853', etc. 
             Refer to the scipy documentation for a full list of supported methods.
         rtol : float, optional
-            The relative tolerance for the solver. Defaults to 1e-6.
+            The relative tolerance for the solver. Defaults to 1e-3.
         atol : float, optional
             The absolute tolerance for the solver. Defaults to 1e-6.
+        max_step : float, optional
+            The maximum time step to use in the solver. Defaults to np.inf.
 
         Notes
         -----
