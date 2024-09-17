@@ -577,7 +577,7 @@
 
         return jac
 
-    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-6, atol=1e-6):
+    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-3, atol=1e-6, max_step=np.inf):
         """
         Evolve the system in time using an ODE solver for a given time step.
 
@@ -594,9 +594,11 @@
             Possible options include 'RK45', 'RK23', 'DOP853', etc. 
             Refer to the scipy documentation for a full list of supported methods.
         rtol : float, optional
-            The relative tolerance for the solver. Defaults to 1e-6.
+            The relative tolerance for the solver. Defaults to 1e-3.
         atol : float, optional
             The absolute tolerance for the solver. Defaults to 1e-6.
+        max_step : float, optional
+            The maximum time step to use in the solver. Defaults to np.inf.
 
         Notes
         -----
@@ -626,10 +628,11 @@
         # Implement basic Euler as part of same wrapper
         sol = Solution()
         if method == "Euler":
-            sol.y = y0 + t_diff * f(0., y0)
+            delta_t = min(t_diff, max_step)
+            sol.y = y0 + delta_t * f(0., y0)
         else:
             sol = solve_ivp(f, (0, t_diff), y0, method=method,
-                            t_eval=[t_diff], jac=jac)
+                            t_eval=[t_diff], jac=jac, max_step=max_step)
 
         # Update the values of the domain
         self.initialize_from_list(sol.y, split, split_loc)
@@ -1449,7 +1452,7 @@
 
 
 <h3 id="splitfxm.simulation.Simulation.evolve" class="doc doc-heading">
-            <code class="highlight language-python">evolve(t_diff, split=False, split_loc=None, method='RK45', rtol=1e-06, atol=1e-06)</code>
+            <code class="highlight language-python">evolve(t_diff, split=False, split_loc=None, method='RK45', rtol=0.001, atol=1e-06, max_step=np.inf)</code>
 
 </h3>
 
@@ -1512,11 +1515,11 @@ Refer to the scipy documentation for a full list of supported methods.</p>
             <li>
               <b><code>rtol</code></b>
                   (<code>float</code>, default:
-                      <code>1e-06</code>
+                      <code>0.001</code>
 )
               –
               <div class="doc-md-description">
-                <p>The relative tolerance for the solver. Defaults to 1e-6.</p>
+                <p>The relative tolerance for the solver. Defaults to 1e-3.</p>
               </div>
             </li>
             <li>
@@ -1527,6 +1530,16 @@ Refer to the scipy documentation for a full list of supported methods.</p>
               –
               <div class="doc-md-description">
                 <p>The absolute tolerance for the solver. Defaults to 1e-6.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>max_step</code></b>
+                  (<code>float</code>, default:
+                      <code><span title="numpy.inf">inf</span></code>
+)
+              –
+              <div class="doc-md-description">
+                <p>The maximum time step to use in the solver. Defaults to np.inf.</p>
               </div>
             </li>
         </ul>
@@ -1567,7 +1580,7 @@ The system's state is updated using the computed solution at the end of the time
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <pre class="highlight"><code class="language-python">def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-6, atol=1e-6):
+              <pre class="highlight"><code class="language-python">def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-3, atol=1e-6, max_step=np.inf):
     """
     Evolve the system in time using an ODE solver for a given time step.
 
@@ -1584,9 +1597,11 @@ The system's state is updated using the computed solution at the end of the time
         Possible options include 'RK45', 'RK23', 'DOP853', etc. 
         Refer to the scipy documentation for a full list of supported methods.
     rtol : float, optional
-        The relative tolerance for the solver. Defaults to 1e-6.
+        The relative tolerance for the solver. Defaults to 1e-3.
     atol : float, optional
         The absolute tolerance for the solver. Defaults to 1e-6.
+    max_step : float, optional
+        The maximum time step to use in the solver. Defaults to np.inf.
 
     Notes
     -----
@@ -1616,10 +1631,11 @@ The system's state is updated using the computed solution at the end of the time
     # Implement basic Euler as part of same wrapper
     sol = Solution()
     if method == "Euler":
-        sol.y = y0 + t_diff * f(0., y0)
+        delta_t = min(t_diff, max_step)
+        sol.y = y0 + delta_t * f(0., y0)
     else:
         sol = solve_ivp(f, (0, t_diff), y0, method=method,
-                        t_eval=[t_diff], jac=jac)
+                        t_eval=[t_diff], jac=jac, max_step=max_step)
 
     # Update the values of the domain
     self.initialize_from_list(sol.y, split, split_loc)</code></pre>
