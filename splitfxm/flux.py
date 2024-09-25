@@ -38,7 +38,7 @@ def minmod(a, b):
     return minmod_result
 
 
-def fluxes(F, cell_sub, scheme):
+def fluxes(F, cell_sub, scheme, dFdU=None):
     """
     Calculate the fluxes for a given stencil and numerical scheme.
 
@@ -103,11 +103,15 @@ def fluxes(F, cell_sub, scheme):
     ur = cell_sub[2].values()
 
     if scheme == FVSchemes.LAX_FRIEDRICHS:
-        # Lax-Friedrichs scheme
+        # Lax-Friedrichs requires spectral radius, so dFdU is needed
+        if dFdU is None:
+            raise SFXM(
+                f"{scheme} requires dFdU for computing the spectral radius.")
+
         Fl = F(ul)
         Fr = F(uc)
         u_diff = uc - ul
-        sigma = 0.1  # TODO: Evaluate spectral radius
+        sigma = np.max(np.abs(np.linalg.eigvals(dFdU(uc))))  # Spectral radius
         Fw = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
 
         Fl = F(uc)
@@ -116,17 +120,48 @@ def fluxes(F, cell_sub, scheme):
         Fe = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
 
     elif scheme == FVSchemes.UPWIND:
-        # Upwind scheme
-        if np.all(uc > 0):
-            Fw = F(ul)
-        else:
-            Fw = F(uc)
+        if dFdU is None:
+            raise ValueError(
+                "dFdU is required for determining upwind direction.")
 
-        if np.all(ur > 0):
-            Fe = F(uc)
-        else:
-            Fe = F(ur)
+        # Compute the flux Jacobian matrix at the central state (uc)
+        A = dFdU(uc)
 
+        # Eigenvalue decomposition of the Jacobian matrix A
+        eigvals, R = np.linalg.eig(A)
+        R_inv = np.linalg.inv(R)
+
+        # Transform the conservative variables (ul, uc, ur) into characteristic variables
+        wl = R_inv @ ul  # Characteristic variables at the left state
+        wc = R_inv @ uc  # Characteristic variables at the central state
+        wr = R_inv @ ur  # Characteristic variables at the right state
+
+        # Evaluate the functions at the characteristic variables
+        Fl = F(wl)
+        Fc = F(wc)
+        Fr = F(wr)
+
+        # Apply upwind scheme in the characteristic space
+        # Flux at the west (left) side in characteristic space
+        Fw_char = np.zeros_like(uc)
+        # Flux at the east (right) side in characteristic space
+        Fe_char = np.zeros_like(uc)
+
+        for i, eig in enumerate(eigvals):
+            if eig > 0:
+                # Positive eigenvalue: wave moves to the right, use left (upwind) state for Fw
+                Fw_char[i] = Fl[i]
+                Fe_char[i] = Fc[i]
+            else:
+                # Negative eigenvalue: wave moves to the left, use right (upwind) state for Fe
+                Fw_char[i] = Fc[i]
+                Fe_char[i] = Fr[i]
+
+        # Convert the characteristic fluxes back to the original space
+        Fw = R @ Fw_char  # West (left) flux in original space
+        Fe = R @ Fe_char  # East (right) flux in original space
+
+        return Fw, Fe
     elif scheme == FVSchemes.CENTRAL:
         # Central differencing scheme
         Fw = 0.5 * (F(ul) + F(uc))
