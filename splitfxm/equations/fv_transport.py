@@ -15,13 +15,14 @@ class FVTransportEquation:
         The function representing the source term for the equation.
     """
 
-    def __init__(self, F, D, S):
+    def __init__(self, F, D, S, dFdU):
         """
         Initialize a `TransportEquation` object.
         """
         self.F = F
         self.D = D
         self.S = S
+        self.dFdU = dFdU
 
     def residuals(self, cell_sub, scheme):
         """
@@ -49,7 +50,7 @@ class FVTransportEquation:
         dx = 0.5 * (dxw + dxe)
 
         # Calculate fluxes
-        Fw, Fe = fluxes(self.F, cell_sub, scheme)
+        Fw, Fe = fluxes(self.F, cell_sub, scheme, self.dFdU)
         DFw, DFe = diffusion_fluxes(self.D, cell_sub, scheme)
         rhs = self.S(cell_sub) - (1 / dx) * (Fe - Fw) + (1 / dx) * (DFe - DFw)
         return rhs
