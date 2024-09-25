@@ -11,6 +11,21 @@ def flux_function(values):
     return values * 2
 
 
+def dfdu(values):
+    """Simple dFdU function for testing."""
+    return np.diag([2] * len(values))
+
+
+def flux_function_n(values):
+    """Simple flux function for testing."""
+    return values * -2.
+
+
+def dfdu_n(values):
+    """Simple dFdU function for testing."""
+    return np.diag([-2.] * len(values))
+
+
 def diffusion_function(values):
     """Simple diffusion function for testing."""
     return values * 0.5
@@ -60,20 +75,26 @@ def cells4_s():
 
 def test_fluxes_lf(cells3):
     """Test west and east fluxes calculation for Lax-Friedrichs scheme."""
-    Fw, Fe = fluxes(flux_function, cells3, FVSchemes.LAX_FRIEDRICHS)
+    Fw, Fe = fluxes(flux_function, cells3, FVSchemes.LAX_FRIEDRICHS, dfdu)
 
     expected_Fw = 0.5 * (flux_function(cells3[0].values()) + flux_function(
-        cells3[1].values())) - 0.5 * 0.1 * (cells3[1].values() - cells3[0].values())
+        cells3[1].values())) - 0.5 * 2 * (cells3[1].values() - cells3[0].values())
     expected_Fe = 0.5 * (flux_function(cells3[1].values()) + flux_function(
-        cells3[2].values())) - 0.5 * 0.1 * (cells3[2].values() - cells3[1].values())
+        cells3[2].values())) - 0.5 * 2 * (cells3[2].values() - cells3[1].values())
 
     assert np.allclose(Fw, expected_Fw)
     assert np.allclose(Fe, expected_Fe)
 
 
+def test_fluxes_lf_fail(cells3):
+    """Test west and east fluxes calculation for Lax-Friedrichs scheme."""
+    with pytest.raises(SFXM):
+        Fw, Fe = fluxes(flux_function, cells3, FVSchemes.LAX_FRIEDRICHS)
+
+
 def test_fluxes_upwind(cells3):
     """Test west and east fluxes calculation for Upwind scheme."""
-    Fw, Fe = fluxes(flux_function, cells3, FVSchemes.UPWIND)
+    Fw, Fe = fluxes(flux_function, cells3, FVSchemes.UPWIND, dfdu)
 
     # Extract values
     ul = cells3[0].values()
@@ -81,15 +102,8 @@ def test_fluxes_upwind(cells3):
     ur = cells3[2].values()
 
     # Calculate expected fluxes
-    if np.all(uc > 0):
-        expected_Fw = flux_function(ul)
-    else:
-        expected_Fw = flux_function(uc)
-
-    if np.all(ur > 0):
-        expected_Fe = flux_function(uc)
-    else:
-        expected_Fe = flux_function(ur)
+    expected_Fw = flux_function(ul)
+    expected_Fe = flux_function(uc)
 
     # Check if the computed fluxes are close to expected values
     assert np.allclose(Fw, expected_Fw)
@@ -98,7 +112,7 @@ def test_fluxes_upwind(cells3):
 
 def test_fluxes_upwind_neg(cells3_n):
     """Test west and east fluxes calculation for Upwind scheme."""
-    Fw, Fe = fluxes(flux_function, cells3_n, FVSchemes.UPWIND)
+    Fw, Fe = fluxes(flux_function_n, cells3_n, FVSchemes.UPWIND, dfdu_n)
 
     # Extract values
     ul = cells3_n[0].values()
@@ -106,19 +120,18 @@ def test_fluxes_upwind_neg(cells3_n):
     ur = cells3_n[2].values()
 
     # Calculate expected fluxes
-    if np.all(uc > 0):
-        expected_Fw = flux_function(ul)
-    else:
-        expected_Fw = flux_function(uc)
-
-    if np.all(ur > 0):
-        expected_Fe = flux_function(uc)
-    else:
-        expected_Fe = flux_function(ur)
+    expected_Fw = flux_function_n(uc)
+    expected_Fe = flux_function_n(ur)
 
     # Check if the computed fluxes are close to expected values
     assert np.allclose(Fw, expected_Fw)
     assert np.allclose(Fe, expected_Fe)
+
+
+def test_fluxes_upwind_fail(cells3):
+    """Test west and east fluxes calculation for Upwind scheme."""
+    with pytest.raises(SFXM):
+        Fw, Fe = fluxes(flux_function, cells3, FVSchemes.UPWIND)
 
 
 def test_fluxes_central(cells3):

@@ -15,9 +15,15 @@ class MockFDEquation:
 
 
 class MockFVEquation:
+    def __init__(self):
+        # Mock behavior for testing purposes
+        self.c = 0.1
+        self.F = lambda u: np.array([self.c * x for x in u])
+        self.dFdU = lambda x: np.diag([self.c] * len(x))
+
     def residuals(self, cell_sub, scheme):
         # Simple mock behavior for testing purposes
-        Fw, Fe = fluxes(lambda x: x, cell_sub, scheme)
+        Fw, Fe = fluxes(self.F, cell_sub, scheme, self.dFdU)
         dx = cell_sub[1].x() - cell_sub[0].x()
         return (Fe - Fw) / (dx)
 

@@ -10,6 +10,7 @@ from splitfxm.equations.fv_transport import FVTransportEquation
 def F(u): return np.array([self.c * x for x in u])
 def D(u): return np.array([self.nu * x for x in u])
 def S(u): return np.array([0.0])
+def dFdU(u): return np.diag([self.c] * len(u))
 
 
 class AdvectionDiffusion(Model):
@@ -35,7 +36,7 @@ class AdvectionDiffusion(Model):
         if method == 'FDM':
             self._equations = [FDTransportEquation(F, D, S)]
         elif method == 'FVM':
-            self._equations = [FVTransportEquation(F, D, S)]
+            self._equations = [FVTransportEquation(F, D, S, dFdU)]
         else:
             raise SFXM("Invalid numerical method specified")
 

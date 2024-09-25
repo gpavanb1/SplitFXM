@@ -121,7 +121,7 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
 
     elif scheme == FVSchemes.UPWIND:
         if dFdU is None:
-            raise ValueError(
+            raise SFXM(
                 "dFdU is required for determining upwind direction.")
 
         # Compute the flux Jacobian matrix at the central state (uc)
