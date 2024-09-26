@@ -12,11 +12,11 @@ stencil_sizes = {
     FVSchemes.LAX_WENDROFF: 3,
     FVSchemes.CENTRAL: 3,
     FVSchemes.UPWIND: 3,
-    FVSchemes.MUSCL: 4,
-    FVSchemes.ENO: 4,
-    FVSchemes.WENO: 4,
-    FVSchemes.BQUICK: 4,
-    FVSchemes.QUICK: 4
+    FVSchemes.MUSCL: 5,
+    FVSchemes.ENO: 5,
+    FVSchemes.WENO: 5,
+    FVSchemes.BQUICK: 5,
+    FVSchemes.QUICK: 5
 }
 
 

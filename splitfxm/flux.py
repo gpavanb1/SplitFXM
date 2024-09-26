@@ -3,39 +3,59 @@ from .error import SFXM
 from .schemes import stencil_sizes, FVSchemes
 
 
+# Apply the slope limiter (e.g., minmod limiter)
 def minmod(a, b):
+    if a * b > 0:
+        return np.sign(a) * min(abs(a), abs(b))
+    else:
+        return 0
+
+
+def smoothness_indicator(F, states):
     """
-    Compute the minmod of two values, a and b.
+    Compute the smoothness indicator based on the states provided.
 
-    The minmod function is a slope limiter used in high-resolution schemes
-    (like MUSCL) to prevent non-physical oscillations in numerical solutions
-    of hyperbolic PDEs
+    Parameters:
+    F : function
+        The flux function.
+    states : tuple
+        A tuple of states to evaluate the smoothness.
 
-    Parameters
-    ----------
-    a : float or numpy.ndarray
-        First value or array of values.
-    b : float or numpy.ndarray
-        Second value or array of values.
-
-    Returns
-    -------
-    float or numpy.ndarray
-        The minmod value, which is either the smaller magnitude of a or b
-        if they have the same sign, or zero otherwise.
+    Returns:
+    float
+        The smoothness indicator value.
     """
-    a = np.asarray(a)
-    b = np.asarray(b)
+    # Unpack states
+    f0, f1, f2 = F(states[0]), F(states[1]), F(states[2])
 
-    # Compute the sign of a and b
-    sign_a = np.sign(a)
-    sign_b = np.sign(b)
+    # Calculate the differences
+    d1 = f1 - f0
+    d2 = f2 - f1
 
-    # Compute minmod element-wise
-    minmod_result = np.where(sign_a == sign_b, sign_a *
-                             np.minimum(np.abs(a), np.abs(b)), 0)
+    # Calculate the smoothness indicator (L2 norm of the differences)
+    # Adding a small constant to avoid division by zero
+    indicator = (d1**2 + d2**2) + 1e-6
+    return indicator
 
-    return minmod_result
+
+def weno_weights(betas):
+    """
+    Compute WENO weights based on the smoothness indicators.
+
+    Parameters:
+    betas : list
+        List of smoothness indicators for each stencil.
+
+    Returns:
+    np.ndarray
+        Array of normalized weights.
+    """
+    epsilon = 1e-6  # Regularization term to avoid division by zero
+    alpha = [1 / (beta + epsilon) for beta in betas]
+    alpha_sum = sum(alpha)
+    weights = [a / alpha_sum for a in alpha]
+
+    return np.array(weights)
 
 
 def fluxes(F, cell_sub, scheme, dFdU=None):
@@ -98,11 +118,11 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
         raise SFXM(
             f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
 
-    ul = cell_sub[0].values()
-    uc = cell_sub[1].values()
-    ur = cell_sub[2].values()
-
     if scheme == FVSchemes.LAX_FRIEDRICHS:
+        ul = cell_sub[0].values()
+        uc = cell_sub[1].values()
+        ur = cell_sub[2].values()
+
         # Lax-Friedrichs requires spectral radius, so dFdU is needed
         if dFdU is None:
             raise SFXM(
@@ -120,6 +140,10 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
         Fe = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
 
     elif scheme == FVSchemes.UPWIND:
+        ul = cell_sub[0].values()
+        uc = cell_sub[1].values()
+        ur = cell_sub[2].values()
+
         if dFdU is None:
             raise SFXM(
                 "dFdU is required for determining upwind direction.")
@@ -163,11 +187,19 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
 
         return Fw, Fe
     elif scheme == FVSchemes.CENTRAL:
+        ul = cell_sub[0].values()
+        uc = cell_sub[1].values()
+        ur = cell_sub[2].values()
+
         # Central differencing scheme
         Fw = 0.5 * (F(ul) + F(uc))
         Fe = 0.5 * (F(uc) + F(ur))
 
     elif scheme == FVSchemes.LAX_WENDROFF:
+        ul = cell_sub[0].values()
+        uc = cell_sub[1].values()
+        ur = cell_sub[2].values()
+
         # Lax-Wendroff scheme
         Fl = F(ul)
         Fr = F(uc)
@@ -178,82 +210,291 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
         Fe = Fl + 0.5 * (ur - uc) * (Fr - Fl)
 
     elif scheme == FVSchemes.QUICK:
-        # QUICK Scheme (3rd-order upwind)
-        ul = cell_sub[0].values()
-        um = cell_sub[1].values()
-        ur = cell_sub[2].values()
-        # Quadratic interpolation at the face
-        Fw = (3/8) * F(ul) + (6/8) * F(um) - (1/8) * F(ur)
+        uc = cell_sub[2].values()
 
-        ul = cell_sub[1].values()
-        um = cell_sub[2].values()
-        ur = cell_sub[3].values()
-        Fe = (3/8) * F(ul) + (6/8) * F(um) - (1/8) * F(ur)
+        if dFdU is None:
+            raise SFXM(
+                "dFdU is required for determining upwind direction.")
+
+        # Compute the flux Jacobian matrix at the central state (uc)
+        A = dFdU(uc)
+
+        # Eigenvalue decomposition of the Jacobian matrix A
+        eigvals, R = np.linalg.eig(A)
+        R_inv = np.linalg.inv(R)
+
+        # Initialize characteristic fluxes
+        Fw_char = np.zeros_like(uc)
+        Fe_char = np.zeros_like(uc)
+
+        # Compute the characteristic variables at the left and right states
+        wl2 = R_inv @ cell_sub[0].values()
+        wl = R_inv @ cell_sub[1].values()
+        wc = R_inv @ cell_sub[2].values()
+        wr = R_inv @ cell_sub[3].values()
+        wr2 = R_inv @ cell_sub[4].values()
+
+        # Evaluate the functions at the characteristic variables
+        Fwl2, Fwl, Fwc, Fwr, Fwr2 = F(wl2), F(wl), F(wc), F(wr), F(wr2)
+
+        # Loop over each characteristic field (based on the eigenvalues)
+        for i, eig in enumerate(eigvals):
+            # Positive eigenvalue, use left-biased stencil (upwind)
+            if eig > 0:
+                # Use 3rd-order interpolation with left-biased stencil
+                Fw_char[i] = 3/8 * Fwl2[i] + 6/8 * Fwl[i] - 1/8 * Fwc[i]
+                Fe_char[i] = -1/8 * Fwl[i] + 6/8 * Fwc[i] + 3/8 * Fwr[i]
+            else:  # Negative eigenvalue, use right-biased stencil (downwind)
+                Fw_char[i] = 3/8 * Fwc[i] + 6/8 * Fwr[i] - 1/8 * Fwr2[i]
+                Fe_char[i] = -1/8 * Fwc[i] + 6/8 * Fwr[i] + 3/8 * Fwr2[i]
+
+        # Convert fluxes back to physical space
+        Fw = R @ Fw_char  # West (left) flux in physical space
+        Fe = R @ Fe_char  # East (right) flux in physical space
 
     elif scheme == FVSchemes.BQUICK:
-        # BQUICK Scheme (Bounded QUICK)
-        # This requires a limiter to avoid oscillations near discontinuities.
-        ul = cell_sub[0].values()
-        um = cell_sub[1].values()
-        ur = cell_sub[2].values()
+        uc = cell_sub[2].values()
 
-        Fw = np.clip((3/8) * F(ul) + (6/8) * F(um) -
-                     (1/8) * F(ur), F(ul), F(ur))
+        if dFdU is None:
+            raise SFXM(
+                "dFdU is required for determining upwind direction.")
 
-        ul = cell_sub[1].values()
-        um = cell_sub[2].values()
-        ur = cell_sub[3].values()
-        Fe = np.clip((3/8) * F(ul) + (6/8) * F(um) -
-                     (1/8) * F(ur), F(ul), F(ur))
+        # Compute the flux Jacobian matrix at the central state (uc)
+        A = dFdU(uc)
+
+        # Eigenvalue decomposition of the Jacobian matrix A
+        eigvals, R = np.linalg.eig(A)
+        R_inv = np.linalg.inv(R)
+
+        # Initialize characteristic fluxes
+        Fw_char = np.zeros_like(uc)
+        Fe_char = np.zeros_like(uc)
+
+        # Compute the characteristic variables at the left and right states
+        wl2 = R_inv @ cell_sub[0].values()
+        wl = R_inv @ cell_sub[1].values()
+        wc = R_inv @ cell_sub[2].values()
+        wr = R_inv @ cell_sub[3].values()
+        wr2 = R_inv @ cell_sub[4].values()
+
+        # Evaluate the functions at the characteristic variables
+        Fwl2, Fwl, Fwc, Fwr, Fwr2 = F(wl2), F(wl), F(wc), F(wr), F(wr2)
+
+        # Loop over each characteristic field (based on the eigenvalues)
+        for i, eig in enumerate(eigvals):
+            # Positive eigenvalue, use left-biased stencil (upwind)
+            if eig > 0:
+                # Use 3rd-order interpolation with left-biased stencil
+                Fw_char[i] = 3/8 * Fwl2[i] + 6/8 * Fwl[i] - 1/8 * Fwc[i]
+                Fe_char[i] = -1/8 * Fwl[i] + 6/8 * Fwc[i] + 3/8 * Fwr[i]
+            else:  # Negative eigenvalue, use right-biased stencil (downwind)
+                Fw_char[i] = 3/8 * Fwc[i] + 6/8 * Fwr[i] - 1/8 * Fwr2[i]
+                Fe_char[i] = -1/8 * Fwc[i] + 6/8 * Fwr[i] + 3/8 * Fwr2[i]
+
+            # Apply bounds to avoid oscillations (based on min/max of neighboring states)
+            Fw_char[i] = np.maximum(np.minimum(Fw_char[i], Fwc[i]), Fwl[i])
+            Fe_char[i] = np.maximum(np.minimum(Fe_char[i], Fwr[i]), Fwc[i])
+
+        # Convert fluxes back to physical space
+        Fw = R @ Fw_char  # West (left) flux in physical space
+        Fe = R @ Fe_char  # East (right) flux in physical space
 
     elif scheme == FVSchemes.MUSCL:
-        # MUSCL (Monotonic Upwind Scheme for Conservation Laws)
-        ul = cell_sub[0].values()
-        um = cell_sub[1].values()
-        ur = cell_sub[2].values()
+        uc = cell_sub[2].values()  # Central cell values
 
-        slope = minmod(um - ul, ur - um)
-        Fw = F(um - 0.5 * slope)
-        Fe = F(um + 0.5 * slope)
+        if dFdU is None:
+            raise SFXM("dFdU is required for determining upwind direction.")
+
+        # Compute the flux Jacobian matrix at the central state (uc)
+        A = dFdU(uc)
+
+        # Eigenvalue decomposition of the Jacobian matrix A
+        eigvals, R = np.linalg.eig(A)
+        R_inv = np.linalg.inv(R)
+
+        # Initialize characteristic fluxes
+        Fw_char = np.zeros_like(uc)
+        Fe_char = np.zeros_like(uc)
+
+        # Compute the characteristic variables at the left, central, and right states
+        wl2 = R_inv @ cell_sub[0].values()  # Left-left state
+        wl = R_inv @ cell_sub[1].values()   # Left state
+        wc = R_inv @ cell_sub[2].values()   # Central state
+        wr = R_inv @ cell_sub[3].values()   # Right state
+        wr2 = R_inv @ cell_sub[4].values()  # Right-right state
+
+        # Evaluate the functions at the characteristic variables
+        Fwl2, Fwl, Fwc, Fwr, Fwr2 = F(wl2), F(wl), F(wc), F(wr), F(wr2)
+
+        # Loop over each characteristic field (based on the eigenvalues)
+        for i, eig in enumerate(eigvals):
+            if eig > 0:  # Positive eigenvalue (upwind to the left)
+                # Compute left-biased slope
+                delta_wl = wc[i] - wl[i]
+                delta_wl2 = wl[i] - wl2[i]
+                slope_w = minmod(delta_wl, delta_wl2)
+
+                # Left flux at west interface
+                Fw_char[i] = Fwl[i] + 0.5 * slope_w
+
+                # Compute right-biased slope
+                delta_wc = wr[i] - wc[i]
+                delta_wr = wr2[i] - wr[i]
+                slope_e = minmod(delta_wc, delta_wr)
+
+                # Right flux at east interface
+                Fe_char[i] = Fwc[i] + 0.5 * slope_e
+
+            else:  # Negative eigenvalue (upwind to the right)
+                # Compute right-biased slope
+                delta_wc = wr[i] - wc[i]
+                delta_wr = wr2[i] - wr[i]
+                slope_e = minmod(delta_wc, delta_wr)
+
+                # Left flux at west interface
+                Fw_char[i] = Fwc[i] + 0.5 * slope_e
+
+                # Compute left-biased slope
+                delta_wl = wc[i] - wl[i]
+                delta_wl2 = wl[i] - wl2[i]
+                slope_w = minmod(delta_wl, delta_wl2)
+
+                # Right flux at east interface
+                Fe_char[i] = Fwl[i] + 0.5 * slope_w
+
+        # Convert fluxes back to physical space
+        Fw = R @ Fw_char  # West (left) flux in physical space
+        Fe = R @ Fe_char  # East (right) flux in physical space
 
     elif scheme == FVSchemes.ENO:
-        # ENO (Essentially Non-Oscillatory Scheme)
-        ul = cell_sub[0].values()
-        um = cell_sub[1].values()
-        ur = cell_sub[2].values()
-        us = cell_sub[3].values()
+        uc = cell_sub[2].values()
 
-        # ENO chooses the smoothest stencil, basic implementation for 2nd-order
-        diff1 = um - ul
-        diff2 = ur - um
-        diff3 = us - ur
+        if dFdU is None:
+            raise SFXM("dFdU is required for determining upwind direction.")
 
-        # Check smoothest region based on divided differences
-        if np.all(abs(diff2 - diff1) < abs(diff3 - diff2)):
-            Fw = F(ul)
-        else:
-            Fw = F(um)
+        # Compute the flux Jacobian matrix at the central state (uc)
+        A = dFdU(uc)
 
-        Fe = F(ur)
+        # Eigenvalue decomposition of the Jacobian matrix A
+        eigvals, R = np.linalg.eig(A)
+        R_inv = np.linalg.inv(R)
+
+        # Initialize characteristic fluxes
+        Fw_char = np.zeros_like(uc)
+        Fe_char = np.zeros_like(uc)
+
+        # Compute the characteristic variables at the stencils
+        wl2 = R_inv @ cell_sub[0].values()
+        wl = R_inv @ cell_sub[1].values()
+        wc = R_inv @ cell_sub[2].values()
+        wr = R_inv @ cell_sub[3].values()
+        wr2 = R_inv @ cell_sub[4].values()
+
+        # Evaluate the fluxes at the characteristic variables
+        Fwl2, Fwl, Fwc, Fwr, Fwr2 = F(wl2), F(wl), F(wc), F(wr), F(wr2)
+
+        # Compute smoothness indicators for each stencil
+        smoothness = [
+            (Fwl2 - 2 * Fwl + Fwc) ** 2,  # Smoothness for stencil 1
+            (Fwl - 2 * Fwc + Fwr) ** 2,    # Smoothness for stencil 2
+            (Fwc - 2 * Fwr + Fwr2) ** 2     # Smoothness for stencil 3
+        ]
+
+        # Determine the index of the minimum smoothness indicator
+        min_smoothness_index = np.argmin(smoothness)
+
+        # Loop over each characteristic field (based on the eigenvalues)
+        for i, eig in enumerate(eigvals):
+            if eig > 0:
+                # Use left-biased stencil based on minimum smoothness index
+                if min_smoothness_index == 0:
+                    Fw_char[i] = Fwl2[i]  # Stencil 1
+                elif min_smoothness_index == 1:
+                    Fw_char[i] = Fwl[i]   # Stencil 2
+                else:
+                    Fw_char[i] = Fwc[i]   # Stencil 3
+
+                # Calculate the right flux for consistency
+                Fe_char[i] = Fwc[i]
+
+            elif eig < 0:
+                # Use right-biased stencil based on minimum smoothness index
+                if min_smoothness_index == 0:
+                    Fe_char[i] = Fwc[i]   # Stencil 1
+                elif min_smoothness_index == 1:
+                    Fe_char[i] = Fwr[i]   # Stencil 2
+                else:
+                    Fe_char[i] = Fwr2[i]  # Stencil 3
+
+                # Calculate the left flux for consistency
+                Fw_char[i] = Fwc[i]
+
+        # Convert fluxes back to physical space
+        Fw = R @ Fw_char  # West (left) flux in physical space
+        Fe = R @ Fe_char  # East (right) flux in physical space
 
     elif scheme == FVSchemes.WENO:
-        # WENO (Weighted Essentially Non-Oscillatory Scheme)
-        ul = cell_sub[0].values()
-        um = cell_sub[1].values()
-        ur = cell_sub[2].values()
-        us = cell_sub[3].values()
+        uc = cell_sub[2].values()
 
-        # WENO coefficients for a simple 5th-order WENO scheme
-        beta0 = 13/12 * (ul - 2*um + ur)**2 + 1/4 * (ul - 4*um + 3*ur)**2
-        beta1 = 13/12 * (um - 2*ur + us)**2 + 1/4 * (um - us)**2
-        epsilon = 1e-6
-        alpha0 = 1 / (epsilon + beta0)**2
-        alpha1 = 1 / (epsilon + beta1)**2
-        w0 = alpha0 / (alpha0 + alpha1)
-        w1 = alpha1 / (alpha0 + alpha1)
+        if dFdU is None:
+            raise SFXM("dFdU is required for determining upwind direction.")
 
-        Fw = w0 * F(ul) + w1 * F(um)
-        Fe = w0 * F(ur) + w1 * F(us)
+        # Compute the flux Jacobian matrix at the central state (uc)
+        A = dFdU(uc)
+
+        # Eigenvalue decomposition of the Jacobian matrix A
+        eigvals, R = np.linalg.eig(A)
+        R_inv = np.linalg.inv(R)
+
+        # Initialize characteristic fluxes
+        Fw_char = np.zeros_like(uc)
+        Fe_char = np.zeros_like(uc)
+
+        # Compute the characteristic variables at the stencils
+        wl2 = R_inv @ cell_sub[0].values()
+        wl = R_inv @ cell_sub[1].values()
+        wc = R_inv @ cell_sub[2].values()
+        wr = R_inv @ cell_sub[3].values()
+        wr2 = R_inv @ cell_sub[4].values()
+
+        # Evaluate the fluxes at the characteristic variables
+        Fwl2, Fwl, Fwc, Fwr, Fwr2 = F(wl2), F(wl), F(wc), F(wr), F(wr2)
+
+        # Compute smoothness indicators for each stencil
+        smoothness = [
+            (Fwl2 - 2 * Fwl + Fwc) ** 2,  # Smoothness for stencil 1
+            (Fwl - 2 * Fwc + Fwr) ** 2,    # Smoothness for stencil 2
+            (Fwc - 2 * Fwr + Fwr2) ** 2     # Smoothness for stencil 3
+        ]
+
+        # Calculate WENO weights
+        weights = weno_weights(smoothness)
+
+        # Loop over each characteristic field (based on the eigenvalues)
+        for i, eig in enumerate(eigvals):
+            # For positive eigenvalue: use left-biased stencil
+            if eig > 0:
+                Fw_char[i] = (weights[0][i] * Fwl2[i] +
+                              weights[1][i] * Fwl[i] +
+                              weights[2][i] * Fwc[i])
+                # We might still want to calculate the right flux for consistency
+                Fe_char[i] = (weights[0][i] * Fwc[i] +
+                              weights[1][i] * Fwr[i] +
+                              weights[2][i] * Fwr2[i])
+
+            # For negative eigenvalue: use right-biased stencil
+            elif eig < 0:
+                Fe_char[i] = (weights[0][i] * Fwc[i] +
+                              weights[1][i] * Fwr[i] +
+                              weights[2][i] * Fwr2[i])
+                # We might still want to calculate the left flux for consistency
+                Fw_char[i] = (weights[0][i] * Fwl2[i] +
+                              weights[1][i] * Fwl[i] +
+                              weights[2][i] * Fwc[i])
+
+        # Convert fluxes back to physical space
+        Fw = R @ Fw_char  # West (left) flux in physical space
+        Fe = R @ Fe_char  # East (right) flux in physical space
 
     return Fw, Fe
 
