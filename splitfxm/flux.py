@@ -3,8 +3,23 @@ from .error import SFXM
 from .schemes import stencil_sizes, FVSchemes
 
 
-# Apply the slope limiter (e.g., minmod limiter)
 def minmod(a, b):
+    """
+    Apply the minmod slope limiter to the input values.
+
+    Parameters
+    ----------
+    a : float
+        First input value.
+    b : float
+        Second input value.
+
+    Returns
+    -------
+    float
+        The limited slope, which is the minimum absolute value of `a` and `b` 
+        with the same sign, or 0 if they have different signs.
+    """
     if a * b > 0:
         return np.sign(a) * min(abs(a), abs(b))
     else:
