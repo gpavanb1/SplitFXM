@@ -185,7 +185,7 @@ def lax_friedrichs(F, cell_sub, dFdU):
     # Lax-Friedrichs requires spectral radius, so dFdU is needed
     if dFdU is None:
         raise SFXM(
-            f"{scheme} requires dFdU for computing the spectral radius.")
+            f"dFdU is required for determining spectral radius")
 
     Fl = F(ul)
     Fr = F(uc)
