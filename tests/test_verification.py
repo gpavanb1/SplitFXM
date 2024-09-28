@@ -17,7 +17,7 @@ def test_invalid_method():
         m = AdvectionDiffusion(c=0.1, nu=0.0, method="INVALID_METHOD")
 
 
-def test_validation_all_schemes():
+def test_verification_all_schemes():
     THRESHOLD = 2e-2
     method = 'FVM'
     m = AdvectionDiffusion(c=0.1, nu=0.0, method=method)
@@ -60,7 +60,7 @@ def test_validation_all_schemes():
         assert area < THRESHOLD, {"scheme": scheme, "area": area}
 
 
-def test_validation():
+def test_verification():
     # Check Advection-Diffusion using FDM and FVM
     method = 'FVM'
     m = AdvectionDiffusion(c=0.1, nu=0.0, method=method)
