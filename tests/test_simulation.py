@@ -13,7 +13,7 @@ from splitfxm.models.advection_diffusion import AdvectionDiffusion
 
 
 class MockEquation:
-    def residuals(self, cell_sub, scheme, limiter=None):
+    def residuals(self, cell_sub, scheme, scheme_opts={}):
         # Simple mock behavior for testing purposes
         return Dx(lambda x: x, cell_sub, scheme)
 

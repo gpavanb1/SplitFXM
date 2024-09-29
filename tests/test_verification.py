@@ -40,7 +40,8 @@ def test_verification_all_schemes():
         }
 
         limiter = FVLimiters.VAN_LEER if scheme == FVSchemes.MUSCL else None  # MUSCL limiter
-        s = Simulation(d, m, ics, bcs, scheme, limiter)
+        scheme_opts = {"limiter": limiter}
+        s = Simulation(d, m, ics, bcs, scheme, scheme_opts)
         split = False
         split_loc = None
 

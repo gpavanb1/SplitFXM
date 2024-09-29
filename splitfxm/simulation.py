@@ -66,16 +66,20 @@ class Simulation:
         The initial conditions to apply to the domain.
     bcs : dict
         The boundary conditions to apply to the domain.
+    scheme : Schemes
+        The discretization scheme to use for the simulation.
+    scheme_opts : dict, optional
+        A dictionary of options for the scheme.
     ss : dict, optional
         The steady-state solver settings to use in the simulation.
     """
 
-    def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme, limiter=None, ss: dict = {}):
+    def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme, scheme_opts: dict = {}, ss: dict = {}):
         """
         Initialize a Simulation object.
         """
         self._d = d
-        self._s = System(m, scheme, limiter)
+        self._s = System(m, scheme, scheme_opts)
         self._r = Refiner()
         self._bcs = bcs
 
