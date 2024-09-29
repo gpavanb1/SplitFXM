@@ -18,6 +18,9 @@ def test_invalid_method():
 
 
 def test_verification_all_schemes():
+    """
+    Perform one time step of each scheme and check that the solution is valid.
+    """
     THRESHOLD = 2e-2
     method = 'FVM'
     m = AdvectionDiffusion(c=0.1, nu=0.0, method=method)
@@ -39,27 +42,34 @@ def test_verification_all_schemes():
             },
         }
 
-        limiter = FVLimiters.VAN_LEER if scheme == FVSchemes.MUSCL else None  # MUSCL limiter
-        scheme_opts = {"limiter": limiter}
-        s = Simulation(d, m, ics, bcs, scheme, scheme_opts)
-        split = False
-        split_loc = None
+        # Cycle through limiters as well
+        if scheme == FVSchemes.MUSCL:
+            limiters = [FVLimiters.MINMOD, FVLimiters.VAN_ALBADA,
+                        FVLimiters.SUPERBEE, FVLimiters.VAN_LEER]
+        else:
+            limiters = [None]
 
-        s.evolve(10., split, split_loc, method='Euler', max_step=0.05)
-        set_initial_condition(d_copy, "u", "tophat")
+        for limiter in limiters:
+            scheme_opts = {"limiter": limiter}
+            s = Simulation(d, m, ics, bcs, scheme, scheme_opts)
+            split = False
+            split_loc = None
 
-        # Extract the expected and actual solution
-        expected_u = np.array([x[0] for x in d_copy.values(interior=True)])
-        actual_u = np.array([x[0] for x in s._d.values(interior=True)])
+            s.evolve(0.05, split, split_loc, method='Euler', max_step=0.05)
+            set_initial_condition(d_copy, "u", "tophat")
 
-        # Calculate the absolute difference
-        abs_diff = np.abs(expected_u - actual_u)
+            # Extract the expected and actual solution
+            expected_u = np.array([x[0] for x in d_copy.values(interior=True)])
+            actual_u = np.array([x[0] for x in s._d.values(interior=True)])
 
-        # Compute the area under the curve using the trapezoidal rule
-        area = np.trapezoid(abs_diff, dx=1/len(expected_u))
+            # Calculate the absolute difference
+            abs_diff = np.abs(expected_u - actual_u)
 
-        # Check if the area is below the threshold
-        assert area < THRESHOLD, {"scheme": scheme, "area": area}
+            # Compute the area under the curve using the trapezoidal rule
+            area = np.trapezoid(abs_diff, dx=1/len(expected_u))
+
+            # Check if the area is below the threshold
+            assert area < THRESHOLD, {"scheme": scheme, "area": area}
 
 
 def test_verification():
