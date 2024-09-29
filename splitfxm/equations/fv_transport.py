@@ -24,7 +24,7 @@ class FVTransportEquation:
         self.S = S
         self.dFdU = dFdU
 
-    def residuals(self, cell_sub, scheme):
+    def residuals(self, cell_sub, scheme, limiter=None):
         """
         Calculate the residuals for the transport equation at the given cell subset using the given scheme.
 
@@ -50,7 +50,7 @@ class FVTransportEquation:
         dx = 0.5 * (dxw + dxe)
 
         # Calculate fluxes
-        Fw, Fe = fluxes(self.F, cell_sub, scheme, self.dFdU)
+        Fw, Fe = fluxes(self.F, cell_sub, scheme, self.dFdU, limiter)
         DFw, DFe = diffusion_fluxes(self.D, cell_sub, scheme)
         rhs = self.S(cell_sub) - (1 / dx) * (Fe - Fw) + (1 / dx) * (DFe - DFw)
         return rhs

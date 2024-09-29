@@ -23,7 +23,7 @@ class FDTransportEquation:
         self.D = D
         self.S = S
 
-    def residuals(self, cell_sub, scheme):
+    def residuals(self, cell_sub, scheme, limiter=None):
         """
         Calculate the residuals for the transport equation at the given cell subset using the given scheme.
 

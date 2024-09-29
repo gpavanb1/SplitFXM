@@ -8,7 +8,7 @@ from splitfxm.error import SFXM
 from splitfxm.initialize import set_initial_condition
 from splitfxm.models.advection_diffusion import AdvectionDiffusion
 from splitfxm.simulation import Simulation
-from splitfxm.schemes import default_scheme, FVSchemes, stencil_sizes
+from splitfxm.schemes import default_scheme, FVSchemes, stencil_sizes, FVLimiters
 from splitfxm.visualize import draw
 
 
@@ -39,7 +39,8 @@ def test_verification_all_schemes():
             },
         }
 
-        s = Simulation(d, m, ics, bcs, scheme)
+        limiter = FVLimiters.VAN_LEER if scheme == FVSchemes.MUSCL else None  # MUSCL limiter
+        s = Simulation(d, m, ics, bcs, scheme, limiter)
         split = False
         split_loc = None
 

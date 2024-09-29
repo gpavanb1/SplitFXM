@@ -70,12 +70,12 @@ class Simulation:
         The steady-state solver settings to use in the simulation.
     """
 
-    def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme: dict, ss: dict = {}):
+    def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme, limiter=None, ss: dict = {}):
         """
         Initialize a Simulation object.
         """
         self._d = d
-        self._s = System(m, scheme)
+        self._s = System(m, scheme, limiter)
         self._r = Refiner()
         self._bcs = bcs
 

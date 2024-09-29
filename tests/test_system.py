@@ -9,7 +9,7 @@ from splitfxm.system import System
 
 
 class MockFDEquation:
-    def residuals(self, cell_sub, scheme):
+    def residuals(self, cell_sub, scheme, limiter=None):
         # Simple mock behavior for testing purposes
         return Dx(lambda x: x, cell_sub, scheme)
 
@@ -21,9 +21,9 @@ class MockFVEquation:
         self.F = lambda u: np.array([self.c * x for x in u])
         self.dFdU = lambda x: np.diag([self.c] * len(x))
 
-    def residuals(self, cell_sub, scheme):
+    def residuals(self, cell_sub, scheme, limiter=None):
         # Simple mock behavior for testing purposes
-        Fw, Fe = fluxes(self.F, cell_sub, scheme, self.dFdU)
+        Fw, Fe = fluxes(self.F, cell_sub, scheme, self.dFdU, limiter)
         dx = cell_sub[1].x() - cell_sub[0].x()
         return (Fe - Fw) / (dx)
 

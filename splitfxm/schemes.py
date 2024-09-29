@@ -5,6 +5,8 @@ FDSchemes = Enum("FDSchemes", "CENTRAL RIGHT_BIAS")
 FVSchemes = Enum(
     "FVSchemes", "LAX_FRIEDRICHS LAX_WENDROFF CENTRAL UPWIND MUSCL ENO WENO BQUICK QUICK")
 
+FVLimiters = Enum("FVLimiters", "MINMOD VAN_ALBADA SUPERBEE VAN_LEER")
+
 stencil_sizes = {
     FDSchemes.CENTRAL: 3,
     FDSchemes.RIGHT_BIAS: 4,

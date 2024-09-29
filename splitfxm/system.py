@@ -15,12 +15,13 @@ class System:
         The discretization scheme to use for the system
     """
 
-    def __init__(self, model, scheme):
+    def __init__(self, model, scheme, limiter=None):
         """
         Initialize a System object.
         """
         self._model = model
         self._scheme = scheme
+        self._limiter = limiter
 
     def residuals(self, d: Domain):
         """
@@ -58,7 +59,7 @@ class System:
                 cell_sub = [cells[i + offset]
                             for offset in range(-nb_left, nb_right + 1)]
                 rhs = np.concatenate(
-                    (rhs, eq.residuals(cell_sub, self._scheme)))
+                    (rhs, eq.residuals(cell_sub, self._scheme, self._limiter)))
             rhs_list.append(rhs)
 
         return rhs_list

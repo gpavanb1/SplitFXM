@@ -1,29 +1,7 @@
 import numpy as np
 from .error import SFXM
 from .schemes import stencil_sizes, FVSchemes
-
-
-def minmod(a, b):
-    """
-    Apply the minmod slope limiter to the input values.
-
-    Parameters
-    ----------
-    a : float
-        First input value.
-    b : float
-        Second input value.
-
-    Returns
-    -------
-    float
-        The limited slope, which is the minimum absolute value of `a` and `b` 
-        with the same sign, or 0 if they have different signs.
-    """
-    if a * b > 0:
-        return np.sign(a) * min(abs(a), abs(b))
-    else:
-        return 0
+from .flux_limiters import psi
 
 
 def smoothness_indicator(F, states):
@@ -73,14 +51,13 @@ def weno_weights(betas):
     return np.array(weights)
 
 
-def fluxes(F, cell_sub, scheme, dFdU=None):
+def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
     """
-    Calculate the fluxes for a given stencil and numerical scheme.
+    Calculate the fluxes for a given stencil and numerical scheme with limiters.
 
     This function calculates the west and east fluxes for a given stencil
-    of cells, using the specified finite volume scheme. The scheme determines
-    how the fluxes are computed, such as using upwind differencing, central
-    differencing, or more advanced schemes like QUICK, MUSCL, ENO, or WENO.
+    of cells, using the specified finite volume scheme. Optionally, a slope 
+    limiter can be applied to reduce non-physical oscillations in the fluxes.
 
     Parameters
     ----------
@@ -89,7 +66,6 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
         of the conserved quantities and their fluxes.
     cell_sub : list of Cell
         The stencil of cells over which the fluxes are calculated.
-        Typically, this list contains 3 or more cells.
     scheme : FVSchemes
         The finite volume scheme to use for flux calculations.
         Available options include:
@@ -103,6 +79,19 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
         - MUSCL: Monotonic Upwind Scheme for Conservation Laws
         - ENO: Essentially Non-Oscillatory scheme
         - WENO: Weighted Essentially Non-Oscillatory scheme
+
+    dFdU : function, optional
+        The Jacobian of the flux function, used for schemes that require
+        knowledge of wave propagation direction (e.g., upwind schemes).
+    limiter : FVLimiters, optional
+        The slope limiter function to be applied. Limiters are used in
+        higher-order schemes like MUSCL to prevent spurious oscillations.
+        Available limiters include:
+
+        - MINMOD: Reduces oscillations by limiting the slope to the minimum.
+        - VAN_LEER: Smooth, differentiable limiter with good accuracy.
+        - VAN_ALBADA: A smoother version of MINMOD, avoids excessive flattening.
+        - SUPERBEE: A sharp limiter that maximizes the steepness of the slope.
 
     Returns
     -------
@@ -151,8 +140,9 @@ def fluxes(F, cell_sub, scheme, dFdU=None):
     elif scheme == FVSchemes.BQUICK:
         return bquick(F, cell_sub, dFdU)
 
+    # Ensure that limiter is specified for MUSCL
     elif scheme == FVSchemes.MUSCL:
-        return muscl(F, cell_sub, dFdU)
+        return muscl(F, cell_sub, dFdU, limiter)
 
     elif scheme == FVSchemes.ENO:
         return eno(F, cell_sub, dFdU)
@@ -451,8 +441,8 @@ def bquick(F, cell_sub, dFdU):
     return Fw, Fe
 
 
-def muscl(F, cell_sub, dFdU):
-    """Calculate fluxes using the MUSCL scheme.
+def muscl(F, cell_sub, dFdU, limiter):
+    """Calculate fluxes using the MUSCL scheme with slope limiters.
 
     Parameters
     ----------
@@ -462,6 +452,8 @@ def muscl(F, cell_sub, dFdU):
         The stencil of cells.
     dFdU : function
         The Jacobian of the flux function.
+    limiter : FVLimiters
+        The name of the limiter dictates the slope limiter function psi(r, limiter) to be used.
 
     Returns
     -------
@@ -473,6 +465,9 @@ def muscl(F, cell_sub, dFdU):
     if dFdU is None:
         raise SFXM("dFdU is required for determining upwind direction.")
 
+    if limiter is None:
+        raise SFXM("Explicit limiter definition is required for this scheme")
+
     # Compute the flux Jacobian matrix at the central state (uc)
     A = dFdU(uc)
 
@@ -480,9 +475,9 @@ def muscl(F, cell_sub, dFdU):
     eigvals, R = np.linalg.eig(A)
     R_inv = np.linalg.inv(R)
 
-    # Initialize characteristic fluxes
-    Fw_char = np.zeros_like(uc)
-    Fe_char = np.zeros_like(uc)
+    # Initialize face values
+    w_west = np.zeros_like(uc)
+    w_east = np.zeros_like(uc)
 
     # Compute the characteristic variables at the left, central, and right states
     wl2 = R_inv @ cell_sub[0].values()  # Left-left state
@@ -491,44 +486,47 @@ def muscl(F, cell_sub, dFdU):
     wr = R_inv @ cell_sub[3].values()   # Right state
     wr2 = R_inv @ cell_sub[4].values()  # Right-right state
 
-    # Evaluate the functions at the characteristic variables
-    Fwl2, Fwl, Fwc, Fwr, Fwr2 = F(wl2), F(wl), F(wc), F(wr), F(wr2)
-
     # Loop over each characteristic field (based on the eigenvalues)
     for i, eig in enumerate(eigvals):
         if eig > 0:  # Positive eigenvalue (upwind to the left)
-            # Compute left-biased slope
+            # Use the left-most values on each face for flux determination
+            # Use the left-biased slope ratios for flux determination
             delta_wl = wc[i] - wl[i]
             delta_wl2 = wl[i] - wl2[i]
-            slope_w = minmod(delta_wl, delta_wl2)
+            r_w = delta_wl2 / (delta_wl + 1e-6)  # Avoid division by zero
+            slope_w = psi(r_w, limiter) * delta_wl
+            # Extrapolated left state at the west interface
+            w_west[i] = wl[i] + 0.5 * slope_w
 
-            # Left flux at west interface
-            Fw_char[i] = Fwl[i] + 0.5 * slope_w
-
-            # Compute right-biased slope
+            # Similarly on the east side
             delta_wc = wr[i] - wc[i]
             delta_wr = wr2[i] - wr[i]
-            slope_e = minmod(delta_wc, delta_wr)
-
-            # Right flux at east interface
-            Fe_char[i] = Fwc[i] + 0.5 * slope_e
+            r_e = delta_wc / (delta_wr + 1e-6)  # Avoid division by zero
+            slope_e = psi(r_e, limiter) * delta_wr
+            # Extrapolated left state at the east interface
+            w_east[i] = wc[i] + 0.5 * slope_e
 
         else:  # Negative eigenvalue (upwind to the right)
-            # Compute right-biased slope
-            delta_wc = wr[i] - wc[i]
-            delta_wr = wr2[i] - wr[i]
-            slope_e = minmod(delta_wc, delta_wr)
-
-            # Left flux at west interface
-            Fw_char[i] = Fwc[i] + 0.5 * slope_e
-
-            # Compute left-biased slope
+            # Use the right-most values on each face for flux determination
+            # Use the right-biased slope ratios for flux determination
             delta_wl = wc[i] - wl[i]
             delta_wl2 = wl[i] - wl2[i]
-            slope_w = minmod(delta_wl, delta_wl2)
+            r_w = delta_wl / (delta_wl2 + 1e-6)  # Avoid division by zero
+            slope_w = psi(r_w, limiter) * delta_wl2
+            # Extrapolated right state at the west interface
+            w_west[i] = wc[i] - 0.5 * slope_w
 
-            # Right flux at east interface
-            Fe_char[i] = Fwl[i] + 0.5 * slope_w
+            # Similarly on the east side
+            delta_wc = wr[i] - wc[i]
+            delta_wr = wr2[i] - wr[i]
+            r_e = delta_wr / (delta_wc + 1e-6)  # Avoid division by zero
+            slope_e = psi(r_e, limiter) * delta_wc
+            # Extrapolated right state at the east interface
+            w_east[i] = wr[i] - 0.5 * slope_e
+
+    # Compute fluxes at the extrapolated states (for characteristic variables)
+    Fw_char = F(w_west)
+    Fe_char = F(w_east)
 
     # Convert fluxes back to physical space
     Fw = R @ Fw_char  # West (left) flux in physical space
