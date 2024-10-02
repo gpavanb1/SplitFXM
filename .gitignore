@@ -7,3 +7,10 @@ venv
 # Cython
 **/*.c
 **/*.so
+
+# Ignore build
+build
+dist
+
+# Ignore performance tests
+*.prof
