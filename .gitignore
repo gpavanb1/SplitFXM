@@ -3,3 +3,7 @@ venv
 .DS_Store
 .vscode
 .coverage
+
+# Cython
+**/*.c
+**/*.so
