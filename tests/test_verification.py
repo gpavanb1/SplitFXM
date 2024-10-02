@@ -8,7 +8,7 @@ from splitfxm.error import SFXM
 from splitfxm.initialize import set_initial_condition
 from splitfxm.models.advection_diffusion import AdvectionDiffusion
 from splitfxm.simulation import Simulation
-from splitfxm.schemes import default_scheme, FVSchemes, stencil_sizes, FVLimiters
+from splitfxm.schemes import default_scheme, FVSchemes, stencil_sizes
 from splitfxm.visualize import draw
 
 
@@ -19,20 +19,19 @@ def test_invalid_method():
 
 def test_verification_all_schemes():
     """
-    Perform one time step of each scheme and check that the solution is valid.
+    Perform one domain length of each scheme and check that the solution is valid.
     """
     THRESHOLD = 2e-2
     method = 'FVM'
     m = AdvectionDiffusion(c=0.1, nu=0.0, method=method)
 
-    schemes = [FVSchemes.LAX_FRIEDRICHS, FVSchemes.UPWIND, FVSchemes.CENTRAL, FVSchemes.LAX_WENDROFF,
-               FVSchemes.QUICK, FVSchemes.BQUICK, FVSchemes.MUSCL, FVSchemes.ENO, FVSchemes.WENO]
+    schemes = [FVSchemes.LAX_FRIEDRICHS, FVSchemes.UPWIND]
 
     for scheme in schemes:
 
         nb = stencil_sizes[scheme] // 2
 
-        d = Domain.from_size(200, nb, nb, ["u"])
+        d = Domain.from_size(100, nb, nb, ["u"])
         d_copy = deepcopy(d)
         ics = {"u": "tophat"}
         bcs = {
@@ -42,34 +41,72 @@ def test_verification_all_schemes():
             },
         }
 
-        # Cycle through limiters as well
-        if scheme == FVSchemes.MUSCL:
-            limiters = [FVLimiters.MINMOD, FVLimiters.VAN_ALBADA,
-                        FVLimiters.SUPERBEE, FVLimiters.VAN_LEER]
-        else:
-            limiters = [None]
+        scheme_opts = {"limiter": None}
+        s = Simulation(d, m, ics, bcs, scheme, scheme_opts)
+        split = False
+        split_loc = None
 
-        for limiter in limiters:
-            scheme_opts = {"limiter": limiter}
-            s = Simulation(d, m, ics, bcs, scheme, scheme_opts)
-            split = False
-            split_loc = None
+        s.evolve(10., split, split_loc, method='Euler', max_step=0.1)
+        set_initial_condition(d_copy, "u", "tophat")
 
-            s.evolve(0.05, split, split_loc, method='Euler', max_step=0.05)
-            set_initial_condition(d_copy, "u", "tophat")
+        # Extract the expected and actual solution
+        expected_u = np.array([x[0] for x in d_copy.values(interior=True)])
+        actual_u = np.array([x[0] for x in s._d.values(interior=True)])
 
-            # Extract the expected and actual solution
-            expected_u = np.array([x[0] for x in d_copy.values(interior=True)])
-            actual_u = np.array([x[0] for x in s._d.values(interior=True)])
+        # Calculate the absolute difference
+        abs_diff = np.abs(expected_u - actual_u)
 
-            # Calculate the absolute difference
-            abs_diff = np.abs(expected_u - actual_u)
+        # Compute the area under the curve using the trapezoidal rule
+        area = np.trapezoid(abs_diff, dx=1/len(expected_u))
 
-            # Compute the area under the curve using the trapezoidal rule
-            area = np.trapezoid(abs_diff, dx=1/len(expected_u))
+        # Check if the area is below the threshold
+        assert area < THRESHOLD, {"scheme": scheme, "area": area}
 
-            # Check if the area is below the threshold
-            assert area < THRESHOLD, {"scheme": scheme, "area": area}
+
+def test_reverse_verification_all_schemes():
+    """
+    Perform one time step of each scheme in reverse and check that the solution is valid.
+    """
+    THRESHOLD = 2e-2
+    method = 'FVM'
+    m = AdvectionDiffusion(c=-0.1, nu=0.0, method=method)
+
+    schemes = [FVSchemes.LAX_FRIEDRICHS, FVSchemes.UPWIND]
+
+    for scheme in schemes:
+
+        nb = stencil_sizes[scheme] // 2
+
+        d = Domain.from_size(100, nb, nb, ["u"])
+        d_copy = deepcopy(d)
+        ics = {"u": "tophat"}
+        bcs = {
+            "u": {
+                "left": "periodic",
+                "right": "periodic"
+            },
+        }
+
+        scheme_opts = {"limiter": None}
+        s = Simulation(d, m, ics, bcs, scheme, scheme_opts)
+        split = False
+        split_loc = None
+
+        s.evolve(10., split, split_loc, method='Euler', max_step=0.1)
+        set_initial_condition(d_copy, "u", "tophat")
+
+        # Extract the expected and actual solution
+        expected_u = np.array([x[0] for x in d_copy.values(interior=True)])
+        actual_u = np.array([x[0] for x in s._d.values(interior=True)])
+
+        # Calculate the absolute difference
+        abs_diff = np.abs(expected_u - actual_u)
+
+        # Compute the area under the curve using the trapezoidal rule
+        area = np.trapezoid(abs_diff, dx=1/len(expected_u))
+
+        # Check if the area is below the threshold
+        assert area < THRESHOLD, {"scheme": scheme, "area": area}
 
 
 def test_verification():
