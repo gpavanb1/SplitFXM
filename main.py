@@ -1,33 +1,16 @@
 from splitfxm.domain import Domain
 from splitfxm.simulation import Simulation
+from splitfxm.models.advection_diffusion import AdvectionDiffusion
 from splitfxm.schemes import default_scheme
 from splitfxm.visualize import draw
-from matplotlib.pyplot import legend, show
-
-from splitfxm.models.advection_diffusion import AdvectionDiffusion
-
-import argparse
-import logging
-from copy import deepcopy
-
-# Set logging level
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--log",
-    dest="loglevel",
-    help="Set the loglevel for your solver  (DEBUG, INFO, WARNING, CRITICAL, ERROR)",
-    type=str,
-    default="WARNING",
-)
-args = parser.parse_args()
-loglevel = getattr(logging, args.loglevel.upper())
-logging.basicConfig(level=loglevel)
+import matplotlib.pyplot as plt
 
 # Define the problem
-method = 'FDM'
+method = 'FVM'
 m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
+# nx, nb_left, nb_right, variables
 d = Domain.from_size(20, 1, 1, ["u", "v", "w"])
-ics = {"u": "gaussian", "v": "rarefaction"}
+ics = {"u": "gaussian", "v": "rarefaction", "w": "tophat"}
 bcs = {
     "u": {
         "left": "periodic",
@@ -44,17 +27,12 @@ bcs = {
 }
 s = Simulation(d, m, ics, bcs, default_scheme(method))
 
-# Initial domain
-d_init = deepcopy(d)
 
-# Advance in time
-s.evolve(0.01)
-bounds = [[-1., -2., 0.], [5., 4., 3.]]
+# Advance in time or to steady state
+s.evolve(t_diff=0.1)
+bounds = [[-1., -2., -2.], [5., 4., 3.]]
 iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
-print(f"Took {iter} iterations")
 
-# Show plot
-draw(d_init, "l1")
-draw(d, "l2")
-legend()
-show()
+# Visualize
+draw(d, "label")
+plt.show()
