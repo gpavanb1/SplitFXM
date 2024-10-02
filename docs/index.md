@@ -45,3 +45,19 @@ for any questions.
 ## Acknowledgements
 
 Special thanks to [Cantera](https://github.com/Cantera/cantera) and [WENO-Scalar](https://github.com/comp-physics/WENO-scalar) for serving as an inspiration for code architecture.
+
+## Citing
+
+If you are using `SplitFXM` in any scientific work, please make sure to cite as follows
+```
+@software{pavan_b_govindaraju_2024_13882261,
+  author       = {Pavan B Govindaraju},
+  title        = {gpavanb1/SplitFXM: v0.4.0},
+  month        = oct,
+  year         = 2024,
+  publisher    = {Zenodo},
+  version      = {v0.4.0},
+  doi          = {10.5281/zenodo.13882261},
+  url          = {https://doi.org/10.5281/zenodo.13882261}
+}
+```
