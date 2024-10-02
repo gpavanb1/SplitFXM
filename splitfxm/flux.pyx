@@ -1,4 +1,5 @@
 import numpy as np
+cimport numpy as cnp
 from .error import SFXM
 from .schemes import stencil_sizes, FVSchemes
 from .flux_limiters import psi
@@ -75,7 +76,6 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
         - CENTRAL: Central differencing scheme
         - LAX_WENDROFF: Lax-Wendroff scheme
         - QUICK: Quadratic upwind interpolation
-        - BQUICK: Bounded QUICK scheme
         - MUSCL: Monotonic Upwind Scheme for Conservation Laws
         - ENO: Essentially Non-Oscillatory scheme
         - WENO: Weighted Essentially Non-Oscillatory scheme
@@ -110,9 +110,7 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
     - LAX_FRIEDRICHS: Uses a central average with a diffusive term.
     - UPWIND: Chooses fluxes based on the direction of the flow.
     - CENTRAL: Takes a simple average of fluxes at the cell interfaces.
-    - LAX_WENDROFF: Uses a Taylor series expansion to improve accuracy.
     - QUICK: A 3rd-order upwind-biased scheme.
-    - BQUICK: A bounded version of QUICK to prevent oscillations.
     - MUSCL: Uses a slope limiter to prevent non-physical oscillations.
     - ENO: Selects the smoothest stencil for flux calculation.
     - WENO: A higher-order extension of ENO using weighted averages.
@@ -131,14 +129,8 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
     elif scheme == FVSchemes.CENTRAL:
         return central(F, cell_sub)
 
-    elif scheme == FVSchemes.LAX_WENDROFF:
-        return lax_wendroff(F, cell_sub)
-
     elif scheme == FVSchemes.QUICK:
         return quick(F, cell_sub, dFdU)
-
-    elif scheme == FVSchemes.BQUICK:
-        return bquick(F, cell_sub, dFdU)
 
     # Ensure that limiter is specified for MUSCL
     elif scheme == FVSchemes.MUSCL:
@@ -151,7 +143,7 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
         return weno(F, cell_sub, dFdU)
 
 
-def lax_friedrichs(F, cell_sub, dFdU):
+cdef tuple lax_friedrichs(F, list cell_sub, dFdU):
     """Calculate fluxes using the Lax-Friedrichs scheme.
 
     Parameters
@@ -168,14 +160,19 @@ def lax_friedrichs(F, cell_sub, dFdU):
     tuple of np.ndarray
         The west (Fw) and east (Fe) fluxes.
     """
+    cdef cnp.ndarray ul, uc, ur
+    cdef cnp.ndarray Fl, Fr
+    cdef cnp.ndarray u_diff
+    cdef double sigma
+
+    # Get values from the cells
     ul = cell_sub[0].values()
     uc = cell_sub[1].values()
     ur = cell_sub[2].values()
 
     # Lax-Friedrichs requires spectral radius, so dFdU is needed
     if dFdU is None:
-        raise SFXM(
-            f"dFdU is required for determining spectral radius")
+        raise SFXM("dFdU is required for determining spectral radius")
 
     Fl = F(ul)
     Fr = F(uc)
@@ -191,7 +188,7 @@ def lax_friedrichs(F, cell_sub, dFdU):
     return Fw, Fe
 
 
-def upwind(F, cell_sub, dFdU):
+cdef upwind(F, cell_sub, dFdU):
     """Calculate fluxes using the Upwind scheme.
 
     Parameters
@@ -208,6 +205,11 @@ def upwind(F, cell_sub, dFdU):
     tuple of np.ndarray
         The west (Fw) and east (Fe) fluxes.
     """
+    cdef cnp.ndarray ul, uc, ur, A, eigvals, R, R_inv, wl, wc, wr
+    cdef cnp.ndarray Fl, Fc, Fr, Fw_char, Fe_char, Fw, Fe
+    cdef int i
+    cdef double eig
+
     ul = cell_sub[0].values()
     uc = cell_sub[1].values()
     ur = cell_sub[2].values()
@@ -256,7 +258,7 @@ def upwind(F, cell_sub, dFdU):
     return Fw, Fe
 
 
-def central(F, cell_sub):
+cdef central(F, cell_sub):
     """Calculate fluxes using the Central scheme.
 
     Parameters
@@ -271,6 +273,8 @@ def central(F, cell_sub):
     tuple of np.ndarray
         The west (Fw) and east (Fe) fluxes.
     """
+    cdef cnp.ndarray ul, uc, ur, Fw, Fe
+
     ul = cell_sub[0].values()
     uc = cell_sub[1].values()
     ur = cell_sub[2].values()
@@ -278,37 +282,6 @@ def central(F, cell_sub):
     # Central differencing scheme
     Fw = 0.5 * (F(ul) + F(uc))
     Fe = 0.5 * (F(uc) + F(ur))
-
-    return Fw, Fe
-
-
-def lax_wendroff(F, cell_sub):
-    """Calculate fluxes using the Lax-Wendroff scheme.
-
-    Parameters
-    ----------
-    F : function
-        The flux function.
-    cell_sub : list of Cell
-        The stencil of cells.
-
-    Returns
-    -------
-    tuple of np.ndarray
-        The west (Fw) and east (Fe) fluxes.
-    """
-    ul = cell_sub[0].values()
-    uc = cell_sub[1].values()
-    ur = cell_sub[2].values()
-
-    # Lax-Wendroff scheme
-    Fl = F(ul)
-    Fr = F(uc)
-    Fw = Fl + 0.5 * (uc - ul) * (Fr - Fl)
-
-    Fl = F(uc)
-    Fr = F(ur)
-    Fe = Fl + 0.5 * (ur - uc) * (Fr - Fl)
 
     return Fw, Fe
 
@@ -364,75 +337,9 @@ def quick(F, cell_sub, dFdU):
             # Use 3rd-order interpolation with left-biased stencil
             Fw_char[i] = 3/8 * Fwl2[i] + 6/8 * Fwl[i] - 1/8 * Fwc[i]
             Fe_char[i] = -1/8 * Fwl[i] + 6/8 * Fwc[i] + 3/8 * Fwr[i]
-        else:  # Negative eigenvalue, use right-biased stencil (downwind)
-            Fw_char[i] = 3/8 * Fwc[i] + 6/8 * Fwr[i] - 1/8 * Fwr2[i]
-            Fe_char[i] = -1/8 * Fwc[i] + 6/8 * Fwr[i] + 3/8 * Fwr2[i]
-
-    # Convert fluxes back to physical space
-    Fw = R @ Fw_char  # West (left) flux in physical space
-    Fe = R @ Fe_char  # East (right) flux in physical space
-
-    return Fw, Fe
-
-
-def bquick(F, cell_sub, dFdU):
-    """Calculate fluxes using the BQUICK scheme.
-
-    Parameters
-    ----------
-    F : function
-        The flux function.
-    cell_sub : list of Cell
-        The stencil of cells.
-    dFdU : function
-        The Jacobian of the flux function.
-
-    Returns
-    -------
-    tuple of np.ndarray
-        The west (Fw) and east (Fe) fluxes.
-    """
-    uc = cell_sub[2].values()
-
-    if dFdU is None:
-        raise SFXM(
-            "dFdU is required for determining upwind direction.")
-
-    # Compute the flux Jacobian matrix at the central state (uc)
-    A = dFdU(uc)
-
-    # Eigenvalue decomposition of the Jacobian matrix A
-    eigvals, R = np.linalg.eig(A)
-    R_inv = np.linalg.inv(R)
-
-    # Initialize characteristic fluxes
-    Fw_char = np.zeros_like(uc)
-    Fe_char = np.zeros_like(uc)
-
-    # Compute the characteristic variables at the left and right states
-    wl2 = R_inv @ cell_sub[0].values()
-    wl = R_inv @ cell_sub[1].values()
-    wc = R_inv @ cell_sub[2].values()
-    wr = R_inv @ cell_sub[3].values()
-    wr2 = R_inv @ cell_sub[4].values()
-
-    # Evaluate the functions at the characteristic variables
-    Fwl2, Fwl, Fwc, Fwr, Fwr2 = F(wl2), F(wl), F(wc), F(wr), F(wr2)
-
-    # Loop over each characteristic field (based on the eigenvalues)
-    for i, eig in enumerate(eigvals):
-        # Positive eigenvalue, use left-biased stencil (upwind)
-        if eig > 0:
-            # Use 3rd-order interpolation with left-biased stencil
-            Fw_char[i] = 3/8 * Fwl2[i] + 6/8 * Fwl[i] - 1/8 * Fwc[i]
-            Fe_char[i] = -1/8 * Fwl[i] + 6/8 * Fwc[i] + 3/8 * Fwr[i]
-        else:  # Negative eigenvalue, use right-biased stencil (downwind)
-            Fw_char[i] = 3/8 * Fwc[i] + 6/8 * Fwr[i] - 1/8 * Fwr2[i]
-            Fe_char[i] = -1/8 * Fwc[i] + 6/8 * Fwr[i] + 3/8 * Fwr2[i]
-
-        # Apply bounds to avoid oscillations (based on min/max of neighboring states)
-        Fw_char[i] = np.maximum(np.minimum(Fw_char[i], Fwc[i]), Fwl[i])
-        Fe_char[i] = np.maximum(np.minimum(Fe_char[i], Fwr[i]), Fwc[i])
+        else:  # Negative eigenvalue, use flipped stencil
+            Fe_char[i] = 3/8 * Fwr2[i] + 6/8 * Fwr[i] - 1/8 * Fwc[i]
+            Fw_char[i] = -1/8 * Fwr[i] + 6/8 * Fwc[i] + 3/8 * Fwl[i]
 
     # Convert fluxes back to physical space
     Fw = R @ Fw_char  # West (left) flux in physical space
@@ -491,9 +398,9 @@ def muscl(F, cell_sub, dFdU, limiter):
         if eig > 0:  # Positive eigenvalue (upwind to the left)
             # Use the left-most values on each face for flux determination
             # Use the left-biased slope ratios for flux determination
-            delta_wl = wc[i] - wl[i]
             delta_wl2 = wl[i] - wl2[i]
-            r_w = delta_wl2 / (delta_wl + 1e-6)  # Avoid division by zero
+            delta_wl = wc[i] - wl[i]
+            r_w = delta_wl2 / (delta_wl + 1e-9)  # Avoid division by zero
             slope_w = psi(r_w, limiter) * delta_wl
             # Extrapolated left state at the west interface
             w_west[i] = wl[i] + 0.5 * slope_w
@@ -501,23 +408,23 @@ def muscl(F, cell_sub, dFdU, limiter):
             # Similarly on the east side
             delta_wc = wr[i] - wc[i]
             delta_wr = wr2[i] - wr[i]
-            r_e = delta_wc / (delta_wr + 1e-6)  # Avoid division by zero
+            r_e = delta_wc / (delta_wr + 1e-9)  # Avoid division by zero
             slope_e = psi(r_e, limiter) * delta_wr
             # Extrapolated left state at the east interface
-            w_east[i] = wc[i] + 0.5 * slope_e
+            w_east[i] = wr[i] - 0.5 * slope_e
 
         else:  # Negative eigenvalue (upwind to the right)
             # Use the right-most values on each face for flux determination
             # Use the right-biased slope ratios for flux determination
-            delta_wl = wc[i] - wl[i]
-            delta_wl2 = wl[i] - wl2[i]
-            r_w = delta_wl / (delta_wl2 + 1e-6)  # Avoid division by zero
-            slope_w = psi(r_w, limiter) * delta_wl2
+            delta_wr2 = wr2[i] - wr[i]
+            delta_wr = wr[i] - wc[i]
+            r_w = delta_wr2 / (delta_wr + 1e-6)  # Avoid division by zero
+            slope_w = psi(r_w, limiter) * delta_wr
             # Extrapolated right state at the west interface
-            w_west[i] = wc[i] - 0.5 * slope_w
+            w_west[i] = wr[i] - 0.5 * slope_w
 
             # Similarly on the east side
-            delta_wc = wr[i] - wc[i]
+            delta_wc = wc[i] - wc[i]
             delta_wr = wr2[i] - wr[i]
             r_e = delta_wr / (delta_wc + 1e-6)  # Avoid division by zero
             slope_e = psi(r_e, limiter) * delta_wc

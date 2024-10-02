@@ -13,8 +13,22 @@ extensions = [
         include_dirs=[np.get_include()],  # Include NumPy headers
         # Disable deprecated API warnings
         define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')]
+    ),
+    Extension(
+        "splitfxm.flux",  # Assuming `flux.pyx` is in `splitfxm` package
+        sources=["splitfxm/flux.pyx"],
+        include_dirs=[np.get_include()],
+        # Disable deprecated API warnings
+        define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')]
     )
 ]
+
+# Common compile arguments for all extensions
+# Disable fallthrough warnings
+common_compile_args = ['-Wno-unreachable-code-fallthrough']
+# Apply common compile arguments globally
+for ext in extensions:
+    ext.extra_compile_args = common_compile_args
 
 setup(
     name="SplitFXM",
