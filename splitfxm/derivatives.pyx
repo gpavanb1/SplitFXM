@@ -3,11 +3,12 @@ from .schemes import stencil_sizes, FDSchemes
 cimport numpy as np
 
 # Function for handling callable functions
+# Enum is not used as it is not supported by Cython
 cdef np.ndarray derivative_callable(
     F,  # Function pointer type for callable functions
     list cell_sub,  # List of Cell, the stencil points
-    int scheme,  # FDSchemes: the finite difference scheme to use
-    int stencil_size, # Size of the stencil
+    int scheme,  # FDSchemes.value: the finite difference scheme to use
+    int stencil_size,  # Size of the stencil
     int order=1,  # Order of the derivative (1 for first, 2 for second)
 ):
     """
@@ -19,8 +20,10 @@ cdef np.ndarray derivative_callable(
         A function that takes the values at the stencil points.
     cell_sub : list of Cell
         The stencil, a list of cells around the point of interest.
-    scheme : FDSchemes
-        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
+    scheme : FDSchemes.value
+        The finite difference scheme to use (1 or 2).
+    stencil_size : int
+        The size of the stencil.
     order : int, optional
         The order of the derivative (1 for first derivative, 2 for second derivative). Default is 1.
 
