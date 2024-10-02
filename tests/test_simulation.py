@@ -3,11 +3,11 @@ import numpy as np
 import numdifftools as nd
 
 from splitfxm.bc import apply_BC
-from splitfxm.derivatives import Dx, FDSchemes
+from splitfxm.derivatives import Dx
 from splitfxm.domain import Domain
 from splitfxm.error import SFXM
 from splitfxm.refine import Refiner
-from splitfxm.schemes import default_scheme
+from splitfxm.schemes import default_scheme, FDSchemes
 from splitfxm.simulation import Simulation
 from splitfxm.models.advection_diffusion import AdvectionDiffusion
 
