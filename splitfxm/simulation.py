@@ -47,9 +47,7 @@ def array_list_reshape(l, shape):
     reshaped_list : list of ndarray
         The reshaped list.
     """
-
-    # Reshape to list of 1D numpy arrays
-    return [np.array(x) for x in np.reshape(l, shape).tolist()]
+    return np.array(l).reshape(shape)
 
 
 class Simulation:
@@ -143,8 +141,7 @@ class Simulation:
             The location to split the values at. Required if `split` is True.
         """
 
-        # Just demarcate every nv entries as a block
-        # This gives block-diagonal structure in unsplit case
+        # Just demarcate every nv entries as a row in the 2D array
         num_points, nv = self.get_shape_from_list(l)
 
         if split:
@@ -158,23 +155,20 @@ class Simulation:
             # Same as SplitNewton convention
             # Outer system will be excluding `loc`
             outer_block = array_list_reshape(
-                l[: split_loc * num_points], (-1, split_loc)
-            )
+                l[: split_loc * num_points], (num_points, split_loc))
             inner_block = array_list_reshape(
-                l[split_loc * num_points:], (-1, nv - split_loc)
-            )
+                l[split_loc * num_points:], (num_points, nv - split_loc))
 
-            block = []
-            for i in range(num_points):
-                block.append(np.concatenate((outer_block[i], inner_block[i])))
+            # Concatenate outer and inner blocks
+            block = np.hstack((outer_block, inner_block))
         else:
-            # Reshape list
+            # No need to split, just use the values_array directly
             block = array_list_reshape(l, (num_points, nv))
 
         # Assign values to cells in domain
         cells = self._d.interior()
         for i, b in enumerate(cells):
-            b.set_values(block[i])
+            b.set_values(block[i, :])
 
     def get_residuals_from_list(self, l, split=False, split_loc=None):
         """
@@ -206,14 +200,14 @@ class Simulation:
         interior_residual_block = self._s.residuals(self._d)
 
         if split:
-            outer_block = [x[:split_loc] for x in interior_residual_block]
-            inner_block = [x[split_loc:] for x in interior_residual_block]
-            outer_list = np.array(outer_block).flatten()
-            inner_list = np.array(inner_block).flatten()
-            residual_list = np.concatenate((outer_list, inner_list))
+            # Split the array into outer and inner blocks
+            outer_block = interior_residual_block[:, :split_loc].flatten()
+            inner_block = interior_residual_block[:, split_loc:].flatten()
+            # Concatenate the flattened outer and inner blocks
+            residual_list = np.concatenate((outer_block, inner_block))
         else:
-            # Reshape residual block in list order
-            residual_list = np.array(interior_residual_block).flatten()
+            # Flatten the entire residual block
+            residual_list = interior_residual_block.flatten()
 
         return residual_list
 
