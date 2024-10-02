@@ -1,7 +1,20 @@
 from setuptools import setup
+from setuptools.extension import Extension
+from Cython.Build import cythonize
+import numpy as np
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+extensions = [
+    Extension(
+        name="splitfxm.derivatives",
+        sources=["splitfxm/derivatives.pyx"],
+        include_dirs=[np.get_include()],  # Include NumPy headers
+        # Disable deprecated API warnings
+        define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')]
+    )
+]
 
 setup(
     name="SplitFXM",
@@ -27,4 +40,6 @@ setup(
         "Source": "https://github.com/gpavanb1/SplitFXM/",
     },
     zip_safe=False,
+    ext_modules=cythonize(extensions, compiler_directives={
+                          'language_level': "3"}),
 )
