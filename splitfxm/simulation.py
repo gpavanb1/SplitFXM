@@ -307,8 +307,7 @@ class Simulation:
                         min(ihi + 1, i + nb_right + 1)))
 
             # Calculate unperturbed residuals
-            rhs = np.concatenate([eq.residuals(cell_sub, self._s._scheme)
-                                  for eq in self._s._model.equations()])
+            rhs = self._s._model.equation().residuals(cell_sub, self._s._scheme)
 
             # Perturb each variable and compute the Jacobian columns
             for j in range(nv):
@@ -333,8 +332,7 @@ class Simulation:
                             apply_BC(self._d, c, bctype)
 
                     # Calculate updated residual
-                    rhs_pert = np.concatenate([eq.residuals(cell_sub, self._s._scheme)
-                                               for eq in self._s._model.equations()])
+                    rhs_pert = self._s._model.equation().residuals(cell_sub, self._s._scheme)
 
                     # Reset the value
                     cell.set_value(j, current_value)
