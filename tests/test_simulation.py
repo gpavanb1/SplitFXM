@@ -19,11 +19,11 @@ class MockEquation:
 
 
 class MockModel:
-    def __init__(self, equations):
-        self._equations = equations
+    def __init__(self, equation):
+        self._equation = equation
 
-    def equations(self):
-        return self._equations
+    def equation(self):
+        return self._equation
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def mock_domain():
 
 @pytest.fixture
 def mock_model():
-    return MockModel([MockEquation()])
+    return MockModel(MockEquation())
 
 
 @pytest.fixture
@@ -82,7 +82,7 @@ def test_simulation_initialization(mock_domain, mock_model, mock_scheme, mock_ic
 def test_improper_stencil_size():
     # Test for improper stencil size that raises SFXM
     d = Domain.from_size(5, 1, 2, ["u", "v"])
-    m = MockModel([MockEquation()])
+    m = MockModel(MockEquation())
     with pytest.raises(SFXM):
         s = Simulation(d, m, {}, {}, FDSchemes.CENTRAL)
 

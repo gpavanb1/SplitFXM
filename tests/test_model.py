@@ -34,9 +34,9 @@ class AdvectionDiffusion(Model):
         self.nu = nu
 
         if method == 'FDM':
-            self._equations = [FDTransportEquation(F, D, S)]
+            self._equation = FDTransportEquation(F, D, S)
         elif method == 'FVM':
-            self._equations = [FVTransportEquation(F, D, S, dFdU)]
+            self._equation = FVTransportEquation(F, D, S, dFdU)
         else:
             raise SFXM("Invalid numerical method specified")
 
@@ -46,7 +46,7 @@ def test_model_initialization():
     Test the initialization of the Model class.
     """
     model = Model()
-    assert model._equations == [], "Model should have no equations by default"
+    assert model._equation == None, "Model should have no equation by default"
 
 
 def test_model_equations_method():
@@ -54,11 +54,11 @@ def test_model_equations_method():
     Test the equations method of the Model class.
     """
     model = AdvectionDiffusion(c=0.2, nu=0.001, method='FDM')
-    equations = model.equations()
+    equation = model.equation()
     assert isinstance(
-        equations[0], FDTransportEquation), "equations() method should return a Advection-Diffusion equations"
+        equation, FDTransportEquation), "equations() method should return a Advection-Diffusion equations"
 
     model = AdvectionDiffusion(c=0.2, nu=0.001, method='FVM')
-    equations = model.equations()
+    equation = model.equation()
     assert isinstance(
-        equations[0], FVTransportEquation), "equations() method should return a Advection-Diffusion equations"
+        equation, FVTransportEquation), "equations() method should return a Advection-Diffusion equations"

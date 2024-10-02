@@ -30,11 +30,11 @@ class MockFVEquation:
 
 
 class MockModel:
-    def __init__(self, equations):
-        self._equations = equations
+    def __init__(self, equation):
+        self._equation = equation
 
-    def equations(self):
-        return self._equations
+    def equation(self):
+        return self._equation
 
 
 @pytest.fixture
@@ -43,7 +43,7 @@ def mock_domain():
 
 
 def test_system_initialization():
-    model = MockModel([MockFDEquation()])
+    model = MockModel(MockFDEquation())
     scheme = FDSchemes.CENTRAL
     system = System(model, scheme, scheme_opts={})
     assert system._model == model
@@ -51,7 +51,7 @@ def test_system_initialization():
 
 
 def test_fd_residuals(mock_domain):
-    model = MockModel([MockFDEquation()])
+    model = MockModel(MockFDEquation())
     fd_scheme = FDSchemes.CENTRAL
 
     # Check for FD
@@ -66,7 +66,7 @@ def test_fd_residuals(mock_domain):
 
 
 def test_fv_residuals(mock_domain):
-    model = MockModel([MockFVEquation()])
+    model = MockModel(MockFVEquation())
     fv_scheme = FVSchemes.LAX_FRIEDRICHS
 
     # Check for FV
