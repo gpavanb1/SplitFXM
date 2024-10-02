@@ -73,13 +73,11 @@
     <ul class="current">
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.derivatives">derivatives</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.derivatives.derivative">derivative</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.derivatives.Dx">Dx</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.derivatives.dx">dx</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.derivatives.D2x">D2x</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.derivatives.dx">dx</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.derivatives.d2x">d2x</a>
     </li>
@@ -134,7 +132,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="finite-difference-schemes">Finite-Difference Schemes</h1>
-<p>This section contains details related to the implementation of finite-difference schemes. Note that the solver can utilize any finite-difference scheme, including asymmetric stencils. For now, only central differencing has been implemented.</p>
+<p>This section contains details related to the implementation of finite-difference schemes. Note that the solver can utilize any finite-difference scheme, including asymmetric stencils. Additionally, the derivative-related methods are implemented using Cython.</p>
 
 
 <div class="doc doc-object doc-module">
@@ -159,205 +157,12 @@
 <div class="doc doc-object doc-function">
 
 
-<h2 id="splitfxm.derivatives.derivative" class="doc doc-heading">
-            <code class="highlight language-python">derivative(F, cell_sub, scheme, order=1, is_values=False)</code>
-
-</h2>
-
-
-    <div class="doc doc-contents ">
-
-        <p>General function to calculate the first or second derivative based on a given function or precomputed values.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>F</code></b>
-                  (<code>function or list / <span title="numpy.ndarray">ndarray</span></code>)
-              –
-              <div class="doc-md-description">
-                <p>If <code>is_values</code> is False, this is a function that takes the values at the stencil points.
-If <code>is_values</code> is True, this is the precomputed values of the function at the stencil points.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>cell_sub</code></b>
-                  (<code>list of Cell</code>)
-              –
-              <div class="doc-md-description">
-                <p>The stencil, a list of cells around the point of interest.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
-              –
-              <div class="doc-md-description">
-                <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
-              </div>
-            </li>
-            <li>
-              <b><code>order</code></b>
-                  (<code>int</code>, default:
-                      <code>1</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The order of the derivative (1 for first derivative, 2 for second derivative). Default is 1.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>is_values</code></b>
-                  (<code>bool</code>, default:
-                      <code>False</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>If True, <code>F</code> is treated as precomputed values of the function at the stencil points. If False, <code>F</code> is treated as a function. Default is False.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-              –
-              <div class="doc-md-description">
-                <p>The computed derivative based on the selected scheme and order.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Raises:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code><span title="splitfxm.error.SFXM">SFXM</span></code>
-              –
-              <div class="doc-md-description">
-                <p>If an improper stencil size is provided or an unsupported scheme is used.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/derivatives.py</code></summary>
-              <pre class="highlight"><code class="language-python">def derivative(F, cell_sub, scheme, order=1, is_values=False):
-    """
-    General function to calculate the first or second derivative based on a given function or precomputed values.
-
-    Parameters
-    ----------
-    F : function or list/numpy.ndarray
-        If `is_values` is False, this is a function that takes the values at the stencil points.
-        If `is_values` is True, this is the precomputed values of the function at the stencil points.
-    cell_sub : list of Cell
-        The stencil, a list of cells around the point of interest.
-    scheme : FDSchemes
-        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
-    order : int, optional
-        The order of the derivative (1 for first derivative, 2 for second derivative). Default is 1.
-    is_values : bool, optional
-        If True, `F` is treated as precomputed values of the function at the stencil points. If False, `F` is treated as a function. Default is False.
-
-    Returns
-    -------
-    numpy.ndarray
-        The computed derivative based on the selected scheme and order.
-
-    Raises
-    ------
-    SFXM
-        If an improper stencil size is provided or an unsupported scheme is used.
-    """
-    if len(cell_sub) != stencil_sizes.get(scheme):
-        raise SFXM(
-            f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
-
-    if order == 1:
-        if scheme == FDSchemes.CENTRAL:
-            Fl = F[0] if is_values else F(
-                cell_sub[0].values())
-            Fr = F[2] if is_values else F(
-                cell_sub[2].values())
-            dx = cell_sub[2].x() - cell_sub[0].x()
-            return (Fr - Fl) / dx
-        elif scheme == FDSchemes.RIGHT_BIAS:
-            F_vals = F if is_values else [
-                F(cell_sub[i].values()) for i in range(4)]
-            dx = cell_sub[1].x() - cell_sub[0].x()
-            return (-F_vals[0] - F_vals[1] + F_vals[2] + F_vals[3]) / (4 * dx)
-
-    elif order == 2:
-        if scheme == FDSchemes.CENTRAL:
-            Dl = F[0] if is_values else F(
-                cell_sub[0].values())
-            Dr = F[1] if is_values else F(
-                cell_sub[1].values())
-            dx_w = cell_sub[1].x() - cell_sub[0].x()
-            Dw = (Dr - Dl) / dx_w
-
-            Dl = F[1] if is_values else F(
-                cell_sub[1].values())
-            Dr = F[2] if is_values else F(
-                cell_sub[2].values())
-            dx_e = cell_sub[2].x() - cell_sub[1].x()
-            De = (Dr - Dl) / dx_e
-
-            return (De - Dw) / ((dx_w + dx_e) / 2)
-        elif scheme == FDSchemes.RIGHT_BIAS:
-            D_vals = F if is_values else [
-                F(cell_sub[i].values()) for i in range(4)]
-            dx = cell_sub[1].x() - cell_sub[0].x()
-            return (D_vals[0] - D_vals[1] - D_vals[2] + D_vals[3]) / (2 * dx**2)
-
-    raise SFXM("Unsupported scheme or order")</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h2 id="splitfxm.derivatives.Dx" class="doc doc-heading">
             <code class="highlight language-python">Dx(F, cell_sub, scheme)</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-method descriptor"><code>method descriptor</code></small>
+  </span>
 
 </h2>
 
@@ -395,7 +200,7 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
+                  (<code>FDSchemes</code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
@@ -429,130 +234,6 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
     </tr>
   </tbody>
 </table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/derivatives.py</code></summary>
-              <pre class="highlight"><code class="language-python">def Dx(F, cell_sub, scheme):
-    """
-    Calculate the first derivative using a given function and stencil.
-
-    Parameters
-    ----------
-    F : function
-        A function that takes the values at the stencil points.
-    cell_sub : list of Cell
-        The stencil, a list of cells around the point of interest.
-    scheme : FDSchemes
-        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
-
-    Returns
-    -------
-    numpy.ndarray
-        The computed first derivative based on the selected scheme.
-    """
-    return derivative(F, cell_sub, scheme, order=1)</code></pre>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="splitfxm.derivatives.dx" class="doc doc-heading">
-            <code class="highlight language-python">dx(values, cell_sub, scheme)</code>
-
-</h2>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Calculate the first derivative using precomputed function values at grid points.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>values</code></b>
-                  (<code>list or <span title="numpy.ndarray">ndarray</span></code>)
-              –
-              <div class="doc-md-description">
-                <p>Precomputed values of the function at the stencil points.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>cell_sub</code></b>
-                  (<code>list of Cell</code>)
-              –
-              <div class="doc-md-description">
-                <p>The stencil, a list of cells around the point of interest.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
-              –
-              <div class="doc-md-description">
-                <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-              –
-              <div class="doc-md-description">
-                <p>The computed first derivative based on the selected scheme.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/derivatives.py</code></summary>
-              <pre class="highlight"><code class="language-python">def dx(values, cell_sub, scheme):
-    """
-    Calculate the first derivative using precomputed function values at grid points.
-
-    Parameters
-    ----------
-    values : list or numpy.ndarray
-        Precomputed values of the function at the stencil points.
-    cell_sub : list of Cell
-        The stencil, a list of cells around the point of interest.
-    scheme : FDSchemes
-        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
-
-    Returns
-    -------
-    numpy.ndarray
-        The computed first derivative based on the selected scheme.
-    """
-    return derivative(values, cell_sub, scheme, order=1, is_values=True)</code></pre>
-            </details>
     </div>
 
 </div>
@@ -562,6 +243,10 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
 
 <h2 id="splitfxm.derivatives.D2x" class="doc doc-heading">
             <code class="highlight language-python">D2x(D, cell_sub, scheme)</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-method descriptor"><code>method descriptor</code></small>
+  </span>
 
 </h2>
 
@@ -599,7 +284,7 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
+                  (<code>FDSchemes</code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
@@ -633,28 +318,90 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
     </tr>
   </tbody>
 </table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/derivatives.py</code></summary>
-              <pre class="highlight"><code class="language-python">def D2x(D, cell_sub, scheme):
-    """
-    Calculate the second derivative using a given function and stencil.
+    </div>
 
-    Parameters
-    ----------
-    D : function
-        A function that takes the values at the stencil points.
-    cell_sub : list of Cell
-        The stencil, a list of cells around the point of interest.
-    scheme : FDSchemes
-        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
+</div>
 
-    Returns
-    -------
-    numpy.ndarray
-        The computed second derivative based on the selected scheme.
-    """
-    return derivative(D, cell_sub, scheme, order=2)</code></pre>
-            </details>
+<div class="doc doc-object doc-function">
+
+
+<h2 id="splitfxm.derivatives.dx" class="doc doc-heading">
+            <code class="highlight language-python">dx(values, cell_sub, scheme)</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-method descriptor"><code>method descriptor</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Calculate the first derivative using precomputed function values at grid points.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>values</code></b>
+                  (<code><span title="np.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Precomputed values of the function at the stencil points.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>cell_sub</code></b>
+                  (<code>list of Cell</code>)
+              –
+              <div class="doc-md-description">
+                <p>The stencil, a list of cells around the point of interest.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>scheme</code></b>
+                  (<code>FDSchemes</code>)
+              –
+              <div class="doc-md-description">
+                <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+              –
+              <div class="doc-md-description">
+                <p>The computed first derivative based on the selected scheme.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
     </div>
 
 </div>
@@ -664,6 +411,10 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
 
 <h2 id="splitfxm.derivatives.d2x" class="doc doc-heading">
             <code class="highlight language-python">d2x(values, cell_sub, scheme)</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-method descriptor"><code>method descriptor</code></small>
+  </span>
 
 </h2>
 
@@ -685,7 +436,7 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
         <ul class="first simple">
             <li>
               <b><code>values</code></b>
-                  (<code>list or <span title="numpy.ndarray">ndarray</span></code>)
+                  (<code><span title="np.ndarray">ndarray</span></code>)
               –
               <div class="doc-md-description">
                 <p>Precomputed values of the function at the stencil points.</p>
@@ -701,7 +452,7 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
             </li>
             <li>
               <b><code>scheme</code></b>
-                  (<code><span title="splitfxm.schemes.FDSchemes">FDSchemes</span></code>)
+                  (<code>FDSchemes</code>)
               –
               <div class="doc-md-description">
                 <p>The finite difference scheme to use (CENTRAL or RIGHT_BIAS).</p>
@@ -735,28 +486,6 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
     </tr>
   </tbody>
 </table>
-            <details class="quote">
-              <summary>Source code in <code>splitfxm/derivatives.py</code></summary>
-              <pre class="highlight"><code class="language-python">def d2x(values, cell_sub, scheme):
-    """
-    Calculate the second derivative using precomputed function values at grid points.
-
-    Parameters
-    ----------
-    values : list or numpy.ndarray
-        Precomputed values of the function at the stencil points.
-    cell_sub : list of Cell
-        The stencil, a list of cells around the point of interest.
-    scheme : FDSchemes
-        The finite difference scheme to use (CENTRAL or RIGHT_BIAS).
-
-    Returns
-    -------
-    numpy.ndarray
-        The computed second derivative based on the selected scheme.
-    """
-    return derivative(values, cell_sub, scheme, order=2, is_values=True)</code></pre>
-            </details>
     </div>
 
 </div>
@@ -807,6 +536,7 @@ If <code>is_values</code> is True, this is the precomputed values of the functio
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script>
         jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);

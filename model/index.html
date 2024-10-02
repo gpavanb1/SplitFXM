@@ -65,7 +65,7 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.model.Model.__init__">__init__</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.model.Model.equations">equations</a>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.model.Model.equation">equation</a>
     </li>
         </ul>
     </li>
@@ -175,18 +175,18 @@ An example is provided in the <code>examples</code> folder</p>
         """
         Initialize a Model object.
         """
-        self._equations = []
+        self._equation = None
 
-    def equations(self):
+    def equation(self):
         """
-        Get the list of equations associated with this Model.
+        Get the equation associated with this model
 
         Returns
         -------
         list
             The list of equations
         """
-        return self._equations</code></pre>
+        return self._equation</code></pre>
               </details>
 
 
@@ -220,7 +220,7 @@ An example is provided in the <code>examples</code> folder</p>
     """
     Initialize a Model object.
     """
-    self._equations = []</code></pre>
+    self._equation = None</code></pre>
             </details>
     </div>
 
@@ -229,15 +229,15 @@ An example is provided in the <code>examples</code> folder</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="splitfxm.model.Model.equations" class="doc doc-heading">
-            <code class="highlight language-python">equations()</code>
+<h3 id="splitfxm.model.Model.equation" class="doc doc-heading">
+            <code class="highlight language-python">equation()</code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Get the list of equations associated with this Model.</p>
+        <p>Get the equation associated with this model</p>
 
 
 <table class="field-list">
@@ -264,16 +264,16 @@ An example is provided in the <code>examples</code> folder</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/model.py</code></summary>
-              <pre class="highlight"><code class="language-python">def equations(self):
+              <pre class="highlight"><code class="language-python">def equation(self):
     """
-    Get the list of equations associated with this Model.
+    Get the equation associated with this model
 
     Returns
     -------
     list
         The list of equations
     """
-    return self._equations</code></pre>
+    return self._equation</code></pre>
             </details>
     </div>
 
@@ -334,6 +334,7 @@ An example is provided in the <code>examples</code> folder</p>
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script>
         jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);

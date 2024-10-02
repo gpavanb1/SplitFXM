@@ -227,6 +227,24 @@
               </div>
             </li>
             <li>
+              <b><code>scheme</code></b>
+                  (<code>Schemes</code>)
+              –
+              <div class="doc-md-description">
+                <p>The discretization scheme to use for the simulation.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>scheme_opts</code></b>
+                  (<code>dict</code>, default:
+                      <code>{}</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>A dictionary of options for the scheme.</p>
+              </div>
+            </li>
+            <li>
               <b><code>ss</code></b>
                   (<code>dict</code>, default:
                       <code>{}</code>
@@ -257,16 +275,20 @@
         The initial conditions to apply to the domain.
     bcs : dict
         The boundary conditions to apply to the domain.
+    scheme : Schemes
+        The discretization scheme to use for the simulation.
+    scheme_opts : dict, optional
+        A dictionary of options for the scheme.
     ss : dict, optional
         The steady-state solver settings to use in the simulation.
     """
 
-    def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme: dict, ss: dict = {}):
+    def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme, scheme_opts: dict = {}, ss: dict = {}):
         """
         Initialize a Simulation object.
         """
         self._d = d
-        self._s = System(m, scheme)
+        self._s = System(m, scheme, scheme_opts)
         self._r = Refiner()
         self._bcs = bcs
 
@@ -330,8 +352,7 @@
             The location to split the values at. Required if `split` is True.
         """
 
-        # Just demarcate every nv entries as a block
-        # This gives block-diagonal structure in unsplit case
+        # Just demarcate every nv entries as a row in the 2D array
         num_points, nv = self.get_shape_from_list(l)
 
         if split:
@@ -345,23 +366,20 @@
             # Same as SplitNewton convention
             # Outer system will be excluding `loc`
             outer_block = array_list_reshape(
-                l[: split_loc * num_points], (-1, split_loc)
-            )
+                l[: split_loc * num_points], (num_points, split_loc))
             inner_block = array_list_reshape(
-                l[split_loc * num_points:], (-1, nv - split_loc)
-            )
+                l[split_loc * num_points:], (num_points, nv - split_loc))
 
-            block = []
-            for i in range(num_points):
-                block.append(np.concatenate((outer_block[i], inner_block[i])))
+            # Concatenate outer and inner blocks
+            block = np.hstack((outer_block, inner_block))
         else:
-            # Reshape list
+            # No need to split, just use the values_array directly
             block = array_list_reshape(l, (num_points, nv))
 
         # Assign values to cells in domain
         cells = self._d.interior()
         for i, b in enumerate(cells):
-            b.set_values(block[i])
+            b.set_values(block[i, :])
 
     def get_residuals_from_list(self, l, split=False, split_loc=None):
         """
@@ -393,14 +411,14 @@
         interior_residual_block = self._s.residuals(self._d)
 
         if split:
-            outer_block = [x[:split_loc] for x in interior_residual_block]
-            inner_block = [x[split_loc:] for x in interior_residual_block]
-            outer_list = np.array(outer_block).flatten()
-            inner_list = np.array(inner_block).flatten()
-            residual_list = np.concatenate((outer_list, inner_list))
+            # Split the array into outer and inner blocks
+            outer_block = interior_residual_block[:, :split_loc].flatten()
+            inner_block = interior_residual_block[:, split_loc:].flatten()
+            # Concatenate the flattened outer and inner blocks
+            residual_list = np.concatenate((outer_block, inner_block))
         else:
-            # Reshape residual block in list order
-            residual_list = np.array(interior_residual_block).flatten()
+            # Flatten the entire residual block
+            residual_list = interior_residual_block.flatten()
 
         return residual_list
 
@@ -500,8 +518,7 @@
                         min(ihi + 1, i + nb_right + 1)))
 
             # Calculate unperturbed residuals
-            rhs = np.concatenate([eq.residuals(cell_sub, self._s._scheme)
-                                  for eq in self._s._model.equations()])
+            rhs = self._s._model.equation().residuals(cell_sub, self._s._scheme)
 
             # Perturb each variable and compute the Jacobian columns
             for j in range(nv):
@@ -526,8 +543,7 @@
                             apply_BC(self._d, c, bctype)
 
                     # Calculate updated residual
-                    rhs_pert = np.concatenate([eq.residuals(cell_sub, self._s._scheme)
-                                               for eq in self._s._model.equations()])
+                    rhs_pert = self._s._model.equation().residuals(cell_sub, self._s._scheme)
 
                     # Reset the value
                     cell.set_value(j, current_value)
@@ -628,8 +644,12 @@
         # Implement basic Euler as part of same wrapper
         sol = Solution()
         if method == "Euler":
-            delta_t = min(t_diff, max_step)
-            sol.y = y0 + delta_t * f(0., y0)
+            t_current = 0.0
+            sol.y = y0
+            while t_current &lt; t_diff:
+                delta_t = min(t_diff - t_current, max_step)
+                sol.y += delta_t * f(t_current, sol.y)
+                t_current += delta_t
         else:
             sol = solve_ivp(f, (0, t_diff), y0, method=method,
                             t_eval=[t_diff], jac=jac, max_step=max_step)
@@ -705,7 +725,7 @@
 
 
 <h3 id="splitfxm.simulation.Simulation.__init__" class="doc doc-heading">
-            <code class="highlight language-python">__init__(d, m, ics, bcs, scheme, ss={})</code>
+            <code class="highlight language-python">__init__(d, m, ics, bcs, scheme, scheme_opts={}, ss={})</code>
 
 </h3>
 
@@ -716,12 +736,12 @@
 
             <details class="quote">
               <summary>Source code in <code>splitfxm/simulation.py</code></summary>
-              <pre class="highlight"><code class="language-python">def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme: dict, ss: dict = {}):
+              <pre class="highlight"><code class="language-python">def __init__(self, d: Domain, m: Model, ics: dict, bcs: dict, scheme, scheme_opts: dict = {}, ss: dict = {}):
     """
     Initialize a Simulation object.
     """
     self._d = d
-    self._s = System(m, scheme)
+    self._s = System(m, scheme, scheme_opts)
     self._r = Refiner()
     self._bcs = bcs
 
@@ -917,8 +937,7 @@
         The location to split the values at. Required if `split` is True.
     """
 
-    # Just demarcate every nv entries as a block
-    # This gives block-diagonal structure in unsplit case
+    # Just demarcate every nv entries as a row in the 2D array
     num_points, nv = self.get_shape_from_list(l)
 
     if split:
@@ -932,23 +951,20 @@
         # Same as SplitNewton convention
         # Outer system will be excluding `loc`
         outer_block = array_list_reshape(
-            l[: split_loc * num_points], (-1, split_loc)
-        )
+            l[: split_loc * num_points], (num_points, split_loc))
         inner_block = array_list_reshape(
-            l[split_loc * num_points:], (-1, nv - split_loc)
-        )
+            l[split_loc * num_points:], (num_points, nv - split_loc))
 
-        block = []
-        for i in range(num_points):
-            block.append(np.concatenate((outer_block[i], inner_block[i])))
+        # Concatenate outer and inner blocks
+        block = np.hstack((outer_block, inner_block))
     else:
-        # Reshape list
+        # No need to split, just use the values_array directly
         block = array_list_reshape(l, (num_points, nv))
 
     # Assign values to cells in domain
     cells = self._d.interior()
     for i, b in enumerate(cells):
-        b.set_values(block[i])</code></pre>
+        b.set_values(block[i, :])</code></pre>
             </details>
     </div>
 
@@ -1066,14 +1082,14 @@
     interior_residual_block = self._s.residuals(self._d)
 
     if split:
-        outer_block = [x[:split_loc] for x in interior_residual_block]
-        inner_block = [x[split_loc:] for x in interior_residual_block]
-        outer_list = np.array(outer_block).flatten()
-        inner_list = np.array(inner_block).flatten()
-        residual_list = np.concatenate((outer_list, inner_list))
+        # Split the array into outer and inner blocks
+        outer_block = interior_residual_block[:, :split_loc].flatten()
+        inner_block = interior_residual_block[:, split_loc:].flatten()
+        # Concatenate the flattened outer and inner blocks
+        residual_list = np.concatenate((outer_block, inner_block))
     else:
-        # Reshape residual block in list order
-        residual_list = np.array(interior_residual_block).flatten()
+        # Flatten the entire residual block
+        residual_list = interior_residual_block.flatten()
 
     return residual_list</code></pre>
             </details>
@@ -1367,8 +1383,7 @@
                     min(ihi + 1, i + nb_right + 1)))
 
         # Calculate unperturbed residuals
-        rhs = np.concatenate([eq.residuals(cell_sub, self._s._scheme)
-                              for eq in self._s._model.equations()])
+        rhs = self._s._model.equation().residuals(cell_sub, self._s._scheme)
 
         # Perturb each variable and compute the Jacobian columns
         for j in range(nv):
@@ -1393,8 +1408,7 @@
                         apply_BC(self._d, c, bctype)
 
                 # Calculate updated residual
-                rhs_pert = np.concatenate([eq.residuals(cell_sub, self._s._scheme)
-                                           for eq in self._s._model.equations()])
+                rhs_pert = self._s._model.equation().residuals(cell_sub, self._s._scheme)
 
                 # Reset the value
                 cell.set_value(j, current_value)
@@ -1631,8 +1645,12 @@ The system's state is updated using the computed solution at the end of the time
     # Implement basic Euler as part of same wrapper
     sol = Solution()
     if method == "Euler":
-        delta_t = min(t_diff, max_step)
-        sol.y = y0 + delta_t * f(0., y0)
+        t_current = 0.0
+        sol.y = y0
+        while t_current &lt; t_diff:
+            delta_t = min(t_diff - t_current, max_step)
+            sol.y += delta_t * f(t_current, sol.y)
+            t_current += delta_t
     else:
         sol = solve_ivp(f, (0, t_diff), y0, method=method,
                         t_eval=[t_diff], jac=jac, max_step=max_step)
@@ -1908,9 +1926,7 @@ The system's state is updated using the computed solution at the end of the time
     reshaped_list : list of ndarray
         The reshaped list.
     """
-
-    # Reshape to list of 1D numpy arrays
-    return [np.array(x) for x in np.reshape(l, shape).tolist()]</code></pre>
+    return np.array(l).reshape(shape)</code></pre>
             </details>
     </div>
 
@@ -1959,6 +1975,7 @@ The system's state is updated using the computed solution at the end of the time
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script>
         jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);

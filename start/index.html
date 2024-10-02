@@ -128,14 +128,17 @@
 <p>A basic driver program is as follows</p>
 <pre><code>from splitfxm.domain import Domain
 from splitfxm.simulation import Simulation
+from splitfxm.models.advection_diffusion import AdvectionDiffusion
 from splitfxm.schemes import default_scheme
 from splitfxm.visualize import draw
+import matplotlib.pyplot as plt
 
 # Define the problem
-method = 'FDM'
+method = 'FVM'
 m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
-d = Domain.from_size(20, 1, 1, [&quot;u&quot;, &quot;v&quot;, &quot;w&quot;]) # nx, nb_left, nb_right, variables
-ics = {&quot;u&quot;: &quot;gaussian&quot;, &quot;v&quot;: &quot;rarefaction&quot;}
+# nx, nb_left, nb_right, variables
+d = Domain.from_size(20, 1, 1, [&quot;u&quot;, &quot;v&quot;, &quot;w&quot;])
+ics = {&quot;u&quot;: &quot;gaussian&quot;, &quot;v&quot;: &quot;rarefaction&quot;, &quot;w&quot;: &quot;tophat&quot;}
 bcs = {
     &quot;u&quot;: {
         &quot;left&quot;: &quot;periodic&quot;,
@@ -155,11 +158,12 @@ s = Simulation(d, m, ics, bcs, default_scheme(method))
 
 # Advance in time or to steady state
 s.evolve(t_diff=0.1)
-bounds = [[-1., -2., 0.], [5., 4., 3.]]
+bounds = [[-1., -2., -2.], [5., 4., 3.]]
 iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
 
 # Visualize
 draw(d, &quot;label&quot;)
+plt.show()
 </code></pre>
               
             </div>
@@ -200,6 +204,7 @@ draw(d, &quot;label&quot;)
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script>
         jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);

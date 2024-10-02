@@ -196,6 +196,14 @@
                 <p>The discretization scheme to use for the system</p>
               </div>
             </li>
+            <li>
+              <b><code>scheme_opts</code></b>
+                  (<code>dict</code>)
+              –
+              <div class="doc-md-description">
+                <p>A dictionary of options for the scheme.</p>
+              </div>
+            </li>
         </ul>
       </td>
     </tr>
@@ -213,14 +221,17 @@
         The model for which to solve the system of equations.
     scheme : Schemes
         The discretization scheme to use for the system
+    scheme_opts : dict
+        A dictionary of options for the scheme.
     """
 
-    def __init__(self, model, scheme):
+    def __init__(self, model, scheme, scheme_opts):
         """
         Initialize a System object.
         """
         self._model = model
         self._scheme = scheme
+        self._scheme_opts = scheme_opts
 
     def residuals(self, d: Domain):
         """
@@ -247,21 +258,24 @@
         nb_left = d.nb(btype.LEFT)
         nb_right = d.nb(btype.RIGHT)
 
+        # Fetch equation for model
+        eq = self._model.equation()
+
         rhs_list = []
 
         for i in range(ilo, ihi + 1):
-            rhs = np.array([])
-            # Append residuals from each equation
-            for eq in self._model.equations():
-                # Send two-sided stencil
-                # Let model decide computation
-                cell_sub = [cells[i + offset]
-                            for offset in range(-nb_left, nb_right + 1)]
-                rhs = np.concatenate(
-                    (rhs, eq.residuals(cell_sub, self._scheme)))
+            # Define the neighborhood and band around the current cell
+            cell_sub = [cells[i + offset]
+                        for offset in range(-nb_left, nb_right + 1)]
+            # Send two-sided stencil
+            # Let model decide computation
+            rhs = eq.residuals(cell_sub, self._scheme, self._scheme_opts)
             rhs_list.append(rhs)
 
-        return rhs_list</code></pre>
+        # Stack the residuals to form a 2D array
+        rhs_array = np.vstack(rhs_list)
+
+        return rhs_array</code></pre>
               </details>
 
 
@@ -280,7 +294,7 @@
 
 
 <h3 id="splitfxm.system.System.__init__" class="doc doc-heading">
-            <code class="highlight language-python">__init__(model, scheme)</code>
+            <code class="highlight language-python">__init__(model, scheme, scheme_opts)</code>
 
 </h3>
 
@@ -291,12 +305,13 @@
 
             <details class="quote">
               <summary>Source code in <code>splitfxm/system.py</code></summary>
-              <pre class="highlight"><code class="language-python">def __init__(self, model, scheme):
+              <pre class="highlight"><code class="language-python">def __init__(self, model, scheme, scheme_opts):
     """
     Initialize a System object.
     """
     self._model = model
-    self._scheme = scheme</code></pre>
+    self._scheme = scheme
+    self._scheme_opts = scheme_opts</code></pre>
             </details>
     </div>
 
@@ -389,21 +404,24 @@
     nb_left = d.nb(btype.LEFT)
     nb_right = d.nb(btype.RIGHT)
 
+    # Fetch equation for model
+    eq = self._model.equation()
+
     rhs_list = []
 
     for i in range(ilo, ihi + 1):
-        rhs = np.array([])
-        # Append residuals from each equation
-        for eq in self._model.equations():
-            # Send two-sided stencil
-            # Let model decide computation
-            cell_sub = [cells[i + offset]
-                        for offset in range(-nb_left, nb_right + 1)]
-            rhs = np.concatenate(
-                (rhs, eq.residuals(cell_sub, self._scheme)))
+        # Define the neighborhood and band around the current cell
+        cell_sub = [cells[i + offset]
+                    for offset in range(-nb_left, nb_right + 1)]
+        # Send two-sided stencil
+        # Let model decide computation
+        rhs = eq.residuals(cell_sub, self._scheme, self._scheme_opts)
         rhs_list.append(rhs)
 
-    return rhs_list</code></pre>
+    # Stack the residuals to form a 2D array
+    rhs_array = np.vstack(rhs_list)
+
+    return rhs_array</code></pre>
             </details>
     </div>
 
@@ -464,6 +482,7 @@
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script>
         jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
