@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.0] - 2024-10-02
+## Added
+- Cython-based Finite Difference Methods and Finite Volume Methods
+- Vector Finite Volume
+    - Support for flux Jacobian for all schemes
+    - Characteristic-variable based approach for all schemes. Handles full matrix flux Jacobians
+- Scheme options - for usage such as limiters
+
+## Fixed
+- Single-equation models only
+- Removed lists in favour of multidimensional NumPy arrays
+- `evolve` now advances till `t_diff` is reached for Euler
+- `test_validation` renamed to `test_verification`
+- Prompt in an FVM scheme error message
+
 ## [0.3.4] - 2024-09-18
 ## Fixed
 - Added `max_step` to time-integration

@@ -40,7 +40,7 @@ from splitfxm.visualize import draw
 method = 'FDM'
 m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
 d = Domain.from_size(20, 1, 1, ["u", "v", "w"]) # nx, nb_left, nb_right, variables
-ics = {"u": "gaussian", "v": "rarefaction"}
+ics = {"u": "gaussian", "v": "rarefaction", "w": "tophat"}
 bcs = {
     "u": {
         "left": "periodic",
@@ -65,6 +65,13 @@ iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
 
 # Visualize
 draw(d, "label")
+```
+
+## How to build from source?
+
+Since v0.4.0, SplitFXM utilizes Cython for accelerated computation. To build from source, you will need to install Cython and run the following command:
+```
+python setup.py build_ext --inplace
 ```
 
 ## Run benchmark
