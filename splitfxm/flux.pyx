@@ -2,7 +2,6 @@ import numpy as np
 cimport numpy as cnp
 from .error import SFXM
 from .schemes import stencil_sizes, FVSchemes
-from .flux_limiters import psi
 
 
 def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
@@ -31,15 +30,6 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
     dFdU : function, optional
         The Jacobian of the flux function, used for schemes that require
         knowledge of wave propagation direction (e.g., upwind schemes).
-    limiter : FVLimiters, optional
-        The slope limiter function to be applied. Limiters are used in
-        higher-order schemes like MUSCL to prevent spurious oscillations.
-        Available limiters include:
-
-        - MINMOD: Reduces oscillations by limiting the slope to the minimum.
-        - VAN_LEER: Smooth, differentiable limiter with good accuracy.
-        - VAN_ALBADA: A smoother version of MINMOD, avoids excessive flattening.
-        - SUPERBEE: A sharp limiter that maximizes the steepness of the slope.
 
     Returns
     -------
