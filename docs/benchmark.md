@@ -16,3 +16,9 @@ The benchmark can be executed from the parent folder using the command
 The sparsity pattern of the Jacobian is as follows. Both `split` parameter and boundary conditions lead to wrap-around and reshuffle of the sparse entries, which are correctly captured and match with the dense Jacobian entries. Note that the image is shown for N=20 for better representation. Also, 
 
 ![img](images/benchmark.jpg)
+
+# Solver Verification
+
+One of the tests in the `tests` folder is a verification test for the solver. This involves advecting the initial condition of a multi-dimensional problem in a 1D domain with a constant velocity and comparing the solution to the initial condition after one cycle over the domain.
+
+![img](images/verification.jpg)
