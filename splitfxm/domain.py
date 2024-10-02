@@ -243,7 +243,8 @@ class Domain:
         for cell in self.cells(interior):
             value_list.append(cell.values())
 
-        return value_list
+        # Convert the list of arrays into a single 2D NumPy array
+        return np.vstack(value_list)
 
     def listify_interior(self, split, split_loc):
         """
@@ -262,24 +263,20 @@ class Domain:
             The values of all interior cells in the domain in a list.
         """
         nb_left, nb_right = self.nb(btype.LEFT), self.nb(btype.RIGHT)
-        interior_values = self.values()[nb_left: -nb_right]
+        interior_values = self.values()[nb_left: -nb_right, :]
 
         if not split:
-            return np.array(interior_values).flatten()
+            return interior_values.flatten()
         else:
             if split_loc is None:
                 raise SFXM("Split location must be specified in this case")
 
-            num_points = len(interior_values)
-            ret = []
-            # First add all the outer-block values
-            for i in range(num_points):
-                ret.extend(interior_values[i][:split_loc])
-            # Then add all the inner block values
-            for i in range(num_points):
-                ret.extend(interior_values[i][split_loc:])
+            # Extract outer and inner block values
+            outer_values = interior_values[:, :split_loc].flatten()
+            inner_values = interior_values[:, split_loc:].flatten()
 
-            return np.array(ret)
+            # Concatenate outer and inner values into a single array
+            return np.concatenate((outer_values, inner_values))
 
     def update(self, dt, interior_residual_block):
         """
