@@ -30,8 +30,8 @@ class AdvectionDiffusion(Model):
         def S(u): return np.array([0.0])
         def dFdU(u): return np.diag([self.c] * len(u))
         if method == 'FDM':
-            self._equations = [FDTransportEquation(F, D, S)]
+            self._equation = FDTransportEquation(F, D, S)
         elif method == 'FVM':
-            self._equations = [FVTransportEquation(F, D, S, dFdU)]
+            self._equation = FVTransportEquation(F, D, S, dFdU)
         else:
             raise SFXM("Invalid numerical method specified")
