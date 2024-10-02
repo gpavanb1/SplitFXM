@@ -50,18 +50,21 @@ class System:
         nb_left = d.nb(btype.LEFT)
         nb_right = d.nb(btype.RIGHT)
 
+        # Fetch equation for model
+        eq = self._model.equation()
+
         rhs_list = []
 
         for i in range(ilo, ihi + 1):
-            rhs = np.array([])
-            # Append residuals from each equation
-            for eq in self._model.equations():
-                # Send two-sided stencil
-                # Let model decide computation
-                cell_sub = [cells[i + offset]
-                            for offset in range(-nb_left, nb_right + 1)]
-                rhs = np.concatenate(
-                    (rhs, eq.residuals(cell_sub, self._scheme, self._scheme_opts)))
+            # Define the neighborhood and band around the current cell
+            cell_sub = [cells[i + offset]
+                        for offset in range(-nb_left, nb_right + 1)]
+            # Send two-sided stencil
+            # Let model decide computation
+            rhs = eq.residuals(cell_sub, self._scheme, self._scheme_opts)
             rhs_list.append(rhs)
 
-        return rhs_list
+        # Stack the residuals to form a 2D array
+        rhs_array = np.vstack(rhs_list)
+
+        return rhs_array

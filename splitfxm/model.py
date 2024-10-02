@@ -3,15 +3,15 @@ class Model:
         """
         Initialize a Model object.
         """
-        self._equations = []
+        self._equation = None
 
-    def equations(self):
+    def equation(self):
         """
-        Get the list of equations associated with this Model.
+        Get the equation associated with this model
 
         Returns
         -------
         list
             The list of equations
         """
-        return self._equations
+        return self._equation
