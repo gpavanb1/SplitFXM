@@ -1,5 +1,5 @@
 from .error import SFXM
-from .schemes import stencil_sizes, FDSchemes
+from .schemes import stencil_sizes
 cimport numpy as np
 
 # Function for handling callable functions
@@ -77,7 +77,7 @@ cdef np.ndarray derivative_callable(
         raise SFXM("Unsupported order")
 
 # Function for handling precomputed values
-cdef np.ndarray derivative_values(
+cdef double derivative_values(
     np.ndarray values,  # Precomputed values of the function at the stencil points
     list cell_sub,  # List of Cell, the stencil points
     int scheme,  # FDSchemes: the finite difference scheme to use
@@ -117,7 +117,7 @@ cdef np.ndarray derivative_values(
         if scheme == 1:  # FDSchemes.CENTRAL
             dx = cell_sub[2].x() - cell_sub[0].x()
             return (values[2] - values[0]) / dx
-        elif scheme == 2:
+        elif scheme == 2:  # FDSchemes.RIGHT_BIAS
             dx = cell_sub[1].x() - cell_sub[0].x()
             return (-values[0] - values[1] + values[2] + values[3]) / (4 * dx)
         else:
@@ -132,7 +132,7 @@ cdef np.ndarray derivative_values(
             De = (values[2] - values[1]) / dx_e
 
             return (De - Dw) / ((dx_w + dx_e) / 2)
-        elif scheme == 2:
+        elif scheme == 2:  # FDSchemes.RIGHT_BIAS
             dx = cell_sub[1].x() - cell_sub[0].x()
             return (values[0] - values[1] - values[2] + values[3]) / (2 * dx**2)
         else:
