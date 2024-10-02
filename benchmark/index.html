@@ -144,6 +144,9 @@
 <p><code>python -m pytest -s benchmark</code></p>
 <p>The sparsity pattern of the Jacobian is as follows. Both <code>split</code> parameter and boundary conditions lead to wrap-around and reshuffle of the sparse entries, which are correctly captured and match with the dense Jacobian entries. Note that the image is shown for N=20 for better representation. Also, </p>
 <p><img alt="img" src="../images/benchmark.jpg" /></p>
+<h1 id="solver-verification">Solver Verification</h1>
+<p>One of the tests in the <code>tests</code> folder is a verification test for the solver. This involves advecting the initial condition of a multi-dimensional problem in a 1D domain with a constant velocity and comparing the solution to the initial condition after one cycle over the domain.</p>
+<p><img alt="img" src="../images/verification.jpg" /></p>
               
             </div>
           </div><footer>

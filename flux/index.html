@@ -67,25 +67,23 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Finite-Volume Schemes</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#solving-equations-in-characteristic-space">Solving Equations in Characteristic Space</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#step-1-eigenvalue-decomposition">Step 1: Eigenvalue Decomposition</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#step-2-transformation-to-characteristic-variables">Step 2: Transformation to Characteristic Variables</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#step-3-scheme-application-upwind-fluxes-in-characteristic-space">Step 3: Scheme Application - Upwind Fluxes in Characteristic Space</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#step-4-transformation-back-to-conservative-variables">Step 4: Transformation Back to Conservative Variables</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux">flux</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux.fluxes">fluxes</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#splitfxm.flux.diffusion_fluxes">diffusion_fluxes</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#solving-equations-in-characteristic-space">Solving Equations in Characteristic Space</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#step-1-eigenvalue-decomposition">Step 1: Eigenvalue Decomposition</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#step-2-transformation-to-characteristic-variables">Step 2: Transformation to Characteristic Variables</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#step-3-scheme-application-upwind-fluxes-in-characteristic-space">Step 3: Scheme Application - Upwind Fluxes in Characteristic Space</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#step-4-transformation-back-to-conservative-variables">Step 4: Transformation Back to Conservative Variables</a>
-    </li>
-        </ul>
-    </li>
-        </ul>
     </li>
     </ul>
                   </li>
@@ -142,6 +140,49 @@
               
                 <h1 id="finite-volume-schemes">Finite-Volume Schemes</h1>
 <p>This section contains details related to the implementation of finite-volume schemes. Note that the flux-related methods are implemented using Cython.</p>
+<h2 id="solving-equations-in-characteristic-space">Solving Equations in Characteristic Space</h2>
+<p>To solve hyperbolic systems of equations, we use an upwind scheme in characteristic space. The process begins by computing the Jacobian matrix <script type="math/tex"> \mathbf{A} = \frac{\partial \mathbf{F}}{\partial \mathbf{U}} </script>, where <script type="math/tex"> \mathbf{F} </script> is the flux function and <script type="math/tex"> \mathbf{U} </script> represents the conservative variables. The Jacobian <script type="math/tex"> \mathbf{A} </script> is evaluated at the central state <script type="math/tex"> \mathbf{U}_c </script>.</p>
+<h3 id="step-1-eigenvalue-decomposition">Step 1: Eigenvalue Decomposition</h3>
+<p>Next, the Jacobian matrix <script type="math/tex"> \mathbf{A} </script> is decomposed into its eigenvalues and eigenvectors:</p>
+<p>
+<script type="math/tex; mode=display">
+\mathbf{A} = \mathbf{R} \mathbf{\Lambda} \mathbf{R}^{-1}
+</script>
+</p>
+<p>where <script type="math/tex"> \mathbf{\Lambda} </script> is the diagonal matrix of eigenvalues <script type="math/tex"> \lambda_i </script>, and <script type="math/tex"> \mathbf{R} </script> is the matrix of right eigenvectors.</p>
+<h3 id="step-2-transformation-to-characteristic-variables">Step 2: Transformation to Characteristic Variables</h3>
+<p>The conservative variables <script type="math/tex"> \mathbf{U}_l </script> (left state), <script type="math/tex"> \mathbf{U}_c </script> (central state), and <script type="math/tex"> \mathbf{U}_r </script> (right state) are transformed into characteristic variables using the inverse of the eigenvector matrix:</p>
+<p>
+<script type="math/tex; mode=display">
+\mathbf{W}_l = \mathbf{R}^{-1} \mathbf{U}_l, \quad \mathbf{W}_c = \mathbf{R}^{-1} \mathbf{U}_c, \quad \mathbf{W}_r = \mathbf{R}^{-1} \mathbf{U}_r
+</script>
+</p>
+<p>where <script type="math/tex"> \mathbf{W} </script> represents the characteristic variables.</p>
+<h3 id="step-3-scheme-application-upwind-fluxes-in-characteristic-space">Step 3: Scheme Application - Upwind Fluxes in Characteristic Space</h3>
+<p>Once the characteristic variables are computed, the fluxes are computed using any specified scheme. For the sake of disucssion, we will use the upwind scheme.</p>
+<p>For each characteristic, the direction of the wave is determined by the sign of the corresponding eigenvalue <script type="math/tex"> \lambda_i </script>:</p>
+<ul>
+<li>If <script type="math/tex"> \lambda_i > 0 </script>, the wave moves to the right, and the flux at the west (left) side is determined using the left state, while the flux at the east (right) side is determined using the central state. This corresponds to the 'upwind' direction.</li>
+<li>If <script type="math/tex"> \lambda_i < 0 </script>, the wave moves to the left, and the flux at the west side is determined using the central state, while the flux at the east side is determined using the right state. As the wave moves to the left in this case, the upwind direction is to the right.</li>
+</ul>
+<p>The characteristic fluxes are computed as:</p>
+<p>
+<script type="math/tex; mode=display">
+\mathbf{F}_w^\text{char} = \mathbf{F}(\mathbf{W}_l) \quad \text{if} \quad \lambda_i > 0, \quad \mathbf{F}_w^\text{char} = \mathbf{F}(\mathbf{W}_c) \quad \text{if} \quad \lambda_i < 0
+</script>
+<script type="math/tex; mode=display">
+\mathbf{F}_e^\text{char} = \mathbf{F}(\mathbf{W}_c) \quad \text{if} \quad \lambda_i > 0, \quad \mathbf{F}_e^\text{char} = \mathbf{F}(\mathbf{W}_r) \quad \text{if} \quad \lambda_i < 0
+</script>
+</p>
+<h3 id="step-4-transformation-back-to-conservative-variables">Step 4: Transformation Back to Conservative Variables</h3>
+<p>After computing the fluxes in characteristic space, they are transformed back to the original conservative variable space using the eigenvector matrix <script type="math/tex"> \mathbf{R} </script>:</p>
+<p>
+<script type="math/tex; mode=display">
+\mathbf{F}_w = \mathbf{R} \mathbf{F}_w^\text{char}, \quad \mathbf{F}_e = \mathbf{R} \mathbf{F}_e^\text{char}
+</script>
+</p>
+<p>Thus, the west (left) and east (right) fluxes <script type="math/tex"> \mathbf{F}_w </script> and <script type="math/tex"> \mathbf{F}_e </script> are obtained in the original space.</p>
+<p>This method allows the fluxes to be accurately computed by considering wave propagation direction, ensuring stability and correctness in solving hyperbolic systems.</p>
 
 
 <div class="doc doc-object doc-module">
@@ -390,49 +431,7 @@ knowledge of wave propagation direction (e.g., upwind schemes).</p>
 
     </div>
 
-</div><h3 id="solving-equations-in-characteristic-space">Solving Equations in Characteristic Space</h3>
-<p>To solve hyperbolic systems of equations, we use an upwind scheme in characteristic space. The process begins by computing the Jacobian matrix <script type="math/tex"> \mathbf{A} = \frac{\partial \mathbf{F}}{\partial \mathbf{U}} </script>, where <script type="math/tex"> \mathbf{F} </script> is the flux function and <script type="math/tex"> \mathbf{U} </script> represents the conservative variables. The Jacobian <script type="math/tex"> \mathbf{A} </script> is evaluated at the central state <script type="math/tex"> \mathbf{U}_c </script>.</p>
-<h4 id="step-1-eigenvalue-decomposition">Step 1: Eigenvalue Decomposition</h4>
-<p>Next, the Jacobian matrix <script type="math/tex"> \mathbf{A} </script> is decomposed into its eigenvalues and eigenvectors:</p>
-<p>
-<script type="math/tex; mode=display">
-\mathbf{A} = \mathbf{R} \mathbf{\Lambda} \mathbf{R}^{-1}
-</script>
-</p>
-<p>where <script type="math/tex"> \mathbf{\Lambda} </script> is the diagonal matrix of eigenvalues <script type="math/tex"> \lambda_i </script>, and <script type="math/tex"> \mathbf{R} </script> is the matrix of right eigenvectors.</p>
-<h4 id="step-2-transformation-to-characteristic-variables">Step 2: Transformation to Characteristic Variables</h4>
-<p>The conservative variables <script type="math/tex"> \mathbf{U}_l </script> (left state), <script type="math/tex"> \mathbf{U}_c </script> (central state), and <script type="math/tex"> \mathbf{U}_r </script> (right state) are transformed into characteristic variables using the inverse of the eigenvector matrix:</p>
-<p>
-<script type="math/tex; mode=display">
-\mathbf{W}_l = \mathbf{R}^{-1} \mathbf{U}_l, \quad \mathbf{W}_c = \mathbf{R}^{-1} \mathbf{U}_c, \quad \mathbf{W}_r = \mathbf{R}^{-1} \mathbf{U}_r
-</script>
-</p>
-<p>where <script type="math/tex"> \mathbf{W} </script> represents the characteristic variables.</p>
-<h4 id="step-3-scheme-application-upwind-fluxes-in-characteristic-space">Step 3: Scheme Application - Upwind Fluxes in Characteristic Space</h4>
-<p>Once the characteristic variables are computed, the fluxes are computed using any specified scheme. For the sake of disucssion, we will use the upwind scheme.</p>
-<p>For each characteristic, the direction of the wave is determined by the sign of the corresponding eigenvalue <script type="math/tex"> \lambda_i </script>:</p>
-<ul>
-<li>If <script type="math/tex"> \lambda_i > 0 </script>, the wave moves to the right, and the flux at the west (left) side is determined using the left state, while the flux at the east (right) side is determined using the central state. This corresponds to the 'upwind' direction.</li>
-<li>If <script type="math/tex"> \lambda_i < 0 </script>, the wave moves to the left, and the flux at the west side is determined using the central state, while the flux at the east side is determined using the right state. As the wave moves to the left in this case, the upwind direction is to the right.</li>
-</ul>
-<p>The characteristic fluxes are computed as:</p>
-<p>
-<script type="math/tex; mode=display">
-\mathbf{F}_w^\text{char} = \mathbf{F}(\mathbf{W}_l) \quad \text{if} \quad \lambda_i > 0, \quad \mathbf{F}_w^\text{char} = \mathbf{F}(\mathbf{W}_c) \quad \text{if} \quad \lambda_i < 0
-</script>
-<script type="math/tex; mode=display">
-\mathbf{F}_e^\text{char} = \mathbf{F}(\mathbf{W}_c) \quad \text{if} \quad \lambda_i > 0, \quad \mathbf{F}_e^\text{char} = \mathbf{F}(\mathbf{W}_r) \quad \text{if} \quad \lambda_i < 0
-</script>
-</p>
-<h4 id="step-4-transformation-back-to-conservative-variables">Step 4: Transformation Back to Conservative Variables</h4>
-<p>After computing the fluxes in characteristic space, they are transformed back to the original conservative variable space using the eigenvector matrix <script type="math/tex"> \mathbf{R} </script>:</p>
-<p>
-<script type="math/tex; mode=display">
-\mathbf{F}_w = \mathbf{R} \mathbf{F}_w^\text{char}, \quad \mathbf{F}_e = \mathbf{R} \mathbf{F}_e^\text{char}
-</script>
-</p>
-<p>Thus, the west (left) and east (right) fluxes <script type="math/tex"> \mathbf{F}_w </script> and <script type="math/tex"> \mathbf{F}_e </script> are obtained in the original space.</p>
-<p>This method allows the fluxes to be accurately computed by considering wave propagation direction, ensuring stability and correctness in solving hyperbolic systems.</p>
+</div>
               
             </div>
           </div><footer>
