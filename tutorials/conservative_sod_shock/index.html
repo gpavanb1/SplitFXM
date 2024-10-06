@@ -139,8 +139,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="sod-shock-tube">Sod Shock Tube</h1>
-<p>This tutorial will walk you through the process of setting up a Sod Shock Tube problem using <code>splitfxm</code>.</p>
+                <h1 id="conservative-sod-shock-tube">Conservative Sod Shock Tube</h1>
+<p>This tutorial will walk you through the process of setting up a Sod Shock Tube problem in conservative form using <code>splitfxm</code>.</p>
 <h2 id="problem-setup">Problem Setup</h2>
 <p>First, we need to import the necessary modules and create a domain for the problem.</p>
 <pre><code class="language-python">from splitfxm.domain import Domain
@@ -151,36 +151,25 @@ from splitfxm.schemes import default_scheme
 <p>Next, we need to define the method we are going to use. It is preferable to use FVM for shock tubes.</p>
 <p>We need to define the equations to use for this problem. The <code>Euler1DConservative</code> class is provided for this purpose. It is a class that represents the 1D Euler equations for compressible fluid flow and is a special case of the Advection-Diffusion equations.</p>
 <p>Note that the expressions for <code>Euler1DConservative</code> are quite complicated and only the final results are provided here. The derivation of the expressions is provided in the <code>flux_jacobian.py</code> file.</p>
-<p>Note that the <code>dFdU</code> function represents the derivative of the flux function with respect to the state vector <code>U</code>. This can be symbolically computed using <code>sympy</code> and the flux function, the program for which is provided in the <code>flux_jacobian.py</code>. The expressions are as follows:</p>
+<p>Also, the <code>dFdU</code> function represents the derivative of the flux function with respect to the state vector <code>U</code>. This can be symbolically computed using <code>sympy</code> and the flux function, the program for which is provided in the <code>flux_jacobian.py</code>. The expressions are as follows:</p>
 <p>The flux is given by:</p>
-<pre><code class="language-plain">⎡                  U₂                  ⎤
-⎢                                      ⎥
-⎢     2           ⎛              2⎞    ⎥
-⎢   U₂  + (γ - 1)⋅⎝U₁⋅U₃ - 0.5⋅U₂ ⎠    ⎥
-⎢   ───────────────────────────────    ⎥
-⎢                 U₁                   ⎥
-⎢                                      ⎥
-⎢   ⎛                ⎛              2⎞⎞⎥
-⎢U₂⋅⎝U₁⋅U₃ + (γ - 1)⋅⎝U₁⋅U₃ - 0.5⋅U₂ ⎠⎠⎥
-⎢──────────────────────────────────────⎥
-⎢                   2                  ⎥
-⎣                 U₁                   ⎦
-</code></pre>
+<p>
+<script type="math/tex; mode=display">\begin{bmatrix}
+U_2 \\
+\\
+\frac{U_2^2 + (\gamma - 1) \cdot \left(U_1 \cdot U_3 - 0.5 \cdot U_2^2\right)}{U_1} \\
+\\
+\frac{U_2 \cdot \left(U_1 \cdot U_3 + (\gamma - 1) \cdot \left(U_1 \cdot U_3 - 0.5 \cdot U_2^2\right)\right)}{U_1^2}
+\end{bmatrix}</script>
+</p>
 <p>and similarly the Jacobian of the flux is given by:</p>
-<pre><code class="language-plain">⎡               0                                    1                       0  ⎤
-⎢                                                                               ⎥
-⎢         2                                                                     ⎥
-⎢       U₂ ⋅(0.5⋅γ - 1.5)                    U₂⋅(3.0 - 1.0⋅γ)                   ⎥
-⎢       ─────────────────                    ────────────────              γ - 1⎥
-⎢                2                                  U₁                          ⎥
-⎢              U₁                                                               ⎥
-⎢                                                                               ⎥
-⎢       ⎛             2       2⎞      ⎛                    2           2⎞       ⎥
-⎢1.0⋅U₂⋅⎝-U₁⋅U₃⋅γ + U₂ ⋅γ - U₂ ⎠  1.0⋅⎝1.0⋅U₁⋅U₃⋅γ - 1.5⋅U₂ ⋅γ + 1.5⋅U₂ ⎠  U₂⋅γ ⎥
-⎢───────────────────────────────  ───────────────────────────────────────  ──── ⎥
-⎢                3                                    2                     U₁  ⎥
-⎣              U₁                                   U₁                          ⎦
-</code></pre>
+<p>
+<script type="math/tex; mode=display">\begin{bmatrix}
+0 & 1 & 0 \\
+\frac{U_2 \cdot (0.5 \cdot \gamma - 1.5)}{U_1^2} & \frac{U_2 \cdot (3. - \gamma)}{U_1} & \gamma - 1\\
+\frac{U_2 \cdot (-U_1 \cdot U_3 \cdot \gamma + (\gamma - 1) \cdot U_2^2)}{U_1^3} & \frac{(U_1 \cdot U_3 \cdot \gamma - 1.5 \cdot (\gamma - 1) U_2^2)}{U_1^2} & \frac{U_2 \cdot \gamma}{U_1} \\
+\end{bmatrix}</script>
+</p>
 <p>Then, the domain can be created using the <code>Domain.from_size</code> method.</p>
 <pre><code class="language-python"># Define the problem
 method = 'FVM'
@@ -222,6 +211,7 @@ plt.plot(d.positions(interior=True), values, &quot;-o&quot;)
 </code></pre>
 <p>The results should look like this:</p>
 <p><img alt="img" src="../../images/conservative_sod_shock.jpg" /></p>
+<p>It can be noted that the shock velocity and locations have been correctly captured using the default scheme.</p>
               
             </div>
           </div><footer>
