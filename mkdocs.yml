@@ -17,6 +17,9 @@ nav:
         - Overview: derivatives.md
         - Scheme Generation: generate.md
       - Visualization: visualize.md
+      - Tutorials:
+        - Advection-Diffusion: tutorials/advection_diffusion.md
+        - Sod Shock Tube: tutorials/sod_shock.md
       - Adaptive Mesh Refinement: refine.md
       - Internals:
         - Overview: internals.md
