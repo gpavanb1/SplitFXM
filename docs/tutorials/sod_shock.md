@@ -9,7 +9,7 @@ First, we need to import the necessary modules and create a domain for the probl
 ```python
 from splitfxm.domain import Domain
 from splitfxm.simulation import Simulation
-from euler import Euler1D
+from euler1d import Euler1D
 from splitfxm.schemes import default_scheme
 from splitfxm.visualize import draw
 ```

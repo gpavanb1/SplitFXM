@@ -20,6 +20,7 @@ nav:
       - Tutorials:
         - Advection-Diffusion: tutorials/advection_diffusion.md
         - Sod Shock Tube: tutorials/sod_shock.md
+        - Conservative Sod Shock Tube: tutorials/conservative_sod_shock.md
       - Adaptive Mesh Refinement: refine.md
       - Internals:
         - Overview: internals.md
