@@ -3,6 +3,7 @@ from splitfxm.simulation import Simulation
 from euler1d import Euler1DConservative
 from splitfxm.schemes import default_scheme, FVSchemes
 from splitfxm.visualize import draw
+from verification_data import *
 import matplotlib.pyplot as plt
 
 # Define the problem
@@ -38,10 +39,17 @@ s.evolve(split=False, split_loc=1, t_diff=0.2)
 # Visualize the results at a specific time step
 values = [m.conservative_to_primitive(cell_values)
           for cell_values in s._d.values(interior=True)]
-plt.plot(d.positions(interior=True), values, "-o")
+plt.plot(d.positions(interior=True), values, "-")
+
+# Plot the verification data
+plt.gca().set_prop_cycle(None)
+plt.plot(density_x, density_y, "s", markersize=3)
+plt.plot(velocity_x, velocity_y, "s", markersize=3)
+plt.plot(pressure_x, pressure_y, "s", markersize=3)
 
 # Properly formatted labels and legend entries
-plt.legend([r"$\rho/\rho_{0}$", r"$u$", r"$p/p_{0}$"])
+plt.legend([r"$\rho/\rho_{0}$", r"$u$", r"$p/p_{0}$",
+           r"$\rho/\rho_{0}$ Exact", r"$u$ Exact", r"$p/p_{0}$ Exact"])
 plt.xlabel("x")
 plt.ylabel(r"Normalized $\rho$, $u$, Normalized $p$")
 

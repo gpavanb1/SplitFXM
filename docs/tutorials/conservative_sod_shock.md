@@ -1,6 +1,6 @@
-# Sod Shock Tube
+# Conservative Sod Shock Tube
 
-This tutorial will walk you through the process of setting up a Sod Shock Tube problem using `splitfxm`.
+This tutorial will walk you through the process of setting up a Sod Shock Tube problem in conservative form using `splitfxm`.
 
 ## Problem Setup
 
@@ -19,40 +19,28 @@ We need to define the equations to use for this problem. The `Euler1DConservativ
 
 Note that the expressions for `Euler1DConservative` are quite complicated and only the final results are provided here. The derivation of the expressions is provided in the `flux_jacobian.py` file.
 
-Note that the `dFdU` function represents the derivative of the flux function with respect to the state vector `U`. This can be symbolically computed using `sympy` and the flux function, the program for which is provided in the `flux_jacobian.py`. The expressions are as follows:
+Also, the `dFdU` function represents the derivative of the flux function with respect to the state vector `U`. This can be symbolically computed using `sympy` and the flux function, the program for which is provided in the `flux_jacobian.py`. The expressions are as follows:
 
 The flux is given by:
-```plain
-⎡                  U₂                  ⎤
-⎢                                      ⎥
-⎢     2           ⎛              2⎞    ⎥
-⎢   U₂  + (γ - 1)⋅⎝U₁⋅U₃ - 0.5⋅U₂ ⎠    ⎥
-⎢   ───────────────────────────────    ⎥
-⎢                 U₁                   ⎥
-⎢                                      ⎥
-⎢   ⎛                ⎛              2⎞⎞⎥
-⎢U₂⋅⎝U₁⋅U₃ + (γ - 1)⋅⎝U₁⋅U₃ - 0.5⋅U₂ ⎠⎠⎥
-⎢──────────────────────────────────────⎥
-⎢                   2                  ⎥
-⎣                 U₁                   ⎦
-```
+
+\begin{bmatrix}
+U_2 \\
+\\
+\frac{U_2^2 + (\gamma - 1) \cdot \left(U_1 \cdot U_3 - 0.5 \cdot U_2^2\right)}{U_1} \\
+\\
+\frac{U_2 \cdot \left(U_1 \cdot U_3 + (\gamma - 1) \cdot \left(U_1 \cdot U_3 - 0.5 \cdot U_2^2\right)\right)}{U_1^2}
+\end{bmatrix}
+
+
 
 and similarly the Jacobian of the flux is given by:
-```plain
-⎡               0                                    1                       0  ⎤
-⎢                                                                               ⎥
-⎢         2                                                                     ⎥
-⎢       U₂ ⋅(0.5⋅γ - 1.5)                    U₂⋅(3.0 - 1.0⋅γ)                   ⎥
-⎢       ─────────────────                    ────────────────              γ - 1⎥
-⎢                2                                  U₁                          ⎥
-⎢              U₁                                                               ⎥
-⎢                                                                               ⎥
-⎢       ⎛             2       2⎞      ⎛                    2           2⎞       ⎥
-⎢1.0⋅U₂⋅⎝-U₁⋅U₃⋅γ + U₂ ⋅γ - U₂ ⎠  1.0⋅⎝1.0⋅U₁⋅U₃⋅γ - 1.5⋅U₂ ⋅γ + 1.5⋅U₂ ⎠  U₂⋅γ ⎥
-⎢───────────────────────────────  ───────────────────────────────────────  ──── ⎥
-⎢                3                                    2                     U₁  ⎥
-⎣              U₁                                   U₁                          ⎦
-```
+
+
+\begin{bmatrix}
+0 & 1 & 0 \\
+\frac{U_2 \cdot (0.5 \cdot \gamma - 1.5)}{U_1^2} & \frac{U_2 \cdot (3. - \gamma)}{U_1} & \gamma - 1\\
+\frac{U_2 \cdot (-U_1 \cdot U_3 \cdot \gamma + (\gamma - 1) \cdot U_2^2)}{U_1^3} & \frac{(U_1 \cdot U_3 \cdot \gamma - 1.5 \cdot (\gamma - 1) U_2^2)}{U_1^2} & \frac{U_2 \cdot \gamma}{U_1} \\
+\end{bmatrix}
 
 Then, the domain can be created using the `Domain.from_size` method.
 
@@ -117,3 +105,5 @@ plt.plot(d.positions(interior=True), values, "-o")
 The results should look like this:
 
 ![img](../images/conservative_sod_shock.jpg)
+
+It can be noted that the shock velocity and locations have been correctly captured using the default scheme.
