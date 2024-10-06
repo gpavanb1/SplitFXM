@@ -1,5 +1,5 @@
 # Verification data obtained from
-Sod, Gary A. "A survey of several finite difference methods for systems of nonlinear hyperbolic conservation laws." Journal of Computational Physics 27.1 (1978): 1-31.
+# Sod, Gary A. "A survey of several finite difference methods for systems of nonlinear hyperbolic conservation laws." Journal of Computational Physics 27.1 (1978): 1-31.
 
 # Density data
 density_x = [0.03125, 0.07142857142857142, 0.10714285714285714, 0.15625, 0.18303571428571427, 0.2232142857142857, 0.25, 0.2589285714285714, 0.28125, 0.30357142857142855, 0.3169642857142857, 0.34375, 0.36607142857142855, 0.39285714285714285, 0.4196428571428571, 0.4508928571428571, 0.46875, 0.5,
