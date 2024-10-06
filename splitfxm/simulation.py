@@ -209,7 +209,7 @@ class Simulation:
             # Flatten the entire residual block
             residual_list = interior_residual_block.flatten()
 
-        return residual_list
+        return np.array(residual_list, dtype=np.float64)
 
     def extend_bounds(self, bounds, num_points, nv, split=False, split_loc=None):
         """
