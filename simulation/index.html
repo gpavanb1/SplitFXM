@@ -77,6 +77,14 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../visualize/">Visualization</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" >Tutorials</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../tutorials/advection_diffusion/">Advection-Diffusion</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../tutorials/sod_shock/">Sod Shock Tube</a>
+                </li>
+    </ul>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../refine/">Adaptive Mesh Refinement</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" >Internals</a>
@@ -420,7 +428,7 @@
             # Flatten the entire residual block
             residual_list = interior_residual_block.flatten()
 
-        return residual_list
+        return np.array(residual_list, dtype=np.float64)
 
     def extend_bounds(self, bounds, num_points, nv, split=False, split_loc=None):
         """
@@ -1091,7 +1099,7 @@
         # Flatten the entire residual block
         residual_list = interior_residual_block.flatten()
 
-    return residual_list</code></pre>
+    return np.array(residual_list, dtype=np.float64)</code></pre>
             </details>
     </div>
 

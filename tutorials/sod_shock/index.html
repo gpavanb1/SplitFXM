@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Sod Shock Tube - splitfxm</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="../../assets/docs.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Sod Shock Tube";
+        var mkdocs_page_input_path = "tutorials/sod_shock.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> splitfxm
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../start/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../benchmark/">Benchmark</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../pricing/">Pricing</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Documentation</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../model/">Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../domain/">Domain</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ic/">Initial Conditions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../bc/">Boundary Conditions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../flux/">Finite-Volume Schemes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Finite-Difference Schemes</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../derivatives/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../generate/">Scheme Generation</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../visualize/">Visualization</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Tutorials</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../advection_diffusion/">Advection-Diffusion</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Sod Shock Tube</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#problem-setup">Problem Setup</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#initial-conditions">Initial Conditions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#evolve-the-system">Evolve the System</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visualize-the-results">Visualize the Results</a>
+    </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../refine/">Adaptive Mesh Refinement</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Internals</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../internals/">Overview</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../cell/">Cell</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../boundary/">Boundary</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../system/">System</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../simulation/">Simulation</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">splitfxm</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Code Documentation</li>
+          <li class="breadcrumb-item">Tutorials</li>
+      <li class="breadcrumb-item active">Sod Shock Tube</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="sod-shock-tube">Sod Shock Tube</h1>
+<p>This tutorial will walk you through the process of setting up a Sod Shock Tube problem using <code>splitfxm</code>.</p>
+<h2 id="problem-setup">Problem Setup</h2>
+<p>First, we need to import the necessary modules and create a domain for the problem.</p>
+<pre><code class="language-python">from splitfxm.domain import Domain
+from splitfxm.simulation import Simulation
+from euler import Euler1D
+from splitfxm.schemes import default_scheme
+from splitfxm.visualize import draw
+</code></pre>
+<p>Next, we need to define the method we are going to use. It is preferable to use FVM for shock tubes.</p>
+<p>We need to define the equations to use for this problem. The <code>Euler1D</code> class is provided for this purpose. It is a class that represents the 1D Euler equations for compressible fluid flow and is a special case of the Advection-Diffusion equations.</p>
+<p>The code for the <code>Euler1D</code> class is as follows:</p>
+<pre><code class="language-python">class Euler1D(Model):
+    &quot;&quot;&quot;
+    A class representing the 1D Euler equations for compressible fluid flow.
+    Parameters
+    ----------
+    gamma : float
+        The adiabatic index (ratio of specific heats).
+    method : str
+        The numerical method to use, either 'FDM' or 'FVM'.
+    &quot;&quot;&quot;
+    def __init__(self, gamma=1.4, method='FDM'):
+        &quot;&quot;&quot;
+        Initialize an `Euler1D` object.
+        &quot;&quot;&quot;
+        self.gamma = gamma
+        # Define the flux function for Euler equations
+        def F(U):
+            rho, u, p = U
+            E = p / (self.gamma - 1) + 0.5 * rho * u**2  # Total energy
+            return np.array([rho * u, rho * u**2 + p, u * (E + p)])
+        # Diffusion term (not used in standard Euler equations, but can be extended)
+        def D(U):
+            return np.zeros_like(U)  # No diffusion term in the Euler equations
+        # Source term (assuming no external forces, source term is zero)
+        def S(U):
+            return np.zeros_like(U)
+        # Derivative of the flux function with respect to the state vector U
+        def dFdU(U):
+            rho, u, p = U
+            # Obtained from flux_jacobian.py
+            dF_matrix = np.array([
+                [u, rho, 0],
+                [u**2, 2*rho*u, 1],
+                [0.5*(u**3.), 1.5*rho*(u**2.) + gamma*p /
+                 (gamma - 1.), gamma*u/(gamma - 1.)]
+            ])
+</code></pre>
+<p>Note that the <code>dFdU</code> function represents the derivative of the flux function with respect to the state vector <code>U</code>. This can be symbolically computed using <code>sympy</code> and the flux function, the program for which is provided in the <code>flux_jacobian.py</code> file, which is as follows:</p>
+<pre><code class="language-python">import sympy as sp
+# Define symbols
+rho, u, p, gamma = sp.symbols('rho u p gamma')
+# Define the energy term
+E = p / (gamma - 1) + 0.5 * rho * u**2  # Assuming gamma = 1.4
+# Define the flux function F
+F = sp.Matrix([
+    rho * u,                # F1
+    rho * u**2 + p,        # F2
+    u * (E + p)            # F3
+])
+# Calculate the Jacobian dF/dU
+dF_dU = F.jacobian([rho, u, p])
+
+# Display the result
+sp.pprint(dF_dU)
+</code></pre>
+<p>The output of the above code is as follows:</p>
+<pre><code class="language-plain">⎡  u              ρ                  0      ⎤
+⎢                                           ⎥
+⎢   2                                       ⎥
+⎢  u            2⋅ρ⋅u                1      ⎥
+⎢                                           ⎥
+⎢     3        p            2    ⎛      1  ⎞⎥
+⎢0.5⋅u   p + ───── + 1.5⋅ρ⋅u   u⋅⎜1 + ─────⎟⎥
+⎣            γ - 1               ⎝    γ - 1⎠⎦
+</code></pre>
+<p>Then, the domain can be created using the <code>Domain.from_size</code> method.</p>
+<pre><code class="language-python"># Define the problem
+method = 'FVM'
+# Euler equations with gamma for ideal gas
+m = Euler1D(gamma=1.4, method=method)
+
+# Create a domain for the shock tube
+# nx = number of cells, nb_left = 1 ghost cell, nb_right = 1 ghost cell
+# Variables: [&quot;rho&quot;, &quot;u&quot;, &quot;p&quot;] (density, velocity, pressure)
+d = Domain.from_size(100, 1, 1, [&quot;rho&quot;, &quot;u&quot;, &quot;p&quot;])
+</code></pre>
+<p>Once this is done, we can define the initial conditions and boundary conditions. The initial conditions are going to be set afterwards. The boundary conditions are transmissive (or Neumann with zero derivative) for both sides.</p>
+<pre><code class="language-python"># Boundary conditions (transmissive for both sides)
+ics = {}
+bcs = {&quot;rho&quot;: {&quot;left&quot;: {&quot;neumann&quot;: 0.}, &quot;right&quot;: {&quot;neumann&quot;: 0.}},
+       &quot;u&quot;: {&quot;left&quot;: {&quot;neumann&quot;: 0.}, &quot;right&quot;: {&quot;neumann&quot;: 0.}},
+       &quot;p&quot;: {&quot;left&quot;: {&quot;neumann&quot;: 0.}, &quot;right&quot;: {&quot;neumann&quot;: 0.}}}
+</code></pre>
+<p>Now, we can create a simulation object.</p>
+<pre><code class="language-python">s = Simulation(d, m, ics, bcs, default_scheme(method))
+</code></pre>
+<h2 id="initial-conditions">Initial Conditions</h2>
+<p>We can now set the initial conditions for the domain. The initial conditions are set using the <code>set_value</code> method of the <code>Domain</code> class.</p>
+<pre><code class="language-python">for cell in s._d.interior():
+    cell.set_value(s._d.component_index(&quot;rho&quot;),
+                   1.0 if cell.x() &lt; 0.5 else 0.125)
+    cell.set_value(s._d.component_index(&quot;u&quot;), 0.0)
+    cell.set_value(s._d.component_index(&quot;p&quot;), 1. if cell.x() &lt; 0.5 else 0.1)
+</code></pre>
+<h2 id="evolve-the-system">Evolve the System</h2>
+<p>We can now evolve the system in time using the <code>evolve</code> method. The default method uses <code>RK45</code> for the time integration. You can also use Split-Newton to re-order the variables, although its benefits are more for steady-state problems.</p>
+<pre><code class="language-python">s.evolve(split=True, split_loc=1, t_diff=0.2)
+</code></pre>
+<h2 id="visualize-the-results">Visualize the Results</h2>
+<p>Finally, we can visualize the results using the <code>draw</code> function.</p>
+<pre><code class="language-python">draw(s._d, &quot;Sod Shock Tube&quot;, interior=True)
+</code></pre>
+<p>The results should look like this:</p>
+<p><img alt="img" src="../../images/sod_shock.jpg" /></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../advection_diffusion/" class="btn btn-neutral float-left" title="Advection-Diffusion"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../refine/" class="btn btn-neutral float-right" title="Adaptive Mesh Refinement">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../advection_diffusion/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../refine/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
