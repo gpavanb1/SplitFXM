@@ -69,6 +69,10 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.from_size">from_size</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.xmin">xmin</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.xmax">xmax</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.ilo">ilo</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#splitfxm.domain.Domain.ihi">ihi</a>
@@ -274,7 +278,7 @@
     """
 
     def __init__(
-        self, cells: list[Cell], left_boundaries: list[Boundary], right_boundaries: list[Boundary], components: list[str]
+        self, cells: list[Cell], left_boundaries: list[Boundary], right_boundaries: list[Boundary], components: list[str], xmin: float = 0.0, xmax: float = 1.0
     ):
         """
         Initialize a `Domain` object.
@@ -289,6 +293,9 @@
         self._domain = [*left_boundaries, *
                         cells, *right_boundaries]
         self._components = components
+
+        self._xmin = xmin
+        self._xmax = xmax
 
     @ classmethod
     def from_size(
@@ -332,15 +339,39 @@
         # Create boundaries
         dx = (xmax - xmin) / nx
         left_boundaries = [
-            Boundary(xmin - (i + 1) * dx, btype.LEFT, zeros(nv))
+            Boundary(xmin - (i + 1) * dx, btype.LEFT,
+                     zeros(nv), xmin=xmin, xmax=xmax)
             for i in range(nb_left)
         ]
         right_boundaries = [
-            Boundary(xmax + (i + 1) * dx, btype.RIGHT, zeros(nv))
+            Boundary(xmax + (i + 1) * dx, btype.RIGHT,
+                     zeros(nv), xmin=xmin, xmax=xmax)
             for i in range(nb_right)
         ]
 
-        return Domain(interior, left_boundaries, right_boundaries, components)
+        return Domain(interior, left_boundaries, right_boundaries, components, xmin, xmax)
+
+    def xmin(self):
+        """
+        Get the left-most co-ordinate of the domain
+
+        Returns
+        -------
+        float
+            The left-most co-ordinate of the domain.
+        """
+        return self._xmin
+
+    def xmax(self):
+        """
+        Get the right-most co-ordinate of the domain
+
+        Returns
+        -------
+        float
+            The right-most co-ordinate of the domain.
+        """
+        return self._xmax
 
     def ilo(self):
         """
@@ -559,7 +590,7 @@
 
 
 <h3 id="splitfxm.domain.Domain.__init__" class="doc doc-heading">
-            <code class="highlight language-python">__init__(cells, left_boundaries, right_boundaries, components)</code>
+            <code class="highlight language-python">__init__(cells, left_boundaries, right_boundaries, components, xmin=0.0, xmax=1.0)</code>
 
 </h3>
 
@@ -571,7 +602,7 @@
             <details class="quote">
               <summary>Source code in <code>splitfxm/domain.py</code></summary>
               <pre class="highlight"><code class="language-python">def __init__(
-    self, cells: list[Cell], left_boundaries: list[Boundary], right_boundaries: list[Boundary], components: list[str]
+    self, cells: list[Cell], left_boundaries: list[Boundary], right_boundaries: list[Boundary], components: list[str], xmin: float = 0.0, xmax: float = 1.0
 ):
     """
     Initialize a `Domain` object.
@@ -585,7 +616,10 @@
     # Domain is a list of left boundary, interior cells and right boundaries
     self._domain = [*left_boundaries, *
                     cells, *right_boundaries]
-    self._components = components</code></pre>
+    self._components = components
+
+    self._xmin = xmin
+    self._xmax = xmax</code></pre>
             </details>
     </div>
 
@@ -743,15 +777,123 @@ def from_size(
     # Create boundaries
     dx = (xmax - xmin) / nx
     left_boundaries = [
-        Boundary(xmin - (i + 1) * dx, btype.LEFT, zeros(nv))
+        Boundary(xmin - (i + 1) * dx, btype.LEFT,
+                 zeros(nv), xmin=xmin, xmax=xmax)
         for i in range(nb_left)
     ]
     right_boundaries = [
-        Boundary(xmax + (i + 1) * dx, btype.RIGHT, zeros(nv))
+        Boundary(xmax + (i + 1) * dx, btype.RIGHT,
+                 zeros(nv), xmin=xmin, xmax=xmax)
         for i in range(nb_right)
     ]
 
-    return Domain(interior, left_boundaries, right_boundaries, components)</code></pre>
+    return Domain(interior, left_boundaries, right_boundaries, components, xmin, xmax)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.xmin" class="doc doc-heading">
+            <code class="highlight language-python">xmin()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the left-most co-ordinate of the domain</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>float</code>
+              –
+              <div class="doc-md-description">
+                <p>The left-most co-ordinate of the domain.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def xmin(self):
+    """
+    Get the left-most co-ordinate of the domain
+
+    Returns
+    -------
+    float
+        The left-most co-ordinate of the domain.
+    """
+    return self._xmin</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="splitfxm.domain.Domain.xmax" class="doc doc-heading">
+            <code class="highlight language-python">xmax()</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the right-most co-ordinate of the domain</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+                  <code>float</code>
+              –
+              <div class="doc-md-description">
+                <p>The right-most co-ordinate of the domain.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>splitfxm/domain.py</code></summary>
+              <pre class="highlight"><code class="language-python">def xmax(self):
+    """
+    Get the right-most co-ordinate of the domain
+
+    Returns
+    -------
+    float
+        The right-most co-ordinate of the domain.
+    """
+    return self._xmax</code></pre>
             </details>
     </div>
 

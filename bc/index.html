@@ -166,7 +166,7 @@
 
 
 <h2 id="splitfxm.bc.apply_BC" class="doc doc-heading">
-            <code class="highlight language-python">apply_BC(d, v, bc={'left': 'periodic', 'right': 'periodic'}, xmin=0.0, xmax=1.0)</code>
+            <code class="highlight language-python">apply_BC(d, v, bc={'left': 'periodic', 'right': 'periodic'})</code>
 
 </h2>
 
@@ -212,26 +212,6 @@
                 <p>The type of boundary condition to apply. Acceptable values are "periodic" and "outflow". Default is "periodic".</p>
               </div>
             </li>
-            <li>
-              <b><code>xmin</code></b>
-                  (<code>float</code>, default:
-                      <code>0.0</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The minimum x-value of the domain. Default is 0.0.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>xmax</code></b>
-                  (<code>float</code>, default:
-                      <code>1.0</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The maximum x-value of the domain. Default is 1.0.</p>
-              </div>
-            </li>
         </ul>
       </td>
     </tr>
@@ -262,7 +242,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/bc.py</code></summary>
-              <pre class="highlight"><code class="language-python">def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "periodic"}, xmin=0.0, xmax=1.0):
+              <pre class="highlight"><code class="language-python">def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "periodic"}):
     """
     Apply boundary conditions to the given domain.
 
@@ -274,10 +254,6 @@
         The name of the variable to apply the boundary conditions to.
     bc : str, optional
         The type of boundary condition to apply. Acceptable values are "periodic" and "outflow". Default is "periodic".
-    xmin : float, optional
-        The minimum x-value of the domain. Default is 0.0.
-    xmax : float, optional
-        The maximum x-value of the domain. Default is 1.0.
 
     Raises
     ------
@@ -287,6 +263,10 @@
 
     # Get cells
     cells = d.cells()
+
+    # Get bounds
+    xmin = d.xmin()
+    xmax = d.xmax()
 
     # Find index of component
     idx = d.component_index(v)

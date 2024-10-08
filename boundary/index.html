@@ -309,6 +309,9 @@ This ensures that some of the interior cell methods are not unintentionally call
         if x &lt; xmin and _btype == btype.RIGHT or x &gt; xmax and _btype == btype.LEFT:
             raise SFXM("Inappropriate boundary type given")
 
+        self._xmin = xmin
+        self._xmax = xmax
+
         self._value = value
         self._type = _btype
         # X co-ordinate
@@ -353,7 +356,7 @@ This ensures that some of the interior cell methods are not unintentionally call
         return self._value[i]
 
     # Note cell doesn't have set_x
-    def set_x(self, x: float, xmin=0.0, xmax=1.0):
+    def set_x(self, x: float):
         """
         Set the x-coordinate of the boundary cell.
 
@@ -361,22 +364,18 @@ This ensures that some of the interior cell methods are not unintentionally call
         ----------
         x : float
             The new x-coordinate for the boundary cell.
-        xmin : float, optional
-            The minimum x-value of the domain. Default is 0.0.
-        xmax : float, optional
-            The maximum x-value of the domain. Default is 1.0.
 
         Raises
         ------
         SFXM
             If the new x-value is an interior value or if an inappropriate boundary type is given.
         """
-        if x &gt;= xmin and x &lt;= xmax:
+        if x &gt;= self._xmin and x &lt;= self._xmax:
             raise SFXM("Boundary cell cannot have interior X-value")
 
         # Check if correct type specified
-        if (x &lt; xmin and self._type == btype.RIGHT) or (
-            x &gt; xmax and self._type == btype.LEFT
+        if (x &lt; self._xmin and self._type == btype.RIGHT) or (
+            x &gt; self._xmax and self._type == btype.LEFT
         ):
             raise SFXM("Inappropriate boundary type given")
         self._x = x
@@ -431,6 +430,9 @@ This ensures that some of the interior cell methods are not unintentionally call
     # Check if correct type specified
     if x &lt; xmin and _btype == btype.RIGHT or x &gt; xmax and _btype == btype.LEFT:
         raise SFXM("Inappropriate boundary type given")
+
+    self._xmin = xmin
+    self._xmax = xmax
 
     self._value = value
     self._type = _btype
@@ -633,7 +635,7 @@ This ensures that some of the interior cell methods are not unintentionally call
 
 
 <h3 id="splitfxm.boundary.Boundary.set_x" class="doc doc-heading">
-            <code class="highlight language-python">set_x(x, xmin=0.0, xmax=1.0)</code>
+            <code class="highlight language-python">set_x(x)</code>
 
 </h3>
 
@@ -659,26 +661,6 @@ This ensures that some of the interior cell methods are not unintentionally call
               –
               <div class="doc-md-description">
                 <p>The new x-coordinate for the boundary cell.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>xmin</code></b>
-                  (<code>float</code>, default:
-                      <code>0.0</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The minimum x-value of the domain. Default is 0.0.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>xmax</code></b>
-                  (<code>float</code>, default:
-                      <code>1.0</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The maximum x-value of the domain. Default is 1.0.</p>
               </div>
             </li>
         </ul>
@@ -711,7 +693,7 @@ This ensures that some of the interior cell methods are not unintentionally call
 </table>
             <details class="quote">
               <summary>Source code in <code>splitfxm/boundary.py</code></summary>
-              <pre class="highlight"><code class="language-python">def set_x(self, x: float, xmin=0.0, xmax=1.0):
+              <pre class="highlight"><code class="language-python">def set_x(self, x: float):
     """
     Set the x-coordinate of the boundary cell.
 
@@ -719,22 +701,18 @@ This ensures that some of the interior cell methods are not unintentionally call
     ----------
     x : float
         The new x-coordinate for the boundary cell.
-    xmin : float, optional
-        The minimum x-value of the domain. Default is 0.0.
-    xmax : float, optional
-        The maximum x-value of the domain. Default is 1.0.
 
     Raises
     ------
     SFXM
         If the new x-value is an interior value or if an inappropriate boundary type is given.
     """
-    if x &gt;= xmin and x &lt;= xmax:
+    if x &gt;= self._xmin and x &lt;= self._xmax:
         raise SFXM("Boundary cell cannot have interior X-value")
 
     # Check if correct type specified
-    if (x &lt; xmin and self._type == btype.RIGHT) or (
-        x &gt; xmax and self._type == btype.LEFT
+    if (x &lt; self._xmin and self._type == btype.RIGHT) or (
+        x &gt; self._xmax and self._type == btype.LEFT
     ):
         raise SFXM("Inappropriate boundary type given")
     self._x = x</code></pre>
