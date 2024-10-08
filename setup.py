@@ -25,10 +25,12 @@ extensions = [
 
 # Common compile arguments for all extensions
 # Disable fallthrough warnings
-common_compile_args = ['-Wno-unreachable-code-fallthrough']
+common_compile_args = ['-Wno-unreachable-code-fallthrough', '-fopenmp']
+common_link_args = ['-fopenmp']
 # Apply common compile arguments globally
 for ext in extensions:
     ext.extra_compile_args = common_compile_args
+    ext.extra_link_args = common_link_args
 
 setup(
     name="SplitFXM",

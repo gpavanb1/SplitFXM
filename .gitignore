@@ -14,3 +14,4 @@ dist
 
 # Ignore performance tests
 *.prof
+*.html

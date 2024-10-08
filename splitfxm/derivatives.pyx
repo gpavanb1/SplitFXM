@@ -1,4 +1,5 @@
 import cython
+from cython.parallel import prange
 import numpy as np
 from .error import SFXM
 from .schemes import stencil_sizes
@@ -7,6 +8,7 @@ from libc.math cimport pow
 
 # Function for handling callable functions
 # Enum is not used as it is not supported by Cython
+@cython.cdivision(True)
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef np.ndarray derivative_callable(
@@ -61,7 +63,7 @@ cdef np.ndarray derivative_callable(
             Fr = F[2, :]
             dx = cell_sub_x[2] - cell_sub_x[0]
 
-            for i in range(n):
+            for i in prange(n, nogil=True):
                 Fans[i] = (Fr[i] - Fl[i]) / dx
             return np.asarray(Fans)
         elif scheme == 2:
@@ -70,7 +72,7 @@ cdef np.ndarray derivative_callable(
             Fc = F[2, :]
             Fr = F[3, :]
 
-            for i in range(n):
+            for i in prange(n, nogil=True):
                 Fans[i] = (-Fll[i] - Fl[i] + Fc[i] + Fr[i]) / (4 * (cell_sub_x[1] - cell_sub_x[0]))
             return np.asarray(Fans)
         else:
@@ -82,17 +84,17 @@ cdef np.ndarray derivative_callable(
             Fr = F[1, :]
             dx_w = cell_sub_x[1] - cell_sub_x[0]
 
-            for i in range(n):
+            for i in prange(n, nogil=True):
                 Fw[i] = (Fr[i] - Fl[i]) / dx_w
 
             Fl = F[1, :]
             Fr = F[2, :]
             dx_e = cell_sub_x[2] - cell_sub_x[1]
             
-            for i in range(n):
+            for i in prange(n, nogil=True):
                 Fe[i] = (Fr[i] - Fl[i]) / dx_e
 
-            for i in range(n):
+            for i in prange(n, nogil=True):
                 Fans[i] = (Fe[i] - Fw[i]) / ((dx_w + dx_e) / 2)
             return np.asarray(Fans)
         elif scheme == 2:
@@ -101,7 +103,7 @@ cdef np.ndarray derivative_callable(
             Fc = F[2, :]
             Fr = F[3, :]
 
-            for i in range(n):
+            for i in prange(n, nogil=True):
                 Fans[i] = (Fll[i] - Fl[i] - Fc[i] + Fr[i]) / (2 * (cell_sub_x[1] - cell_sub_x[0])**2)
             return np.asarray(Fans)
         else:
@@ -110,13 +112,16 @@ cdef np.ndarray derivative_callable(
         raise SFXM("Unsupported order")
 
 # Function for handling precomputed values
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef double derivative_values(
     double[:] values,  # Memoryview for precomputed values at stencil points
     double[:] cell_sub_x,  # Memoryview for cell positions (x-coordinates)
     int scheme,  # FDSchemes: the finite difference scheme to use
     int stencil_size,  # Size of the stencil
     int order=1  # Order of the derivative (1 for first, 2 for second)
-):
+) nogil:
     """
     Calculate the derivative using precomputed values and cell positions.
     
