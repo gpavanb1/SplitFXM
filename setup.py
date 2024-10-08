@@ -32,13 +32,14 @@ for ext in extensions:
 
 setup(
     name="SplitFXM",
-    version="0.4.1",
+    version="0.4.2",
     description="1D Finite-Difference/Volume Split Newton Solver",
     url="https://github.com/gpavanb1/SplitFXM",
     author="gpavanb1",
     author_email="gpavanb@gmail.com",
     license="CC BY-NC 4.0 for non-commercial use, commercial license available",
     packages=["splitfxm", "splitfxm.equations", "splitfxm.models"],
+    include_package_data=True,
     install_requires=["numpy", "numdifftools", "matplotlib", "splitnewton"],
     long_description=long_description,
     long_description_content_type="text/markdown",

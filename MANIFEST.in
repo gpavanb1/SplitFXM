@@ -1,0 +1,4 @@
+include README.md
+include splitfxm/*.pyx
+include splitfxm/*.pxd
+include splitfxm/*.py
