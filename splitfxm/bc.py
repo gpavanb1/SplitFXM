@@ -3,7 +3,7 @@ from .constants import btype, btype_map
 from .error import SFXM
 
 
-def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "periodic"}, xmin=0.0, xmax=1.0):
+def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "periodic"}):
     """
     Apply boundary conditions to the given domain.
 
@@ -15,10 +15,6 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
         The name of the variable to apply the boundary conditions to.
     bc : str, optional
         The type of boundary condition to apply. Acceptable values are "periodic" and "outflow". Default is "periodic".
-    xmin : float, optional
-        The minimum x-value of the domain. Default is 0.0.
-    xmax : float, optional
-        The maximum x-value of the domain. Default is 1.0.
 
     Raises
     ------
@@ -28,6 +24,10 @@ def apply_BC(d: Domain, v: str, bc: dict = {"left": "periodic", "right": "period
 
     # Get cells
     cells = d.cells()
+
+    # Get bounds
+    xmin = d.xmin()
+    xmax = d.xmax()
 
     # Find index of component
     idx = d.component_index(v)

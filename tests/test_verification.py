@@ -77,7 +77,7 @@ def test_reverse_verification_all_schemes():
 
         nb = stencil_sizes[scheme] // 2
 
-        d = Domain.from_size(100, nb, nb, ["u"])
+        d = Domain.from_size(100, nb, nb, ["u"], xmin=0.2, xmax=1.2)
         d_copy = deepcopy(d)
         ics = {"u": "tophat"}
         bcs = {
@@ -112,8 +112,8 @@ def test_reverse_verification_all_schemes():
 def test_verification():
     # Check Advection-Diffusion using FDM and FVM
     method = 'FVM'
-    m = AdvectionDiffusion(c=0.1, nu=0.0, method=method)
-    d = Domain.from_size(100, 1, 1, ["u", "v"])
+    m = AdvectionDiffusion(c=0.14, nu=0.0, method=method)
+    d = Domain.from_size(100, 1, 1, ["u", "v"], xmin=0.2, xmax=1.6)
     d_copy = deepcopy(d)
     ics = {"u": "sine", "v": "gaussian"}
     bcs = {

@@ -36,6 +36,9 @@ class Boundary:
         if x < xmin and _btype == btype.RIGHT or x > xmax and _btype == btype.LEFT:
             raise SFXM("Inappropriate boundary type given")
 
+        self._xmin = xmin
+        self._xmax = xmax
+
         self._value = value
         self._type = _btype
         # X co-ordinate
@@ -80,7 +83,7 @@ class Boundary:
         return self._value[i]
 
     # Note cell doesn't have set_x
-    def set_x(self, x: float, xmin=0.0, xmax=1.0):
+    def set_x(self, x: float):
         """
         Set the x-coordinate of the boundary cell.
 
@@ -98,12 +101,12 @@ class Boundary:
         SFXM
             If the new x-value is an interior value or if an inappropriate boundary type is given.
         """
-        if x >= xmin and x <= xmax:
+        if x >= self._xmin and x <= self._xmax:
             raise SFXM("Boundary cell cannot have interior X-value")
 
         # Check if correct type specified
-        if (x < xmin and self._type == btype.RIGHT) or (
-            x > xmax and self._type == btype.LEFT
+        if (x < self._xmin and self._type == btype.RIGHT) or (
+            x > self._xmax and self._type == btype.LEFT
         ):
             raise SFXM("Inappropriate boundary type given")
         self._x = x

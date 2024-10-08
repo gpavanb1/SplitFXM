@@ -25,7 +25,7 @@ class Domain:
     """
 
     def __init__(
-        self, cells: list[Cell], left_boundaries: list[Boundary], right_boundaries: list[Boundary], components: list[str]
+        self, cells: list[Cell], left_boundaries: list[Boundary], right_boundaries: list[Boundary], components: list[str], xmin: float = 0.0, xmax: float = 1.0
     ):
         """
         Initialize a `Domain` object.
@@ -40,6 +40,9 @@ class Domain:
         self._domain = [*left_boundaries, *
                         cells, *right_boundaries]
         self._components = components
+
+        self._xmin = xmin
+        self._xmax = xmax
 
     @ classmethod
     def from_size(
@@ -83,15 +86,39 @@ class Domain:
         # Create boundaries
         dx = (xmax - xmin) / nx
         left_boundaries = [
-            Boundary(xmin - (i + 1) * dx, btype.LEFT, zeros(nv))
+            Boundary(xmin - (i + 1) * dx, btype.LEFT,
+                     zeros(nv), xmin=xmin, xmax=xmax)
             for i in range(nb_left)
         ]
         right_boundaries = [
-            Boundary(xmax + (i + 1) * dx, btype.RIGHT, zeros(nv))
+            Boundary(xmax + (i + 1) * dx, btype.RIGHT,
+                     zeros(nv), xmin=xmin, xmax=xmax)
             for i in range(nb_right)
         ]
 
-        return Domain(interior, left_boundaries, right_boundaries, components)
+        return Domain(interior, left_boundaries, right_boundaries, components, xmin, xmax)
+
+    def xmin(self):
+        """
+        Get the left-most co-ordinate of the domain
+
+        Returns
+        -------
+        float
+            The left-most co-ordinate of the domain.
+        """
+        return self._xmin
+
+    def xmax(self):
+        """
+        Get the right-most co-ordinate of the domain
+
+        Returns
+        -------
+        float
+            The right-most co-ordinate of the domain.
+        """
+        return self._xmax
 
     def ilo(self):
         """
