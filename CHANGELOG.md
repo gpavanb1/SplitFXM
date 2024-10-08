@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.4.2] - 2024-10-08
+## Fixed
+- Downgraded `numpy` to `1.26.4` for broaded compatibility instead of `2`
+
+## [0.4.2] - 2024-10-08
 ## Added
 - Conservative Sod Shock Tube tutorial with verification
 
