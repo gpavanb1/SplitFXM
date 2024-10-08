@@ -57,7 +57,7 @@ def test_verification_all_schemes():
         abs_diff = np.abs(expected_u - actual_u)
 
         # Compute the area under the curve using the trapezoidal rule
-        area = np.trapezoid(abs_diff, dx=1/len(expected_u))
+        area = np.trapz(abs_diff, dx=1/len(expected_u))
 
         # Check if the area is below the threshold
         assert area < THRESHOLD, {"scheme": scheme, "area": area}
@@ -103,7 +103,7 @@ def test_reverse_verification_all_schemes():
         abs_diff = np.abs(expected_u - actual_u)
 
         # Compute the area under the curve using the trapezoidal rule
-        area = np.trapezoid(abs_diff, dx=1/len(expected_u))
+        area = np.trapz(abs_diff, dx=1/len(expected_u))
 
         # Check if the area is below the threshold
         assert area < THRESHOLD, {"scheme": scheme, "area": area}
