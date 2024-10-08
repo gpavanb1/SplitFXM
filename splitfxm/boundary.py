@@ -91,10 +91,6 @@ class Boundary:
         ----------
         x : float
             The new x-coordinate for the boundary cell.
-        xmin : float, optional
-            The minimum x-value of the domain. Default is 0.0.
-        xmax : float, optional
-            The maximum x-value of the domain. Default is 1.0.
 
         Raises
         ------
