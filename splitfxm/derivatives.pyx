@@ -5,13 +5,25 @@ from .error import SFXM
 from .schemes import stencil_sizes
 cimport numpy as np
 from libc.math cimport pow
+from cpython.array cimport array, clone
+
+# Helper to initialize memoryviews
+
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef allocate_double_array(int n):
+    cdef array arr, template = array('d')
+    arr = clone(template, n, zero=False)
+    return arr
+
 
 # Function for handling callable functions
 # Enum is not used as it is not supported by Cython
 @cython.cdivision(True)
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef np.ndarray derivative_callable(
+cdef double[:] derivative_callable(
     double[:, :] F,  # Function pointer type for callable functions
     double[:] cell_sub_x,  # List of Cell, the stencil points
     int scheme,  # FDSchemes.value: the finite difference scheme to use
@@ -44,15 +56,16 @@ cdef np.ndarray derivative_callable(
     SFXM
         If an improper stencil size is provided or an unsupported scheme is used.
     """
-    cdef double[:] Fll, Fl, Fc, Fr, Fw, Fe, Fans
+    cdef double[:] Fll, Fl, Fc, Fr
     cdef double dx, dx_w, dx_e
     cdef int i, n
 
     # Initialize memoryviews
     n = F.shape[1]
-    Fw = memoryview(np.zeros(n, dtype=np.double))
-    Fe = memoryview(np.zeros(n, dtype=np.double))
-    Fans = memoryview(np.zeros(n, dtype=np.double))
+
+    cdef double[:] Fw = allocate_double_array(n)
+    cdef double[:] Fe = allocate_double_array(n)
+    cdef double[:] Fans = allocate_double_array(n)
 
     if len(cell_sub_x) != stencil_size:
         raise SFXM(f"Improper stencil size. Expected {stencil_size}, got {len(cell_sub_x)}")
@@ -65,7 +78,7 @@ cdef np.ndarray derivative_callable(
 
             for i in prange(n, nogil=True):
                 Fans[i] = (Fr[i] - Fl[i]) / dx
-            return np.asarray(Fans)
+            return Fans
         elif scheme == 2:
             Fll = F[0, :]
             Fl = F[1, :]
@@ -74,7 +87,7 @@ cdef np.ndarray derivative_callable(
 
             for i in prange(n, nogil=True):
                 Fans[i] = (-Fll[i] - Fl[i] + Fc[i] + Fr[i]) / (4 * (cell_sub_x[1] - cell_sub_x[0]))
-            return np.asarray(Fans)
+            return Fans
         else:
             raise SFXM("Unsupported scheme")
 
@@ -96,7 +109,7 @@ cdef np.ndarray derivative_callable(
 
             for i in prange(n, nogil=True):
                 Fans[i] = (Fe[i] - Fw[i]) / ((dx_w + dx_e) / 2)
-            return np.asarray(Fans)
+            return Fans
         elif scheme == 2:
             Fll = F[0, :]
             Fl = F[1, :]
@@ -105,7 +118,7 @@ cdef np.ndarray derivative_callable(
 
             for i in prange(n, nogil=True):
                 Fans[i] = (Fll[i] - Fl[i] - Fc[i] + Fr[i]) / (2 * (cell_sub_x[1] - cell_sub_x[0])**2)
-            return np.asarray(Fans)
+            return Fans
         else:
             raise SFXM("Unsupported scheme")
     else:
@@ -200,7 +213,7 @@ def Dx(F, cell_sub, scheme):
     """
     cell_sub_x = memoryview(np.array([cell.x() for cell in cell_sub], dtype=np.double))
     F_values = memoryview(np.array([F(cell.values()) for cell in cell_sub], dtype=np.double))
-    return derivative_callable(F_values, cell_sub_x, scheme.value, stencil_sizes[scheme], order=1)
+    return np.asarray(derivative_callable(F_values, cell_sub_x, scheme.value, stencil_sizes[scheme], order=1))
 
 def dx(values, cell_sub, scheme):
     """
@@ -244,7 +257,7 @@ def D2x(D, cell_sub, scheme):
     """
     cell_sub_x = memoryview(np.array([cell.x() for cell in cell_sub], dtype=np.double))
     D_values = memoryview(np.array([D(cell.values()) for cell in cell_sub], dtype=np.double))
-    return derivative_callable(D_values, cell_sub_x, scheme.value, stencil_sizes[scheme], order=2)
+    return np.asarray(derivative_callable(D_values, cell_sub_x, scheme.value, stencil_sizes[scheme], order=2))
 
 def d2x(values, cell_sub, scheme):
     """
