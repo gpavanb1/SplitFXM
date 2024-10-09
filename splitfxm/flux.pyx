@@ -18,6 +18,27 @@ cdef allocate_double_array(int n):
     return arr
 
 
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double[:] matvec(double[:, :] A, double[:] x):
+    cdef int i, j, m, n
+    cdef double sum
+
+    m = A.shape[0]  # Number of rows in A
+    n = A.shape[1]  # Number of columns in A
+    cdef double[:] y = allocate_double_array(m)
+
+    # Use prange for parallel computation
+    for i in range(m):
+        sum = 0.0  # Local sum variable
+        for j in range(n):  # Assuming A is n x n
+            sum += A[i, j] * x[j]  # Access elements using memoryview
+        y[i] = sum  # Assign the computed sum to the result array
+
+    return y
+
+
 def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
     """
     Calculate the fluxes for a given stencil and numerical scheme with limiters.
@@ -84,10 +105,23 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
         return np.asarray(Fw), np.asarray(Fe)
 
     elif scheme == FVSchemes.UPWIND:
-        return upwind(F, cell_sub, dFdU)
+        if dFdU is None:
+            raise SFXM(
+            "dFdU is required for determining upwind direction.")
+
+        F_values = memoryview(np.array([F(cell.values()) for cell in cell_sub], dtype=np.double))
+        u_values = memoryview(np.array([cell.values() for cell in cell_sub], dtype=np.double))
+        eigvals, R = np.linalg.eig(dFdU(cell_sub[1].values()))
+        eigvals, R = memoryview(eigvals), memoryview(R)
+        R_inv = memoryview(np.linalg.inv(R))
+        Fw, Fe = upwind(F_values, u_values, R, R_inv, eigvals)
+        return np.asarray(Fw), np.asarray(Fe)
 
     elif scheme == FVSchemes.CENTRAL:
-        return central(F, cell_sub)
+        F_values = memoryview(np.array([F(cell.values()) for cell in cell_sub], dtype=np.double))
+        u_values = memoryview(np.array([cell.values() for cell in cell_sub], dtype=np.double))
+        Fw, Fe = central(F_values, u_values)
+        return np.asarray(Fw), np.asarray(Fe)
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
@@ -134,106 +168,138 @@ cdef tuple lax_friedrichs(
 
     return Fw, Fe
 
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef tuple upwind(
+    double[:, :]F, 
+    double[:, :]u,
+    double[:, :] R,
+    double[:, :] R_inv,
+    double[:] eigvals
+):
 
-cdef tuple upwind(F, list cell_sub, dFdU):
-    """Calculate fluxes using the Upwind scheme.
+    cdef double[:] ul, uc, ur
+    cdef double[:] wl, wc, wr
+    cdef double[:] Fl, Fc, Fr
+    cdef double[:] Fw, Fe
+    cdef int i, n
 
-    Parameters
-    ----------
-    F : function
-        The flux function.
-    cell_sub : list of Cell
-        The stencil of cells.
-    dFdU : function
-        The Jacobian of the flux function.
+    # Get shape
+    n = F.shape[1]
 
-    Returns
-    -------
-    tuple of np.ndarray
-        The west (Fw) and east (Fe) fluxes.
-    """
-    cdef cnp.ndarray ul, uc, ur, A, eigvals, R, R_inv, wl, wc, wr
-    cdef cnp.ndarray Fl, Fc, Fr, Fw_char, Fe_char, Fw, Fe
-    cdef int i
-    cdef double eig
-
-    ul = cell_sub[0].values()
-    uc = cell_sub[1].values()
-    ur = cell_sub[2].values()
-
-    if dFdU is None:
-        raise SFXM(
-            "dFdU is required for determining upwind direction.")
-
-    # Compute the flux Jacobian matrix at the central state (uc)
-    A = dFdU(uc)
-
-    # Eigenvalue decomposition of the Jacobian matrix A
-    eigvals, R = np.linalg.eig(A)
-    R_inv = np.linalg.inv(R)
+    ul = u[0, :]
+    uc = u[1, :]
+    ur = u[2, :]
 
     # Transform the conservative variables (ul, uc, ur) into characteristic variables
-    wl = R_inv @ ul  # Characteristic variables at the left state
-    wc = R_inv @ uc  # Characteristic variables at the central state
-    wr = R_inv @ ur  # Characteristic variables at the right state
+    wl = matvec(R_inv, ul)  # Characteristic variables at the left state
+    wc = matvec(R_inv, uc)  # Characteristic variables at the central state
+    wr = matvec(R_inv, ur)  # Characteristic variables at the right state
 
     # Evaluate the functions at the characteristic variables
-    Fl = F(wl)
-    Fc = F(wc)
-    Fr = F(wr)
+    Fl = F[0, :]
+    Fc = F[1, :]
+    Fr = F[2, :]
 
     # Apply upwind scheme in the characteristic space
     # Flux at the west (left) side in characteristic space
-    Fw_char = np.zeros_like(uc)
+    cdef double[:] Fw_char = allocate_double_array(n)
     # Flux at the east (right) side in characteristic space
-    Fe_char = np.zeros_like(uc)
+    cdef double[:] Fe_char = allocate_double_array(n)
 
-    for i, eig in enumerate(eigvals):
-        if eig > 0:
-            # Positive eigenvalue: wave moves to the right, use left (upwind) state for Fw
+    for i in range(n):
+        eig = eigvals[i]
+        if eig > 0:  # Positive eigenvalue: wave moves to the right, use left (upwind) state for Fw
             Fw_char[i] = Fl[i]
             Fe_char[i] = Fc[i]
-        else:
-            # Negative eigenvalue: wave moves to the left, use right (upwind) state for Fe
+        else:  # Negative eigenvalue: wave moves to the left, use right (upwind) state for Fe
             Fw_char[i] = Fc[i]
             Fe_char[i] = Fr[i]
 
     # Convert the characteristic fluxes back to the original space
-    Fw = R @ Fw_char  # West (left) flux in original space
-    Fe = R @ Fe_char  # East (right) flux in original space
+    Fw = matvec(R, Fw_char)  # West (left) flux in original space
+    Fe = matvec(R, Fe_char)  # East (right) flux in original space
 
     return Fw, Fe
 
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef tuple central(
+    double[:, :] F, 
+    double[:, :] u
+):
+    
+    cdef double[:] ul, uc, ur
+    cdef int i, n
 
-cdef tuple central(F, list cell_sub):
-    """Calculate fluxes using the Central scheme.
+    # Get shape
+    n = F.shape[1]
 
-    Parameters
-    ----------
-    F : function
-        The flux function.
-    cell_sub : list of Cell
-        The stencil of cells.
+    ul = u[0, :]
+    uc = u[1, :]
+    ur = u[2, :]
 
-    Returns
-    -------
-    tuple of np.ndarray
-        The west (Fw) and east (Fe) fluxes.
-    """
-    cdef cnp.ndarray ul, uc, ur, Fw, Fe
+    Fl = F[0, :]
+    Fc = F[1, :]
+    Fr = F[2, :]
 
-    ul = cell_sub[0].values()
-    uc = cell_sub[1].values()
-    ur = cell_sub[2].values()
+    # Allocate memory for the fluxes
+    cdef double[:] Fw = allocate_double_array(n)
+    cdef double[:] Fe = allocate_double_array(n)
 
     # Central differencing scheme
-    Fw = 0.5 * (F(ul) + F(uc))
-    Fe = 0.5 * (F(uc) + F(ur))
+    for i in prange(n, nogil=True):
+        Fw[i] = 0.5 * (Fl[i] + Fc[i])
+        Fe[i] = 0.5 * (Fc[i] + Fr[i])
 
     return Fw, Fe
 
 
-cpdef tuple diffusion_fluxes(D, list cell_sub, scheme):
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef tuple diff_central(
+    double[:, :] D,
+    double[:, :] u,
+    double[:] cell_sub_x
+):
+    cdef double[:] ul, uc, ur
+    cdef double[:] Dl, Dc, Dr
+    cdef double dxw, dxe
+    cdef int i, n
+
+    # Get shape
+    n = D.shape[1]
+
+    # Allocate memory for the fluxes
+    cdef double[:] Dw = allocate_double_array(n)
+    cdef double[:] De = allocate_double_array(n)
+
+    # Only central scheme for diffusion fluxes
+    # West Flux
+    ul = u[0, :]
+    uc = u[1, :]
+    Dl = D[0, :]
+    Dr = D[1, :]
+    dxw = 0.5 * (cell_sub_x[1] - cell_sub_x[0])
+    for i in prange(n, nogil=True):
+        Dw[i] = (Dr[i] - Dl[i]) / dxw
+
+    # East Flux
+    uc = u[1, :]
+    ur = u[2, :]
+    Dl = D[1, :]
+    Dr = D[2, :]
+    dxe = 0.5 * (cell_sub_x[2] - cell_sub_x[1])
+    for i in prange(n, nogil=True):
+        De[i] = (Dr[i] - Dl[i]) / dxe
+
+    return Dw, De
+
+
+def diffusion_fluxes(D, list cell_sub, scheme):
     """
     Calculate the diffusion fluxes of a given stencil.
 
@@ -251,28 +317,11 @@ cpdef tuple diffusion_fluxes(D, list cell_sub, scheme):
     tuple of numpy.ndarray
         The west and east diffusion fluxes.
     """
-    cdef cnp.ndarray ul, uc, ur, Dl, Dc, Dr, Dw, De
-    cdef double dxw, dxe
-
     if len(cell_sub) != stencil_sizes.get(scheme):
         raise SFXM(
             f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
-
-    # Only central scheme for diffusion fluxes
-    # West Flux
-    ul = cell_sub[0].values()
-    uc = cell_sub[1].values()
-    Dl = D(ul)
-    Dr = D(uc)
-    dxw = 0.5 * (cell_sub[1].x() - cell_sub[0].x())
-    Dw = (Dr - Dl) / dxw
-
-    # East Flux
-    uc = cell_sub[1].values()
-    ur = cell_sub[2].values()
-    Dl = D(uc)
-    Dr = D(ur)
-    dxe = 0.5 * (cell_sub[2].x() - cell_sub[1].x())
-    De = (Dr - Dl) / dxe
-
-    return Dw, De
+    D_values = memoryview(np.array([D(cell.values()) for cell in cell_sub], dtype=np.double))
+    u_values = memoryview(np.array([cell.values() for cell in cell_sub], dtype=np.double))
+    cell_sub_x = memoryview(np.array([cell.x() for cell in cell_sub]))
+    Dw, De = diff_central(D_values, u_values, cell_sub_x)
+    return np.asarray(Dw), np.asarray(De)
