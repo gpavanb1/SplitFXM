@@ -1,7 +1,21 @@
+import cython
+from cython.parallel import prange
 import numpy as np
 cimport numpy as cnp
 from .error import SFXM
 from .schemes import stencil_sizes, FVSchemes
+from cpython.array cimport array, clone
+
+
+# Helper to initialize memoryviews
+
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef allocate_double_array(int n):
+    cdef array arr, template = array('d')
+    arr = clone(template, n, zero=False)
+    return arr
 
 
 def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
@@ -55,7 +69,19 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
             f"Improper stencil size. Expected {stencil_sizes.get(scheme)}, got {len(cell_sub)}")
 
     if scheme == FVSchemes.LAX_FRIEDRICHS:
-        return lax_friedrichs(F, cell_sub, dFdU)
+        # Lax-Friedrichs requires spectral radius, so dFdU is needed
+        if dFdU is None:
+            raise SFXM("dFdU is required for determining spectral radius")
+
+        # Determine spectral radius
+        uc = cell_sub[1].values()
+        sigma = np.max(np.abs(np.linalg.eigvals(dFdU(uc))))
+
+        # Calculate fluxes
+        F_values = memoryview(np.array([F(cell.values()) for cell in cell_sub], dtype=np.double))
+        u_values = memoryview(np.array([cell.values() for cell in cell_sub], dtype=np.double))
+        Fw, Fe = lax_friedrichs(F_values, u_values, sigma)
+        return np.asarray(Fw), np.asarray(Fe)
 
     elif scheme == FVSchemes.UPWIND:
         return upwind(F, cell_sub, dFdU)
@@ -63,48 +89,48 @@ def fluxes(F, cell_sub, scheme, dFdU=None, limiter=None):
     elif scheme == FVSchemes.CENTRAL:
         return central(F, cell_sub)
 
+@cython.cdivision(True)
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef tuple lax_friedrichs(
+    double[:, :]F, 
+    double[:, :]u_values, 
+    double sigma
+):
 
-cdef tuple lax_friedrichs(F, list cell_sub, dFdU):
-    """Calculate fluxes using the Lax-Friedrichs scheme.
+    cdef double[:] ul, uc, ur
+    cdef double[:] Fl, Fr
+    cdef int i, n
 
-    Parameters
-    ----------
-    F : function
-        The flux function.
-    cell_sub : list of Cell
-        The stencil of cells.
-    dFdU : function
-        The Jacobian of the flux function.
-
-    Returns
-    -------
-    tuple of np.ndarray
-        The west (Fw) and east (Fe) fluxes.
-    """
-    cdef cnp.ndarray ul, uc, ur
-    cdef cnp.ndarray Fl, Fr
-    cdef cnp.ndarray u_diff
-    cdef double sigma
+    # Get shape
+    n = F.shape[1]
 
     # Get values from the cells
-    ul = cell_sub[0].values()
-    uc = cell_sub[1].values()
-    ur = cell_sub[2].values()
+    ul = u_values[0, :]
+    uc = u_values[1, :]
+    ur = u_values[2, :]
 
-    # Lax-Friedrichs requires spectral radius, so dFdU is needed
-    if dFdU is None:
-        raise SFXM("dFdU is required for determining spectral radius")
+    Fl = F[0, :]
+    Fr = F[1, :]
 
-    Fl = F(ul)
-    Fr = F(uc)
-    u_diff = uc - ul
-    sigma = np.max(np.abs(np.linalg.eigvals(dFdU(uc))))  # Spectral radius
-    Fw = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
+    cdef double[:] Fw = allocate_double_array(n)
+    cdef double[:] Fe = allocate_double_array(n)
+    cdef double[:] u_diff = allocate_double_array(n)
 
-    Fl = F(uc)
-    Fr = F(ur)
-    u_diff = ur - uc
-    Fe = 0.5 * (Fl + Fr) - 0.5 * sigma * u_diff
+    for i in prange(n, nogil=True):
+        u_diff[i] = uc[i] - ul[i]
+
+    for i in prange(n, nogil=True):
+        Fw[i] = 0.5 * (Fl[i] + Fr[i]) - 0.5 * sigma * u_diff[i]
+
+    Fl = F[1, :]
+    Fr = F[2, :]
+
+    for i in prange(n, nogil=True):
+        u_diff[i] = ur[i] - uc[i]
+
+    for i in prange(n, nogil=True):
+        Fe[i] = 0.5 * (Fl[i] + Fr[i]) - 0.5 * sigma * u_diff[i]
 
     return Fw, Fe
 
