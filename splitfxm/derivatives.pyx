@@ -35,7 +35,7 @@ cdef double[:] derivative_callable(
 
     Parameters
     ----------
-    F_values : double[:, :]
+    F : double[:, :]
         Precomputed function values at the stencil points (evaluated at corresponding points).
     cell_sub_x : double[:]
         The x-coordinates of the stencil points.
