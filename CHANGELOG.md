@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.6] - 2024-10-20
+## Added
+- `evolve` also utilizes bounds and warns if crossed
+- Tests for `evolve` changes
+
 ## [0.4.5] - 2024-10-10
 ## Fixed
 - Annotation-verified Cython speedup for fluxes and derivatives
