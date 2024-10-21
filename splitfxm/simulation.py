@@ -50,6 +50,95 @@ def array_list_reshape(l, shape):
     return np.array(l).reshape(shape)
 
 
+# Evolve event helper methods
+def create_bound_events(y0, bounds):
+    """
+    Create event functions for detecting bound violations during ODE solving.
+
+    Parameters
+    ----------
+    y0 : array-like
+        Initial state of the system variables.
+    bounds : tuple of array-like
+        Tuple containing lower and upper bounds for the system variables.
+
+    Returns
+    -------
+    list
+        A list of event functions that trigger when a bound is violated.
+    """
+    events = []
+    if bounds is not None:
+        lower_bounds, upper_bounds = bounds[0], bounds[1]
+        for i in range(len(y0)):
+            events.append(create_bound_event(
+                i, lower_bounds[i], upper_bounds[i]))
+    return events
+
+
+def create_bound_event(index, lower_bound, upper_bound):
+    """
+    Create an event function for checking if a system variable exceeds its bounds.
+
+    Parameters
+    ----------
+    index : int
+        Index of the variable to check.
+    lower_bound : float
+        The lower bound for the variable.
+    upper_bound : float
+        The upper bound for the variable.
+
+    Returns
+    -------
+    function
+        An event function that triggers when the variable at `index` exceeds its bounds.
+        Prints a warning if a bound is exceeded and returns the difference from the bound.
+        The event is non-terminal, allowing the integration to continue.
+    """
+    def event(t, y):
+        if y[index] < lower_bound:
+            print(
+                f"Warning: At t={t}, bounds exceeded for variable index {index}, value = {y[index]}, lower bound = {lower_bound}")
+            return y[index] - lower_bound
+        elif y[index] > upper_bound:
+            print(
+                f"Warning: At t={t}, bounds exceeded for variable index {index}, value = {y[index]}, upper bound = {upper_bound}")
+            return upper_bound - y[index]
+        return 1  # No bounds exceeded, continue integration
+    event.terminal = False  # Continue integration after event
+    event.direction = 0     # Detect bounds violations in both directions
+    return event
+
+
+def apply_bounds(y, bounds, t_current):
+    """
+    Check if the system variables exceed specified bounds during Euler integration.
+
+    Parameters
+    ----------
+    y : array-like
+        Current values of the system variables.
+    bounds : tuple of array-like
+        Tuple containing the lower and upper bounds for the variables.
+    t_current : float
+        Current time in the integration.
+
+    Returns
+    -------
+    None
+        Prints warnings if any variable exceeds its bounds.
+    """
+    lower_bounds, upper_bounds = bounds
+    for idx, (val, lb, ub) in enumerate(zip(y, lower_bounds, upper_bounds)):
+        if val < lb:
+            print(
+                f"Warning: At t={t_current}, bounds exceeded for variable index {idx}, value = {val}, lower bound = {lb}")
+        elif val > ub:
+            print(
+                f"Warning: At t={t_current}, bounds exceeded for variable index {idx}, value = {val}, upper bound = {ub}")
+
+
 class Simulation:
     """
     A class representing a simulation.
@@ -382,7 +471,7 @@ class Simulation:
 
         return jac
 
-    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-3, atol=1e-6, max_step=np.inf):
+    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-3, atol=1e-6, max_step=np.inf, bounds=None):
         """
         Evolve the system in time using an ODE solver for a given time step.
 
@@ -404,6 +493,8 @@ class Simulation:
             The absolute tolerance for the solver. Defaults to 1e-6.
         max_step : float, optional
             The maximum time step to use in the solver. Defaults to np.inf.
+        bounds: list, optional
+            A list of lists representing the bounds of the domain. Defaults to None.
 
         Notes
         -----
@@ -429,6 +520,13 @@ class Simulation:
         if method in JAC_REQUIRED:
             jac = self.jacobian(y0, split, split_loc)
 
+        # Get the shape of the initial state
+        num_points, nv = self.get_shape_from_list(y0)
+
+        # Construct bounds to be used
+        ext_bounds = self.extend_bounds(
+            bounds, num_points, nv, split, split_loc)
+
         # Use solve_ivp to evolve the system
         # Implement basic Euler as part of same wrapper
         sol = Solution()
@@ -438,10 +536,15 @@ class Simulation:
             while t_current < t_diff:
                 delta_t = min(t_diff - t_current, max_step)
                 sol.y += delta_t * f(t_current, sol.y)
+                if bounds is not None:
+                    apply_bounds(sol.y, ext_bounds, t_current)
                 t_current += delta_t
         else:
+            # Create bound events for the IVP solver
+            events = create_bound_events(y0, ext_bounds)
+
             sol = solve_ivp(f, (0, t_diff), y0, method=method,
-                            t_eval=[t_diff], jac=jac, max_step=max_step)
+                            t_eval=[t_diff], jac=jac, max_step=max_step, events=events)
 
         # Update the values of the domain
         self.initialize_from_list(sol.y, split, split_loc)
@@ -466,6 +569,9 @@ class Simulation:
             The maximum time step to use  in pseudo-time. Defaults to 1.0.
         armijo : bool, optional
             Whether to use the Armijo rule for line searches. Defaults to False.
+        bounds: list, optional
+            A list of lists representing the bounds of the domain. Defaults to None.
+
 
         Returns
         -------
