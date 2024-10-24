@@ -184,6 +184,22 @@ def test_extend_bounds_invalid_split_loc(simulation):
         simulation.extend_bounds(bounds, num_points, nv, split=True)
 
 
+def test_bounds_exceed_evolve():
+    method = 'FDM'
+    m = AdvectionDiffusion(c=0.2, nu=0.0, method=method)
+    ics = {"u": "gaussian"}
+    bcs = {"u": {"left": "periodic", "right": "periodic"}}
+    d = Domain.from_size(10, 1, 1, ["u"])
+    s = Simulation(d, m, ics, bcs, default_scheme(method))
+    bounds = [[0.1], [0.5]]
+    split = False
+    split_loc = None
+    t = 0.1
+    # Apply bounds for both kinds of methods
+    s.evolve(t, split, split_loc, method='RK45', max_step=0.1, bounds=bounds)
+    s.evolve(t, split, split_loc, method='Euler', max_step=0.1, bounds=bounds)
+
+
 def test_dense_sparse_jac_comparison_steady_state():
     method = 'FDM'
     m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
