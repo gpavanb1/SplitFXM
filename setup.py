@@ -34,7 +34,7 @@ for ext in extensions:
 
 setup(
     name="SplitFXM",
-    version="0.4.5",
+    version="0.4.6",
     description="1D Finite-Difference/Volume Split Newton Solver",
     url="https://github.com/gpavanb1/SplitFXM",
     author="gpavanb1",
