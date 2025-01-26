@@ -25,7 +25,7 @@ Just run
 pip install splitfxm
 ```
 
-There is an [examples](https://github.com/gpavanb1/SplitFXM/models) folder that contains a test model - [Advection-Diffusion](https://en.wikipedia.org/wiki/Convection%E2%80%93diffusion_equation)
+There is an [examples](https://github.com/gpavanb1/SplitFXM/tree/main/splitfxm/models) folder that contains a test model - [Advection-Diffusion](https://en.wikipedia.org/wiki/Convection%E2%80%93diffusion_equation)
 
 You can define your own equations by simply creating a derived class from `Model` and adding to the `_equations` using existing or custom equations!
 
