@@ -273,16 +273,16 @@ class Domain:
         # Convert the list of arrays into a single 2D NumPy array
         return np.vstack(value_list)
 
-    def listify_interior(self, split, split_loc):
+    def listify_interior(self, split, split_locs=None):
         """
         Get the values of all interior cells in the domain in a list.
 
         Parameters
         ----------
         split : bool
-            Whether or not to split the values in each cell into two lists.
-        split_loc : int, optional
-            The location to split the values in each cell, if `split` is `True`.
+            Whether or not to split the values in each cell into multiple lists.
+        split_locs : list of int, optional
+            The locations to split the values in each cell, if `split` is `True`.
 
         Returns
         -------
@@ -294,16 +294,22 @@ class Domain:
 
         if not split:
             return interior_values.flatten()
-        else:
-            if split_loc is None:
-                raise SFXM("Split location must be specified in this case")
 
-            # Extract outer and inner block values
-            outer_values = interior_values[:, :split_loc].flatten()
-            inner_values = interior_values[:, split_loc:].flatten()
+        if not split_locs:
+            raise SFXM(
+                "Split locations must be specified when splitting is enabled")
 
-            # Concatenate outer and inner values into a single array
-            return np.concatenate((outer_values, inner_values))
+        # Sort and ensure split locations are valid
+        split_locs = sorted(set(split_locs))  # Remove duplicates and sort
+        if split_locs[-1] > interior_values.shape[1]:
+            raise SFXM(
+                "Split locations exceed the number of columns in the interior values")
+
+        # Split values at each location
+        split_segments = np.split(interior_values, split_locs, axis=1)
+
+        # Flatten and concatenate all segments in the correct order
+        return np.concatenate([segment.flatten() for segment in split_segments])
 
     def update(self, dt, interior_residual_block):
         """
