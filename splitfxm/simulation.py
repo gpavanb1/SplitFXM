@@ -104,7 +104,7 @@ class Simulation:
 
         return num_points, nv
 
-    def initialize_from_list(self, l, split=False, split_loc=None):
+    def initialize_from_list(self, l, split=False, split_locs=None):
         """
         Initialize the domain from a list of values.
 
@@ -114,7 +114,7 @@ class Simulation:
             The list of values to initialize the domain with.
         split : bool, optional
             Whether to split the values into outer and inner blocks. Defaults to False.
-        split_loc : int, optional
+        split_locs : list[int], optional
             The location to split the values at. Required if `split` is True.
         """
 
@@ -123,21 +123,21 @@ class Simulation:
 
         if split:
 
-            if split_loc is None:
+            if split_locs is None:
                 raise SFXM("Split location must be specified in this case")
 
-            if split_loc > nv or split_loc < 0:
-                raise SFXM("Split location must be between 0 and nv-1")
+            # Sort and remove duplicates to maintain consistency
+            split_locs = sorted(set(split_locs))
+
+            if split_locs[-1] > nv or split_locs[0] < 0:
+                raise SFXM("Split locations must be between 0 and nv-1")
 
             # Same as SplitNewton convention
-            # Outer system will be excluding `loc`
-            outer_block = array_list_reshape(
-                l[: split_loc * num_points], (num_points, split_loc))
-            inner_block = array_list_reshape(
-                l[split_loc * num_points:], (num_points, nv - split_loc))
-
-            # Concatenate outer and inner blocks
-            block = np.hstack((outer_block, inner_block))
+            # 1,2,1,2,3,3,4,5,4,5 for example for splits [2, 3]
+            split_locs_full = [i*num_points for i in split_locs]
+            l_split = np.split(l, split_locs_full)
+            block = np.hstack([array_list_reshape(segment, (num_points, ))
+                               for segment in l_split])
         else:
             # No need to split, just use the values_array directly
             block = array_list_reshape(l, (num_points, nv))
@@ -147,7 +147,7 @@ class Simulation:
         for i, b in enumerate(cells):
             b.set_values(block[i, :])
 
-    def get_residuals_from_list(self, l, split=False, split_loc=None):
+    def get_residuals_from_list(self, l, split=False, split_locs=None):
         """
         Get the residuals for the domain given a list of values.
 
@@ -157,8 +157,8 @@ class Simulation:
             The list of values to get the residuals for.
         split : bool, optional
             Whether to split the residuals into outer and inner blocks. Defaults to False.
-        split_loc : int, optional
-            The location to split the residuals at. Required if `split` is True.
+        split_locs : list[int], optional
+            The locations to split the residuals at. Required if `split` is True.
 
         Returns
         -------
@@ -168,7 +168,7 @@ class Simulation:
 
         # Assign values from list
         # Note domain already exists and we preserve distances
-        self.initialize_from_list(l, split, split_loc)
+        self.initialize_from_list(l, split, split_locs)
 
         # Fill BCs
         for c, bctype in self._bcs.items():
@@ -177,11 +177,24 @@ class Simulation:
         interior_residual_block = self._s.residuals(self._d)
 
         if split:
-            # Split the array into outer and inner blocks
-            outer_block = interior_residual_block[:, :split_loc].flatten()
-            inner_block = interior_residual_block[:, split_loc:].flatten()
-            # Concatenate the flattened outer and inner blocks
-            residual_list = np.concatenate((outer_block, inner_block))
+            if split_locs is None:
+                raise SFXM("Split locations must be specified in this case")
+
+            # Sort and remove duplicates to maintain consistency
+            split_locs = sorted(set(split_locs))
+
+            # Ensure split locations are valid
+            num_vars = interior_residual_block.shape[1]
+            if split_locs[-1] > num_vars or split_locs[0] < 0:
+                raise SFXM("Split locations must be between 0 and num_vars-1")
+
+            # Split residuals into multiple blocks
+            split_blocks = np.split(
+                interior_residual_block, split_locs, axis=1)
+
+            # Concatenate the flattened split blocks
+            residual_list = np.concatenate(
+                [block.flatten() for block in split_blocks])
         else:
             # Flatten the entire residual block
             residual_list = interior_residual_block.flatten()
@@ -224,10 +237,29 @@ class Simulation:
         if not split:
             return [bounds[0] * num_points, bounds[1] * num_points]
         else:
-            if split_loc is None:
-                raise SFXM("split_loc must be provided if split is True")
-            return [bounds[0][:split_loc] * num_points + bounds[0][split_loc:] * num_points,
-                    bounds[1][:split_loc] * num_points + bounds[1][split_loc:] * num_points]
+            if split_locs is None:
+                raise SFXM("split_locs must be provided if split is True")
+
+            # Sort and ensure unique split locations
+            split_locs = sorted(set(split_locs))
+
+            # Validate split locations
+            if split_locs[-1] > nv or split_locs[0] < 0:
+                raise SFXM("Split locations must be between 0 and nv-1")
+
+            # Split bounds at specified locations
+            lower_splits = np.split(bounds[0], split_locs)
+            upper_splits = np.split(bounds[1], split_locs)
+
+            # Extend each split block for num_points
+            lower_extended = [segment * num_points for segment in lower_splits]
+            upper_extended = [segment * num_points for segment in upper_splits]
+
+            # Concatenate the extended bounds
+            lower_bounds = np.concatenate(lower_extended)
+            upper_bounds = np.concatenate(upper_extended)
+
+            return [lower_bounds, upper_bounds]
 
     ############
     # Solution related methods
@@ -359,7 +391,7 @@ class Simulation:
 
         return jac
 
-    def evolve(self, t_diff: float, split=False, split_loc=None, method='RK45', rtol=1e-3, atol=1e-6, max_step=np.inf, bounds=None):
+    def evolve(self, t_diff: float, split=False, split_locs=None, method='RK45', rtol=1e-3, atol=1e-6, max_step=np.inf, bounds=None):
         """
         Evolve the system in time using an ODE solver for a given time step.
 
@@ -369,8 +401,8 @@ class Simulation:
             The time advancement to be made.
         split : bool, optional
             If True, applies a domain splitting technique. Defaults to False.
-        split_loc : optional
-            Specifies the location or configuration for domain splitting. Default is None.
+        split_locs : list[int], optional
+            A list of indices specifying where to split the domain. Default is None.
         method : str, optional
             The integration method to use for solving the system. Defaults to 'RK45'.
             Possible options include 'RK45', 'RK23', 'DOP853', etc. 
@@ -398,22 +430,22 @@ class Simulation:
             The system's state is updated in-place.
         """
 
-        def f(_, y): return self.get_residuals_from_list(y, split, split_loc)
+        def f(_, y): return self.get_residuals_from_list(y, split, split_locs)
 
         # Get the initial state from the domain
-        y0 = self._d.listify_interior(split, split_loc)
+        y0 = self._d.listify_interior(split, split_locs)
 
         # Compute Jacobian if required
         jac = None
         if method in JAC_REQUIRED:
-            jac = self.jacobian(y0, split, split_loc)
+            jac = self.jacobian(y0, split, split_locs)
 
         # Get the shape of the initial state
         num_points, nv = self.get_shape_from_list(y0)
 
         # Construct bounds to be used
         ext_bounds = self.extend_bounds(
-            bounds, num_points, nv, split, split_loc)
+            bounds, num_points, nv, split, split_locs)
 
         # Use solve_ivp to evolve the system
         # Implement basic Euler as part of same wrapper
@@ -435,10 +467,10 @@ class Simulation:
                             t_eval=[t_diff], jac=jac, max_step=max_step, events=events)
 
         # Update the values of the domain
-        self.initialize_from_list(sol.y, split, split_loc)
+        self.initialize_from_list(sol.y, split, split_locs)
 
     def steady_state(
-        self, split=False, split_loc=None, sparse=True, dt0=0.0, dtmax=1.0, armijo=False, bounds=None
+        self, split=False, split_locs=None, sparse=True, dt0=0.0, dtmax=1.0, armijo=False, bounds=None
     ):
         """
         Solve for the steady state of the system.
@@ -447,8 +479,8 @@ class Simulation:
         ----------
         split : bool, optional
             Whether to split the solution into outer and inner blocks. Defaults to False.
-        split_loc : int, optional
-            The location to split the solution at. Required if `split` is True.
+        split_locs : list[int], optional
+            A list of indices specifying where to split the domain. Default is None.
         sparse : bool, optional
             Whether to use a sparse Jacobian. Defaults to True.
         dt0 : float, optional
@@ -467,15 +499,15 @@ class Simulation:
             The number of iterations performed.
         """
 
-        def _f(u): return self.get_residuals_from_list(u, split, split_loc)
-        def _jac(u): return self.jacobian(u, split, split_loc)
+        def _f(u): return self.get_residuals_from_list(u, split, split_locs)
+        def _jac(u): return self.jacobian(u, split, split_locs)
 
-        x0 = self._d.listify_interior(split, split_loc)
+        x0 = self._d.listify_interior(split, split_locs)
         num_points, nv = self.get_shape_from_list(x0)
 
         # Extend bounds based on input
         ext_bounds = self.extend_bounds(
-            bounds, num_points, nv, split, split_loc)
+            bounds, num_points, nv, split, split_locs)
 
         if not split:
             xf, _, iter = newton(
@@ -483,10 +515,10 @@ class Simulation:
                 bounds=ext_bounds)
         else:
             # Split location will be checked in initialize_from_list
-            loc = num_points * split_loc
+            locs = num_points * split_locs
             xf, _, iter = split_newton(
-                _f, _jac, x0, loc, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo, bounds=ext_bounds
+                _f, _jac, x0, locs, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo, bounds=ext_bounds
             )
 
-        self.initialize_from_list(xf, split, split_loc)
+        self.initialize_from_list(xf, split, split_locs)
         return iter
