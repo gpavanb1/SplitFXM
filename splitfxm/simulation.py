@@ -136,7 +136,7 @@ class Simulation:
             # 1,2,1,2,3,3,4,5,4,5 for example for splits [2, 3]
             split_locs_full = [i*num_points for i in split_locs]
             l_split = np.split(l, split_locs_full)
-            block = np.hstack([array_list_reshape(segment, (num_points, ))
+            block = np.hstack([array_list_reshape(segment, (num_points, -1))
                                for segment in l_split])
         else:
             # No need to split, just use the values_array directly
@@ -201,7 +201,7 @@ class Simulation:
 
         return np.array(residual_list, dtype=np.float64)
 
-    def extend_bounds(self, bounds, num_points, nv, split=False, split_loc=None):
+    def extend_bounds(self, bounds, num_points, nv, split=False, split_locs=None):
         """
         Extends the provided input bounds based on whether there is a split or not.
 
@@ -215,8 +215,8 @@ class Simulation:
             The number of variables, indicating the length of each bound list.
         split : bool, optional
             A flag indicating whether to split the bounds at a specific location. Default is `False`.
-        split_loc : int, optional
-            The index at which to split the bounds if `split` is `True`. Default is `None`.
+        split_locs : list[int], optional
+            The indices at which to split the bounds if `split` is `True`. Default is `None`.
 
         Returns
         -------
@@ -252,12 +252,14 @@ class Simulation:
             upper_splits = np.split(bounds[1], split_locs)
 
             # Extend each split block for num_points
-            lower_extended = [segment * num_points for segment in lower_splits]
-            upper_extended = [segment * num_points for segment in upper_splits]
+            lower_extended = [np.tile(segment, num_points)
+                              for segment in lower_splits]
+            upper_extended = [np.tile(segment, num_points)
+                              for segment in upper_splits]
 
             # Concatenate the extended bounds
-            lower_bounds = np.concatenate(lower_extended)
-            upper_bounds = np.concatenate(upper_extended)
+            lower_bounds = np.concatenate(lower_extended).tolist()
+            upper_bounds = np.concatenate(upper_extended).tolist()
 
             return [lower_bounds, upper_bounds]
 
@@ -265,7 +267,7 @@ class Simulation:
     # Solution related methods
     ############
 
-    def jacobian(self, l, split=False, split_loc=None, epsilon=1e-8):
+    def jacobian(self, l, split=False, split_locs=None, epsilon=1e-8):
         """
         Calculate the Jacobian of the system using finite differences.
 
@@ -274,9 +276,9 @@ class Simulation:
         l : list
             The list of values to calculate the Jacobian for.
         split : bool, optional
-            Whether to split the Jacobian into outer and inner blocks. Defaults to False.
-        split_loc : int, optional
-            The location to split the Jacobian at. Required if `split` is True.
+            Whether to split the Jacobian into multiple parts. Defaults to False.
+        split_locs : list[int], optional
+            A list of indices specifying where to split the Jacobian. Default is None.
         epsilon : float, optional
             The finite difference step size. Defaults to 1e-8.
 
@@ -286,7 +288,7 @@ class Simulation:
             The Jacobian of the system.
         """
         # Initialize domain from the provided list and apply boundary conditions
-        self.initialize_from_list(l, split, split_loc)
+        self.initialize_from_list(l, split, split_locs)
         for c, bctype in self._bcs.items():
             apply_BC(self._d, c, bctype)
 
@@ -305,7 +307,6 @@ class Simulation:
         nb_left, nb_right, ilo, ihi = self._d.nb(btype.LEFT), self._d.nb(
             btype.RIGHT), self._d.ilo(), self._d.ihi()
 
-        # Use same point iteration as system residuals
         # Iterating over interior points
         for i in range(ilo, ihi + 1):
             # Define the neighborhood and band around the current cell
@@ -345,7 +346,6 @@ class Simulation:
 
                     # Reset the value
                     cell.set_value(j, current_value)
-                    # Apply BC again if cell is adjacent to boundary
                     if ilo in band or ihi in band:
                         for c, bctype in self._bcs.items():
                             apply_BC(self._d, c, bctype)
@@ -353,41 +353,42 @@ class Simulation:
                     # Compute the difference and assign to the Jacobian
                     col = (rhs_pert - rhs) / epsilon
 
-                    # Assign the calculated column to the Jacobian
-                    # Blocks of nv*nv matrices are computed
-                    # row_idx gives the start of the column vector
-                    # First point starts at 0, second point starts at nv and so on
-                    # For col_idx, loc - ilo gives shift from 0 for the block in multiples of nv
+                    # Determine how to split the Jacobian
                     if not split:
                         row_idx = (i - ilo) * nv
                         col_idx = (loc - ilo) * nv + j
                         jac[row_idx:row_idx + nv, col_idx] = col
                     else:
-                        # Split location will be checked in initialize_from_list
-                        # Sizes of the sub-Jacobians
-                        na, nc = split_loc, (nv - split_loc)
-                        # Jumps of block_offset instead of nv here
-                        block_offset = num_points * na
+                        if split_locs is None:
+                            raise SFXM(
+                                "split_locs must be provided if split is True")
 
-                        # First part of residuals
-                        # Same as previous but use na instead
-                        row_idx = (i - ilo) * na
-                        # col_idx jumps to right part of Jacobian
-                        # depending on the variable if pre- or post-split
-                        if j < na:
-                            col_idx = (loc - ilo) * na + j
-                        else:
-                            # Jumps of nc in post-split parts
-                            # j-na to ensure post-split variables start afresh
-                            col_idx = block_offset + \
-                                (loc - ilo) * nc + (j - na)
+                        # Compute sizes of the split regions
+                        split_sizes = [split_locs[0]] + [split_locs[k] - split_locs[k - 1]
+                                                         for k in range(1, len(split_locs))] + [nv - split_locs[-1]]
+                        offsets = [sum(split_sizes[:k])
+                                   for k in range(len(split_sizes))]
 
-                        jac[row_idx:row_idx + na, col_idx] = col[:na]
+                        # Compute row and col indices for each split section
+                        for k, size in enumerate(split_sizes):
+                            # Determine the row index
+                            # The residual from cell i is to be
+                            # distributed among the k splits,
+                            # each with their own row and column offsets
+                            offset = offsets[k] * num_points
+                            row_idx = offset + (i - ilo) * size
 
-                        # Second part of residuals
-                        # col_idx remains same as previous
-                        row_idx = block_offset + (i - ilo) * nc
-                        jac[row_idx:row_idx + nc, col_idx] = col[na:]
+                            if offsets[k] <= j < offsets[k] + size:
+                                # Determine the column index
+                                # Only contributes to the k-th split
+                                # if the variable is in the k-th split
+                                col_idx = offset + \
+                                    (loc - ilo) * size + (j - offsets[k])
+                            else:
+                                continue
+
+                            jac[row_idx:row_idx + size,
+                                col_idx] = col[offsets[k]:offsets[k] + size]
 
         return jac
 
