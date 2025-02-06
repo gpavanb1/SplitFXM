@@ -2,7 +2,7 @@
 
 [![Downloads](https://pepy.tech/badge/splitfxm)](https://pepy.tech/project/splitfxm)
 ![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13882261.svg)](https://doi.org/10.5281/zenodo.13882261)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14827049.svg)](https://doi.org/10.5281/zenodo.14827049)
 
 ![img](https://github.com/gpavanb1/SplitFXM/blob/main/assets/logo.jpg)
 
@@ -145,14 +145,14 @@ Special thanks to [Cantera](https://github.com/Cantera/cantera) and [WENO-Scalar
 
 If you are using `SplitFXM` in any scientific work, please make sure to cite as follows
 ```
-@software{pavan_b_govindaraju_2024_13882261,
+@software{pavan_b_govindaraju_2025_14827049,
   author       = {Pavan B Govindaraju},
-  title        = {gpavanb1/SplitFXM: v0.4.0},
-  month        = oct,
-  year         = 2024,
+  title        = {gpavanb1/SplitFXM: v0.5.0},
+  month        = feb,
+  year         = 2025,
   publisher    = {Zenodo},
-  version      = {v0.4.0},
-  doi          = {10.5281/zenodo.13882261},
-  url          = {https://doi.org/10.5281/zenodo.13882261}
+  version      = {v0.5.0},
+  doi          = {10.5281/zenodo.14827049},
+  url          = {https://doi.org/10.5281/zenodo.14827049},
 }
 ```
