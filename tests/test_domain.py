@@ -125,18 +125,18 @@ def test_values(domain):
 
 def test_listify_interior(domain):
     # Test with no split
-    flat_values = domain.listify_interior(split=False, split_loc=None)
+    flat_values = domain.listify_interior(split=False, split_locs=None)
     assert len(flat_values) == 10  # 5 cells * 2 values each
 
     # Test with split
-    split_values = domain.listify_interior(split=True, split_loc=1)
+    split_values = domain.listify_interior(split=True, split_locs=[1])
     assert len(split_values) == 10  # Each cell is split into 2 sets
 
 
 def test_listify_interior_split_error(domain):
     with pytest.raises(SFXM):
         # Should raise an error without split_loc
-        domain.listify_interior(split=True, split_loc=None)
+        domain.listify_interior(split=True, split_locs=None)
 
 
 def test_update(domain):

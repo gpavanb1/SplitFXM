@@ -88,7 +88,7 @@ def test_improper_stencil_size():
 
 
 def test_evolve(simulation):
-    simulation.evolve(t_diff=0.1, split=True, split_loc=1, method='Radau')
+    simulation.evolve(t_diff=0.1, split=True, split_locs=[1], method='Radau')
 
 
 def test_initialize_from_list(simulation):
@@ -119,7 +119,7 @@ def test_steady_state(simulation):
 
 def test_steady_state_split(simulation):
     num_iterations = simulation.steady_state(
-        split=True, split_loc=1, sparse=True, dt0=0.0, dtmax=1.0, armijo=False)
+        split=True, split_locs=[1], sparse=True, dt0=0.0, dtmax=1.0, armijo=False)
 
     assert num_iterations >= 0  # Ensure the number of iterations is non-negative
     # Additional assertions can be added based on the specific implementation of steady_state
@@ -127,16 +127,16 @@ def test_steady_state_split(simulation):
 
 def test_initialize_from_list_split(simulation):
     values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    split_loc = 1
-    simulation.initialize_from_list(values, split=True, split_loc=split_loc)
+    split_locs = [1]
+    simulation.initialize_from_list(values, split=True, split_locs=split_locs)
 
 
 def test_initialize_from_list_split_wrong_loc(simulation):
     values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    split_loc = 4
+    split_locs = [4]
     with pytest.raises(SFXM):
         simulation.initialize_from_list(
-            values, split=True, split_loc=split_loc)
+            values, split=True, split_locs=split_locs)
 
 
 def test_extend_bounds_no_split(simulation):
@@ -152,9 +152,9 @@ def test_extend_bounds_split(simulation):
     bounds = [[1, 2], [3, 4]]
     nv = 2
     num_points = 2
-    split_loc = 1
+    split_locs = [1]
     result = simulation.extend_bounds(
-        bounds, num_points, nv, split=True, split_loc=split_loc)
+        bounds, num_points, nv, split=True, split_locs=split_locs)
     expected_result = [[1] * num_points + [2] *
                        num_points, [3] * num_points + [4] * num_points]
     assert result == expected_result, "Bounds should extend with split at the given location"
@@ -221,13 +221,13 @@ def test_dense_sparse_jac_comparison_steady_state():
     }
     s = Simulation(d, m, ics, bcs, default_scheme(method))
     split = True
-    split_loc = 1
+    split_locs = [1]
 
     # Construct initial vector
-    x0 = d.listify_interior(split, split_loc)
+    x0 = d.listify_interior(split, split_locs)
 
     # Construct dense Jacobian
-    def _f(u): return s.get_residuals_from_list(u, split, split_loc)
+    def _f(u): return s.get_residuals_from_list(u, split, split_locs)
     jac_dense = nd.Jacobian(_f, method='forward', step=1e-8)(x0)
 
     # Construct Jacobian with no split location
@@ -235,7 +235,7 @@ def test_dense_sparse_jac_comparison_steady_state():
         jac_sparse = s.jacobian(x0, split)
 
     # Construct sparse Jacobian
-    jac_sparse = s.jacobian(x0, split, split_loc)
+    jac_sparse = s.jacobian(x0, split, split_locs)
 
     # Show timing results in prompt in pytest
     assert np.allclose(jac_sparse.toarray(), jac_dense, atol=1e-7)
@@ -245,13 +245,13 @@ def test_dense_sparse_jac_comparison_steady_state():
     m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
     s = Simulation(d, m, ics, bcs, default_scheme(method))
     split = True
-    split_loc = 1
+    split_locs = [1]
 
     # Construct initial vector
-    x0 = d.listify_interior(split, split_loc)
+    x0 = d.listify_interior(split, split_locs)
 
     # Construct dense Jacobian
-    def _f(u): return s.get_residuals_from_list(u, split, split_loc)
+    def _f(u): return s.get_residuals_from_list(u, split, split_locs)
     jac_dense = nd.Jacobian(_f, method='forward', step=1e-8)(x0)
 
     # Construct Jacobian with no split location
@@ -259,7 +259,7 @@ def test_dense_sparse_jac_comparison_steady_state():
         jac_sparse = s.jacobian(x0, split)
 
     # Construct sparse Jacobian
-    jac_sparse = s.jacobian(x0, split, split_loc)
+    jac_sparse = s.jacobian(x0, split, split_locs)
 
     # Show timing results in prompt in pytest
     assert np.allclose(jac_sparse.toarray(), jac_dense, atol=1e-7)
