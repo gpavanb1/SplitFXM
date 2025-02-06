@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.0] - 2025-02-06
+## Added
+- Support and testing for multiple split locations to be compatible with latest `SplitNewton`
+
 ## [0.4.6] - 2024-10-24
 ## Added
 - `evolve` also utilizes bounds and warns if crossed
