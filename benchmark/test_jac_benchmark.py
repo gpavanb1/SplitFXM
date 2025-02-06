@@ -32,10 +32,10 @@ def test_dense_sparse_jac_comparison():
     }
     s = Simulation(d, m, ics, bcs, default_scheme(method))
     split = True
-    split_loc = 1
+    split_locs = [1]
 
     # Construct initial vector
-    x0 = d.listify_interior(split, split_loc)
+    x0 = d.listify_interior(split, split_locs)
 
     # Some output
     print('\n' + '*' * 10)
@@ -44,7 +44,7 @@ def test_dense_sparse_jac_comparison():
     print('Computing...')
 
     # Construct dense Jacobian
-    def _f(u): return s.get_residuals_from_list(u, split, split_loc)
+    def _f(u): return s.get_residuals_from_list(u, split, split_locs)
     start_time = time.perf_counter()
     jac_dense = nd.Jacobian(_f, method='forward', step=1e-8)(x0)
     dense_time = time.perf_counter() - start_time
@@ -52,7 +52,7 @@ def test_dense_sparse_jac_comparison():
 
     # Construct sparse Jacobian
     start_time = time.perf_counter()
-    jac_sparse = s.jacobian(x0, split, split_loc)
+    jac_sparse = s.jacobian(x0, split, split_locs)
     sparse_time = time.perf_counter() - start_time
     print(f'Sparse Jacobian took {sparse_time} s')
 
@@ -82,10 +82,10 @@ def test_dense_sparse_jac_comparison_asym():
     }
     s = Simulation(d, m, ics, bcs, FDSchemes.RIGHT_BIAS)
     split = True
-    split_loc = 1
+    split_locs = [1]
 
     # Construct initial vector
-    x0 = d.listify_interior(split, split_loc)
+    x0 = d.listify_interior(split, split_locs)
 
     # Some output
     print('\n' + '*' * 10)
@@ -94,7 +94,7 @@ def test_dense_sparse_jac_comparison_asym():
     print('Computing...')
 
     # Construct dense Jacobian
-    def _f(u): return s.get_residuals_from_list(u, split, split_loc)
+    def _f(u): return s.get_residuals_from_list(u, split, split_locs)
     start_time = time.perf_counter()
     jac_dense = nd.Jacobian(_f, method='forward', step=1e-8)(x0)
     dense_time = time.perf_counter() - start_time
@@ -102,7 +102,7 @@ def test_dense_sparse_jac_comparison_asym():
 
     # Construct sparse Jacobian
     start_time = time.perf_counter()
-    jac_sparse = s.jacobian(x0, split, split_loc)
+    jac_sparse = s.jacobian(x0, split, split_locs)
     sparse_time = time.perf_counter() - start_time
     print(f'Sparse Jacobian took {sparse_time} s')
 
