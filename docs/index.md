@@ -56,6 +56,8 @@ The link to the repository can be found [here](http://github.com/gpavanb1/SplitF
 Please direct your queries to [gpavanb1](http://github.com/gpavanb1)
 for any questions.
 
+You can also reach out to us on the [SplitFXM Google Group](https://groups.google.com/g/splitfxm)
+
 ## Acknowledgements
 
 Special thanks to [Cantera](https://github.com/Cantera/cantera) and [WENO-Scalar](https://github.com/comp-physics/WENO-scalar) for serving as an inspiration for code architecture.
