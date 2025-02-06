@@ -221,7 +221,7 @@ def test_dense_sparse_jac_comparison_steady_state():
     }
     s = Simulation(d, m, ics, bcs, default_scheme(method))
     split = True
-    split_locs = [1]
+    split_locs = [1, 2]
 
     # Construct initial vector
     x0 = d.listify_interior(split, split_locs)
@@ -245,7 +245,7 @@ def test_dense_sparse_jac_comparison_steady_state():
     m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
     s = Simulation(d, m, ics, bcs, default_scheme(method))
     split = True
-    split_locs = [1]
+    split_locs = [1, 2]
 
     # Construct initial vector
     x0 = d.listify_interior(split, split_locs)
