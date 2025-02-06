@@ -31,7 +31,7 @@ s = Simulation(d, m, ics, bcs, default_scheme(method))
 # Advance in time or to steady state
 s.evolve(t_diff=0.1)
 bounds = [[-1., -2., -2.], [5., 4., 3.]]
-iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
+iter = s.steady_state(split=True, split_locs=[1, 2], bounds=bounds)
 
 # Visualize
 draw(d, "label")
