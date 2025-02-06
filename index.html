@@ -146,18 +146,36 @@
 <p><img alt="img" src="images/logo.jpg" /></p>
 <p>1D <a href="https://en.wikipedia.org/wiki/Finite_difference_method">Finite-Difference</a> or <a href="https://en.wikipedia.org/wiki/Finite_volume_method">Finite-Volume</a> using asymmetric stencils with <a href="https://en.wikipedia.org/wiki/Adaptive_mesh_refinement">adaptive mesh refinement</a> and steady-state solver using Newton and <a href="https://github.com/gpavanb1/SplitNewton">Split-Newton</a> approach</p>
 <h2 id="what-does-split-mean">What does 'split' mean?</h2>
-<p>The system is divided into two and for ease of communication, let's refer to first set of variables as "outer" and the second as "inner".</p>
+<p>The system is divided into multiple segments, and for ease of communication, let’s refer to the first segment of variables as "outer" and the remaining as "inner".</p>
 <ul>
 <li>
-<p>Holding the outer variables fixed, Newton iteration is performed till convergence using the sub-Jacobian</p>
+<p>Holding the outer variables fixed, Newton iteration is performed recursively for the inner variables, using the sub-Jacobian associated with them, until convergence is reached.</p>
 </li>
 <li>
-<p>One Newton step is performed for the outer variables with inner held fixed (using its sub-Jacobian)</p>
+<p>One Newton step is then performed for the outer variables, while the inner variables are kept fixed, using the sub-Jacobian for the outer subsystem.</p>
 </li>
 <li>
-<p>This process is repeated till convergence criterion is met for the full system (same as in Newton)</p>
+<p>This process is repeated, alternating between solving the inner and outer subsystems, until the convergence criterion for the entire system (similar to standard Newton) is met.</p>
 </li>
 </ul>
+<p>Consider a system of 5 variables, with the split locations at indices [1, 4]. This results in the following segments:</p>
+<ul>
+<li><code>a1</code> (variables from 0 to 1)</li>
+<li><code>a2 a3 a4</code> (variables from 1 to 4)</li>
+<li>
+<p><code>a5</code> (variable at index 4)</p>
+</li>
+<li>
+<p>First, the innermost segment <code>a5</code> is solved recursively using Newton's method while holding the variables <code>a1</code> and <code>a2 a3 a4</code>) fixed. This step is repeated until the convergence criterion for <code>a5</code> is met.</p>
+</li>
+<li>
+<p>Next, one Newton step is taken for the segment <code>a2 a3 a4</code>, with <code>a5</code> held fixed. This step is followed by solving <code>a5</code> again till convergence.</p>
+</li>
+<li>
+<p>This alternating process repeats: solving for <code>a5</code> until convergence, then one step for <code>a2 a3 a4</code>, and so on, until all subsystems converge.</p>
+</li>
+</ul>
+<p>Finally, one Newton step is performed for <code>a1</code>, with the other segments fixed. This completes one cycle of the split Newton process.</p>
 <h2 id="why-splitfxm">Why SplitFXM?</h2>
 <p>The combination of adaptive mesh refinement+multiple boundary conditions+various finite-difference/finite-volume schemes in 1D is crucial for accurately capturing steep gradients and complex phenomena in various physical systems. A <a href="http://github.com/gpavanb1/SplitNewton">SplitNewton</a> solver further increases robustness by efficiently handling non-linearities and stiff reactions, ensuring convergence in challenging scenarios.</p>
 <p>Some of the applications where challenging 1D problems exist include:</p>
@@ -240,5 +258,5 @@ for any questions.</p>
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2024-11-03 09:26:04.284369+00:00
+Build Date UTC : 2025-02-06 17:50:40.729273+00:00
 -->
