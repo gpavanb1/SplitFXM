@@ -371,21 +371,22 @@ class Simulation:
 
                         # Compute row and col indices for each split section
                         for k, size in enumerate(split_sizes):
-                            # Determine the row index
-                            # The residual from cell i is to be
-                            # distributed among the k splits,
-                            # each with their own row and column offsets
-                            offset = offsets[k] * num_points
-                            row_idx = offset + (i - ilo) * size
-
                             if offsets[k] <= j < offsets[k] + size:
                                 # Determine the column index
                                 # Only contributes to the k-th split
                                 # if the variable is in the k-th split
+                                offset = offsets[k] * num_points
                                 col_idx = offset + \
                                     (loc - ilo) * size + (j - offsets[k])
                             else:
                                 continue
+
+                            # Determine the row index
+                            # The residual from cell i is to be
+                            # distributed among the k splits,
+                            # each with their own row column offsets
+                            offset = offsets[k] * num_points
+                            row_idx = offset + (i - ilo) * size
 
                             jac[row_idx:row_idx + size,
                                 col_idx] = col[offsets[k]:offsets[k] + size]
@@ -516,7 +517,7 @@ class Simulation:
                 bounds=ext_bounds)
         else:
             # Split location will be checked in initialize_from_list
-            locs = num_points * split_locs
+            locs = [num_points * i for i in split_locs]
             xf, _, iter = split_newton(
                 _f, _jac, x0, locs, sparse=sparse, dt0=dt0, dtmax=dtmax, armijo=armijo, bounds=ext_bounds
             )
