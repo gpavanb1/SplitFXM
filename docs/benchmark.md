@@ -6,7 +6,7 @@ For N=250,
 
 | Method    | Time       | 
 |-----------|------------|
-| Dense   |    20 seconds |
+| Dense   |    ~45 seconds |
 | Sparse |  ~0.6 seconds  |
 
 The benchmark can be executed from the parent folder using the command
