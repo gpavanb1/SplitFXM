@@ -10,13 +10,29 @@
 
 ## What does 'split' mean?
 
-The system is divided into two and for ease of communication, let's refer to first set of variables as "outer" and the second as "inner".
+The system is divided into multiple segments, and for ease of communication, let’s refer to the first segment of variables as "outer" and the remaining as "inner".
 
-* Holding the outer variables fixed, Newton iteration is performed till convergence using the sub-Jacobian
+* Holding the outer variables fixed, Newton iteration is performed recursively for the inner variables, using the sub-Jacobian associated with them, until convergence is reached.
 
-* One Newton step is performed for the outer variables with inner held fixed (using its sub-Jacobian)
+* One Newton step is then performed for the outer variables, while the inner variables are kept fixed, using the sub-Jacobian for the outer subsystem.
 
-* This process is repeated till convergence criterion is met for the full system (same as in Newton)
+* This process is repeated, alternating between solving the inner and outer subsystems, until the convergence criterion for the entire system (similar to standard Newton) is met.
+
+### Example:
+
+Consider a system of 5 variables, with the split locations at indices [1, 4]. This results in the following segments:
+
+  * `a1` (variables from 0 to 1)
+  * `a2 a3 a4` (variables from 1 to 4)
+  * `a5` (variable at index 4)
+
+1. First, the innermost segment `a5` is solved recursively using Newton's method while holding the variables `a1` and `a2 a3 a4`) fixed. This step is repeated until the convergence criterion for `a5` is met.
+
+2. Next, one Newton step is taken for the segment `a2 a3 a4`, with `a5` held fixed. This step is followed by solving `a5` again till convergence.
+
+3. This alternating process repeats: solving for `a5` until convergence, then one step for `a2 a3 a4`, and so on, until all subsystems converge.
+
+Finally, one Newton step is performed for `a1`, with the other segments fixed. This completes one cycle of the split Newton process.
 
 ## How to install and execute?
 
@@ -33,13 +49,16 @@ A basic driver program is as follows
 ```
 from splitfxm.domain import Domain
 from splitfxm.simulation import Simulation
+from splitfxm.models.advection_diffusion import AdvectionDiffusion
 from splitfxm.schemes import default_scheme
 from splitfxm.visualize import draw
+import matplotlib.pyplot as plt
 
 # Define the problem
-method = 'FDM'
+method = 'FVM'
 m = AdvectionDiffusion(c=0.2, nu=0.001, method=method)
-d = Domain.from_size(20, 1, 1, ["u", "v", "w"]) # nx, nb_left, nb_right, variables
+# nx, nb_left, nb_right, variables
+d = Domain.from_size(20, 1, 1, ["u", "v", "w"])
 ics = {"u": "gaussian", "v": "rarefaction", "w": "tophat"}
 bcs = {
     "u": {
@@ -60,11 +79,12 @@ s = Simulation(d, m, ics, bcs, default_scheme(method))
 
 # Advance in time or to steady state
 s.evolve(t_diff=0.1)
-bounds = [[-1., -2., 0.], [5., 4., 3.]]
-iter = s.steady_state(split=True, split_loc=1, bounds=bounds)
+bounds = [[-1., -2., -2.], [5., 4., 3.]]
+iter = s.steady_state(split=True, split_locs=[1, 2], bounds=bounds)
 
 # Visualize
 draw(d, "label")
+plt.show()
 ```
 
 ## How to build from source?
@@ -81,7 +101,7 @@ For N=250,
 
 | Method    | Time       | 
 |-----------|------------|
-| Dense   |    20 seconds |
+| Dense   |    45 seconds |
 | Sparse |  ~0.6 seconds  |
 
 The benchmark can be executed from the parent folder using the command

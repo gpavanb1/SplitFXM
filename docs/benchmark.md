@@ -13,7 +13,7 @@ The benchmark can be executed from the parent folder using the command
 
 `python -m pytest -s benchmark`
 
-The sparsity pattern of the Jacobian is as follows. Both `split` parameter and boundary conditions lead to wrap-around and reshuffle of the sparse entries, which are correctly captured and match with the dense Jacobian entries. Note that the image is shown for N=20 for better representation. Also, 
+The sparsity pattern of the Jacobian for the multi-split approach (split locations at 1, 2) is as follows. Both `split` parameter and boundary conditions lead to wrap-around and reshuffle of the sparse entries, which are correctly captured and match with the dense Jacobian entries. Note that the image is shown for N=20 for better representation. Also, 
 
 ![img](images/benchmark.jpg)
 
