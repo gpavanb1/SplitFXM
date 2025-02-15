@@ -201,7 +201,7 @@ bcs = {&quot;rho&quot;: {&quot;left&quot;: {&quot;neumann&quot;: 0.}, &quot;righ
 </code></pre>
 <h2 id="evolve-the-system">Evolve the System</h2>
 <p>We can now evolve the system in time using the <code>evolve</code> method. The default method uses <code>RK45</code> for the time integration. You can also use Split-Newton to re-order the variables, although its benefits are more for steady-state problems.</p>
-<pre><code class="language-python">s.evolve(split=True, split_loc=1, t_diff=0.2)
+<pre><code class="language-python">s.evolve(split=True, split_locs=[1], t_diff=0.2)
 </code></pre>
 <h2 id="visualize-the-results">Visualize the Results</h2>
 <p>We can visualize the conservative variables using the <code>draw</code> function. However, if we want to visualize the primitive variables, we can use the <code>conservative_to_primitive</code> method of the <code>Euler1DConservative</code> class.</p>
