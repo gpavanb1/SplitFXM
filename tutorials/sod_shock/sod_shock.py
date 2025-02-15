@@ -32,7 +32,7 @@ for cell in s._d.interior():
     cell.set_value(s._d.component_index("p"), 1. if cell.x() < 0.5 else 0.1)
 
 # Evolve in time (using a small time step due to the shock)
-s.evolve(split=True, split_loc=1, t_diff=0.2)
+s.evolve(split=True, split_locs=[1], t_diff=0.2)
 
 # Visualize the results at a specific time step
 draw(s._d, "Sod Shock Tube", interior=True)

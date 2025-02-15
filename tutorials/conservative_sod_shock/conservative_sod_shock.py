@@ -34,7 +34,7 @@ for cell in s._d.interior():
                    0.5 else 0.25)  # p/(gamma - 1) + 0.5*U2**2/U1
 
 # Evolve in time (using a small time step due to the shock)
-s.evolve(split=False, split_loc=1, t_diff=0.2)
+s.evolve(split=True, split_locs=[1], t_diff=0.2)
 
 # Visualize the results at a specific time step
 values = [m.conservative_to_primitive(cell_values)

@@ -25,7 +25,7 @@ extensions = [
 
 # Common compile arguments for all extensions
 # Disable fallthrough warnings
-common_compile_args = ['-Wno-unreachable-code-fallthrough']
+common_compile_args = []
 common_link_args = []
 # Apply common compile arguments globally
 for ext in extensions:
