@@ -89,7 +89,7 @@ for cell in s._d.interior():
 We can now evolve the system in time using the `evolve` method. The default method uses `RK45` for the time integration. You can also use Split-Newton to re-order the variables, although its benefits are more for steady-state problems.
 
 ```python
-s.evolve(split=True, split_loc=1, t_diff=0.2)
+s.evolve(split=True, split_locs=[1], t_diff=0.2)
 ```
 
 ## Visualize the Results
