@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.1] - 2025-02-15
+## Fixed
+- Tutorials to use latest `SplitNewton`
+- `setup.py` details to conform with PEP 625
+
 ## [0.5.0] - 2025-02-06
 ## Added
 - Support and testing for multiple split locations to be compatible with latest `SplitNewton`

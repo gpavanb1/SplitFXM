@@ -33,8 +33,8 @@ for ext in extensions:
     ext.extra_link_args = common_link_args
 
 setup(
-    name="SplitFXM",
-    version="0.5.0",
+    name="splitfxm",
+    version="0.5.1",
     description="1D Finite-Difference/Volume Split Newton Solver",
     url="https://github.com/gpavanb1/SplitFXM",
     author="gpavanb1",
