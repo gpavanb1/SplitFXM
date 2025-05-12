@@ -113,7 +113,7 @@ def test_component_name(domain):
 
 def test_positions(domain):
     positions = domain.positions()
-    expected_positions = [-1, -2, 0, 1, 2, 3, 4, 5, 6]
+    expected_positions = [-2, -1, 0, 1, 2, 3, 4, 5, 6]
     assert np.allclose(positions, expected_positions)
 
 

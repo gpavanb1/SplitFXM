@@ -37,14 +37,14 @@ class Domain:
 
         self._nx = len(cells)
         # Domain is a list of left boundary, interior cells and right boundaries
-        self._domain = [*left_boundaries, *
+        self._domain = [*reversed(left_boundaries), *
                         cells, *right_boundaries]
         self._components = components
 
         self._xmin = xmin
         self._xmax = xmax
 
-    @ classmethod
+    @classmethod
     def from_size(
         cls,
         nx: int,
@@ -174,7 +174,7 @@ class Domain:
             The left and right boundaries of the domain.
         """
         nb_left, nb_right = self._nb[btype.LEFT], self._nb[btype.RIGHT]
-        return self._domain[: nb_left], self._domain[-nb_right:]
+        return self._domain[: nb_left][::-1], self._domain[-nb_right:]
 
     def interior(self):
         """
